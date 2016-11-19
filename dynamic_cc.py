@@ -15,22 +15,17 @@ class Voxel:
     #Voxel class
     #A Voxel is a specific YUV value
 
-    def __init__(self, pixel_vals, yuv = True):
+    def __init__(self, pixel_vals):
         #Initialisation
         assert isinstance(pixel_vals, object)
-        if yuv:
-            self.yuv = pixel_vals
-            self.bgr = None
-        else:
-            self.bgr = pixel_vals
-            self.yuv = None
-        #We need to convert bgr to yuv
+        self.yuv = convertToYUV(pixel_vals)
+        self.votes = 0
 
     def getClassification(self, class_list):
         #returns the color classification of the voxel (or unclassified)
         return None
 
-    def getNeighbours(self):
+    def getNeighbours(self): #GARY TODO
         #returns a list of the neighbouring voxels of the voxel
         return
 
@@ -39,6 +34,14 @@ class Voxel:
 
     def getYUV(self):
         return self.yuv
+
+    def setVotes(self, vote):
+        self.votes = vote
+
+    def getVotes(self):
+        return self.votes
+
+
 
 class Classification:
     #Colour Classification class
@@ -49,33 +52,33 @@ class Classification:
         #Initialisation
         self.Volume = 0
         self.SurfaceArea = 0
-        self.LUT = numpy.zeros((255,255,255))
 
     def getSurfaceArea(self):
         #Gets the surface area of the classification
-        return 0
+        return self.SurfaceArea
 
     def getVolume(self):
         #Gets the volume of the classification
-        return 0
+        return self.Volume
 
-    def isInClassification(self, voxel):
-        #Returns whether a voxel is part of this classification
-        return False
 
-    def addVoxel(self, voxel):
-        #Adds a voxel to the classification
-        #Will need to update Surface Area and Volume
+class LookUpTable:
+    def __init__(self):
+        self.LUT = initialiseLUT()
+        self.greenClass = Classification()
+        self.whiteClass = Classification()
+        self.orangeClass = Classification()
 
+    #Perform shedding on the given class
+    def performShedding(colorClass): #GARY TODO
         return
 
-    def getLUT(self):
-        return self.LUT
 
-image = cv2.imread("red_box.jpg")
-rgbPixel = image[0,50];
-yuvPixel = convertToYUV(rgbPixel)
-print rgbPixel
-print yuvPixel
-#red_rgb = cv2.cvtColor(red_yuv, cv2.COLOR_YUV2RGB)
-#red_yuv2 = cv2.cvtColor(red_rgb, cv2.COLOR_RGB2YUV)
+#This function needs to initialise a 3d array of voxels
+#The voxels in the coordinate range specified by the parameters should be
+#classified orange
+def initialiseLUT(orangeYmax, orangeYmin, orangUmax, orangeUmin, orangeVmax, orangeVmin): #SEAN TODO
+    return
+
+def updateLUT(image, colorClass): #SEAN TODO
+    return
