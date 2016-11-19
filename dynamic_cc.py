@@ -1,6 +1,16 @@
 import numpy
 import cv2
 
+def convertToYUV(BGR):
+    B = BGR[0]
+    G = BGR[1]
+    R = BGR[2]
+
+    Y  = R *  0.29900 + G *  0.58700 + B *  0.11400
+    U = R * -0.16874 + G * -0.33126 + B *  0.50000 + 128
+    V = R *  0.50000 + G * -0.41869 + B * -0.08131 + 128
+    return [Y, U, V]
+
 class Voxel:
     #Voxel class
     #A Voxel is a specific YUV value
@@ -63,11 +73,9 @@ class Classification:
         return self.LUT
 
 image = cv2.imread("red_box.jpg")
-
-red_yuv = cv2.cvtColor(image, cv2.COLOR_BGR2YUV)
-red_val = red_yuv[0,50]
-red_rgb = cv2.cvtColor(red_yuv, cv2.COLOR_YUV2RGB)
-red_yuv2 = cv2.cvtColor(red_rgb, cv2.COLOR_RGB2YUV)
-print red_yuv[0,50]
-print red_rgb[0,50]
-print red_yuv2[0,50]
+rgbPixel = image[0,50];
+yuvPixel = convertToYUV(rgbPixel)
+print rgbPixel
+print yuvPixel
+#red_rgb = cv2.cvtColor(red_yuv, cv2.COLOR_YUV2RGB)
+#red_yuv2 = cv2.cvtColor(red_rgb, cv2.COLOR_RGB2YUV)
