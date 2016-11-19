@@ -5,10 +5,15 @@ class Voxel:
     #Voxel class
     #A Voxel is a specific YUV value
 
-    def __init__(self, bgr):
+    def __init__(self, pixel_vals, yuv = True):
         #Initialisation
-        assert isinstance(bgr, object)
-        self.bgr = bgr
+        assert isinstance(pixel_vals, object)
+        if yuv:
+            self.yuv = pixel_vals
+            self.bgr = None
+        else:
+            self.bgr = pixel_vals
+            self.yuv = None
         #We need to convert bgr to yuv
 
     def getClassification(self, class_list):
@@ -23,7 +28,7 @@ class Voxel:
         return self.bgr
 
     def getYUV(self):
-        return
+        return self.yuv
 
 class Classification:
     #Colour Classification class
@@ -51,6 +56,7 @@ class Classification:
     def addVoxel(self, voxel):
         #Adds a voxel to the classification
         #Will need to update Surface Area and Volume
+
         return
 
     def getLUT(self):
@@ -58,6 +64,10 @@ class Classification:
 
 image = cv2.imread("red_box.jpg")
 
-red_voxel = Voxel(image[0,50])
-
-print red_voxel.getBGR()
+red_yuv = cv2.cvtColor(image, cv2.COLOR_BGR2YUV)
+red_val = red_yuv[0,50]
+red_rgb = cv2.cvtColor(red_yuv, cv2.COLOR_YUV2RGB)
+red_yuv2 = cv2.cvtColor(red_rgb, cv2.COLOR_RGB2YUV)
+print red_yuv[0,50]
+print red_rgb[0,50]
+print red_yuv2[0,50]
