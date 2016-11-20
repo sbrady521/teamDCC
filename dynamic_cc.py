@@ -20,10 +20,14 @@ class Voxel:
         assert isinstance(pixel_vals, object)
         self.yuv = convertToYUV(pixel_vals)
         self.votes = 0
+        self.classification = None
 
-    def getClassification(self, class_list):
+    def getClassification(self):
         #returns the color classification of the voxel (or unclassified)
-        return None
+        return self.classification
+
+    def setClassification(self, classification):
+        self.classification = classification
 
     def getBGR(self):
         return self.bgr
@@ -65,9 +69,21 @@ class LookUpTable:
         self.whiteClass = Classification()
         self.orangeClass = Classification()
 
+        return
+
     #Perform shedding on the given class
     def performShedding(self, colorClass): #GARY TODO
-        
+        removableVoxels = getRemovableVoxels(colorClass)
+
+        averageVotes = 0
+        for voxel in removableVoxels:
+            averageVotes += voxel.getVotes()
+        averageVotes = averageVotes / len(removableVoxels)
+
+        for voxel in removableVoxels:
+            if voxel.getVotes() < averageVotes:
+                voxel.setClassification(None)
+                voxel.setVotes(0)
         return
 
     def getNeighbours(self, voxel): #GARY TODO
