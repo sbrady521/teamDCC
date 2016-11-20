@@ -1,5 +1,6 @@
 import numpy
 import cv2
+import itertools
 
 def convertToYUV(BGR):
     B = BGR[0]
@@ -69,6 +70,61 @@ class LookUpTable:
         self.whiteClass = Classification()
         self.orangeClass = Classification()
 
+    #returns a list of voxels in a specified class TODO
+    def getVoxelsInClass(self, colorClass):
+        return
+
+    #returns the voxel opposite to voxel in reference to reference TODO
+    def oppositeVoxel(self, reference, voxel):
+        return
+
+    #returns whether a voxel is internal - ie 6 neighbouring voxels of the same class TODO
+    def isInternal(self, voxel):
+        return False
+
+    def getRemovableVoxels(self, colorClass): #Gary TODO
+        voxels = getVoxelsInClass(colorClass)
+        removableVoxels = list()
+        for voxel in voxels:
+            rule1 = True
+            internalCnt = 0 #count of internal neighbours
+
+            #check rule 1
+            neighbours = self.getNeighbours(voxel)
+            internalNeighbours = list() #List of Internal Neighbours, for rule 2
+                                        #filled during rule 1 checking for performance
+            for neighbour in neighbours:
+                if neighbour.getClassification() == voxel.getClassification() \
+                 and neighbour.oppositeVoxel(voxel, neighbour) in neighbours:
+                    rule1 = False
+                if self.isInternal(neighbour):
+                    internalCnt += 1
+                    internalNeighbours.append(neighbour)
+            if rule1:
+                removableVoxels.append(voxel)
+                continue
+
+            #To pass rule 2 a voxel must have at least 2 internal neighbours
+            if internalCnt < 2:
+                continue
+
+            #check rule 2
+            validNeighbours = list()
+            for neighbour in internalNeighbours:
+                if self.oppositeVoxel(voxel, neighbour).getClassification() not in validNeighbours:
+                    validNeighbours.append(neighbour)
+
+            #Find neighbours which share a common neighbour with another neighbour
+            #which isn't the original voxel
+            for voxel1, voxel2 in itertools.permutations(validNeighbours, 2):
+                voxel1Neighbours = self.getNeighbours(voxel1)
+                voxel2Neighbours = self.getNeighbours(voxel2)
+                for neighbour in voxel1Neighbours:
+                    if neighbour != voxel and neighbour in voxel2Neighbours:
+                        validNeighbours.append(neighbour)
+
+            if len(validNeighbours) >= 2:
+                removableVoxels.append(voxel)
         return
 
     #Perform shedding on the given class
