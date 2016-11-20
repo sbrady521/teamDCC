@@ -125,7 +125,7 @@ class LookUpTable:
 
             if len(validNeighbours) >= 2:
                 removableVoxels.append(voxel)
-        return
+        return removableVoxels
 
     #Perform shedding on the given class
     def performShedding(self, colorClass): #GARY TODO
@@ -136,6 +136,8 @@ class LookUpTable:
             averageVotes += voxel.getVotes()
         averageVotes = averageVotes / len(removableVoxels)
 
+        #check every removable voxel to see if their votes are too low
+        #unclassify them if so
         for voxel in removableVoxels:
             if voxel.getVotes() < averageVotes:
                 voxel.setClassification(None)
