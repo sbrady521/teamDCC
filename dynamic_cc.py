@@ -25,10 +25,6 @@ class Voxel:
         #returns the color classification of the voxel (or unclassified)
         return None
 
-    def getNeighbours(self): #GARY TODO
-        #returns a list of the neighbouring voxels of the voxel
-        return
-
     def getBGR(self):
         return self.bgr
 
@@ -70,8 +66,26 @@ class LookUpTable:
         self.orangeClass = Classification()
 
     #Perform shedding on the given class
-    def performShedding(colorClass): #GARY TODO
+    def performShedding(self, colorClass): #GARY TODO
+        
         return
+
+    def getNeighbours(self, voxel): #GARY TODO
+        #returns a list of the neighbouring voxels of the voxel
+        #two voxels are considered neighbours if they share a face
+        yuv_coords = voxel.getYUV() #get the coordinates of the specified voxel
+        y = yuv_coords[0]
+        u = yuv_coords[1]
+        v = yuv_coords[2]
+        neighbours = list() #of voxels
+        #iterate through neighbours and append them to the list
+        for i in xrange(y-1,y+1):
+            for j in xrange(u-1,u+1):
+                for k in xrange(v-1,v+1):
+                    if i == y and j == u and k == v:
+                        continue
+                    neighbours.append(self.LUT[i][j][k])
+        return neighbours
 
 
 #This function needs to initialise a 3d array of voxels
@@ -82,3 +96,12 @@ def initialiseLUT(orangeYmax, orangeYmin, orangUmax, orangeUmin, orangeVmax, ora
 
 def updateLUT(image, colorClass): #SEAN TODO
     return
+
+def tests():
+    return
+
+def main():
+    tests()
+
+
+main()
