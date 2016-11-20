@@ -2,6 +2,12 @@ import numpy
 import cv2
 import itertools
 
+MAXVOTES = 10
+UNCLASS = 0
+WHITE = 1
+GREEN = 2
+ORANGE = 3
+
 def convertToYUV(BGR):
     B = BGR[0]
     G = BGR[1]
@@ -19,9 +25,13 @@ class Voxel:
     def __init__(self, pixel_vals):
         #Initialisation
         assert isinstance(pixel_vals, object)
-        self.yuv = convertToYUV(pixel_vals)
+
+        self.yuv = pixel_vals
         self.votes = 0
-        self.classification = None
+        self.classification = UNCLASS
+        self.incVal = 1
+        self.decVal = 1
+        self.maxvotes = 10
 
     def getClassification(self):
         #returns the color classification of the voxel (or unclassified)
@@ -41,6 +51,20 @@ class Voxel:
 
     def getVotes(self):
         return self.votes
+
+    def incrementVote(self):
+        self.votes += self.incVal
+
+        #ensure votes don't exceed max
+        if self.votes > 10:
+            self.votes = 10
+
+    def decrementVote(self):
+        self.votes -= self.decVal
+
+        #Ensure votes do not go in the negatives
+        if self.votes < 0:
+            self.votes = 0
 
 
 
@@ -166,10 +190,84 @@ class LookUpTable:
 #The voxels in the coordinate range specified by the parameters should be
 #classified orange
 def initialiseLUT(orangeYmax, orangeYmin, orangUmax, orangeUmin, orangeVmax, orangeVmin): #SEAN TODO
-    return
+    mainLut = []
 
-def updateLUT(image, colorClass): #SEAN TODO
-    return
+    #Create 3d array of voxels for LUT
+    for y in xrange(257):
+        tempLut1 = []
+        for u in xrange(257):
+            tempLut2 = []
+            for v in xrange(257):
+                tempVox = Voxel([y,u,v]);
+
+                #Check if voxel lies in parameter space
+                if (orangeYmin < y < orangeYmax) and (orangeUmin < u < orangeUmax) and (orangeVmin < v < orangeVmax):
+                    tempVox.setVotes(MAXVOTES)
+                    tempVox.setClassification(ORANGE)
+
+                #Add to the 1d array
+                tempLut2.append(tempVox)
+
+            #Add to the 2d array
+            tempLut1.append(tempLut2)
+
+        #Add to the 3d array
+        mainLut.append(tempLut1)
+
+def updateLUT(mainLUT, image, colorClass): #SEAN TODO
+    #Get image height and width
+    height, width = image.shape[:2]
+
+    #Decrement all votes in the specified color class
+    decrementVotes(mainLUT, colorClass)
+
+    #Loop through every pixel in the image
+    for xval in xrange(0,width):
+        for yval in xrange(0, height):
+
+            #Analyse pixels yuv color and check LUT
+            bgr = image[xval,yval]
+            yuv = convertToYUV(bgr)
+            currentVox = mainLUT.LUT[yuv[0]][yuv[1]][yuv[2]]
+
+            #Increment votes of seen class
+            if currentVox.classification == colorClass:
+                currentVox.incrementVote()
+
+            #Check for unclassified pixels similar to observed color class
+            elif currentVox.classification == UNCLASS and isNeighbour(mainLUT, currentVox, colorClass):
+                currentVox.setClassification(colorClass)
+                currentVox.setVotes(0)
+
+    #Check class volume and surface area
+    if colorClass == ORANGE:
+        classObject = LookUpTable.orangeClass
+    elif colorClass == WHITE:
+        classObject = LookUpTable.whiteClass
+    else:
+        classObject = LookUpTable.greenClass
+    curVol = classObject.getVolume
+    curSA = classObject.getSurfaceArea
+
+    if curVol > MAXCLASSVOL or curSA > MAXCLASSA:
+        performShedding(colorClass)
+
+    return mainLUT
+
+#Decrement all the votes in a color class
+def decrementVotes(mainLUT, colorClass):
+    voxelArr = mainLUT.getVoxelsInClass(colorClass)
+    for voxel in voxelArr:
+        voxel.decrementVote()
+
+
+#Given a voxel and a class, check if any neighbouring voxels have the given color class
+def isNeighbour(mainLUT, vox, colorClass):
+    neighbours = mainLUT.getNeighbours(vox)
+    for currNeighbour in neighbours:
+        if currNeighbour.getClassification == colorClass:
+            return True
+    return False
 
 def tests():
     return
