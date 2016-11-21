@@ -215,8 +215,8 @@ class LookUpTable:
         #unclassify them if so
         for voxel in removableVoxels:
             if voxel.getVotes() < averageVotes:
-                print "removing voxel YUV:"
-                print voxel.yuv
+                #print "removing voxel YUV:"
+                #print voxel.yuv
                 yuv = voxel.getYUV()
                 self.LUT[yuv[0],yuv[1],yuv[2]] = None
                 if colorClass == ORANGE:
@@ -260,8 +260,7 @@ class LookUpTable:
 
                 #Check for unclassified pixels similar to observed color class
                 if not currentVox and isNeighbour(self, yuv, colorClass):
-                    print "adding voxel YUV: "
-                    print yuv
+                    print str(xval) + " " + str(yval)
                     self.LUT[yuv[0]][yuv[1]][yuv[2]] = Voxel(yuv)
                     currentVox = self.LUT[yuv[0]][yuv[1]][yuv[2]]
                     currentVox.setClassification(colorClass)
