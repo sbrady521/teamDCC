@@ -76,6 +76,7 @@ class Classification:
         #Initialisation
         self.Volume = 0
         self.SurfaceArea = 0
+        self.classVoxels = []
 
     def getSurfaceArea(self):
         #Gets the surface area of the classification
@@ -85,6 +86,21 @@ class Classification:
         #Gets the volume of the classification
         return self.Volume
 
+    def addVoxel(self, voxel):
+        self.classVoxels.append(voxel)
+
+    def removeVoxel(self, voxel):
+        i = 0
+        for currVoxel in self.classVoxels:
+            if(currVoxel.getYUV() == voxel.getYUV()):
+                self.classVoxels.pop(i)
+                break;
+            i += 1
+
+    def getClassVoxels(self):
+        return self.classVoxels
+
+
 
 class LookUpTable:
     def __init__(self):
@@ -92,10 +108,20 @@ class LookUpTable:
         self.greenClass = Classification()
         self.whiteClass = Classification()
         self.orangeClass = Classification()
+        self.unclassifiedClass = Classification()
 
-    #returns a list of voxels in a specified class TODO
+    #returns a list of voxels in a specified class
     def getVoxelsInClass(self, colorClass):
-        return
+        if colorClass == WHITE:
+            returnVal = self.whiteClass.getVoxelsInClass()
+        elif colorClass == GREEN:
+            returnVal = self.greenClass.getVoxelsInClass()
+        elif colorClass == ORANGE:
+            returnVal = self.orangeClass.getVoxelsInClass()
+        else:
+            returnVal = self.unclassifiedClass.getVoxelsInClass()
+
+        return returnVals
 
     #returns the voxel opposite to voxel in reference to reference TODO
     def oppositeVoxel(self, reference, voxel):
@@ -207,7 +233,7 @@ class LookUpTable:
 #This function needs to initialise a 3d array of voxels
 #The voxels in the coordinate range specified by the parameters should be
 #classified orange
-def initialiseLUT(orangeYmax, orangeYmin, orangUmax, orangeUmin, orangeVmax, orangeVmin): #SEAN TODO
+def initialiseLUT(orangeYmax, orangeYmin, orangUmax, orangeUmin, orangeVmax, orangeVmin):
     mainLut = []
 
     #Create 3d array of voxels for LUT
@@ -222,6 +248,7 @@ def initialiseLUT(orangeYmax, orangeYmin, orangUmax, orangeUmin, orangeVmax, ora
                 if (orangeYmin < y < orangeYmax) and (orangeUmin < u < orangeUmax) and (orangeVmin < v < orangeVmax):
                     tempVox.setVotes(MAXVOTES)
                     tempVox.setClassification(ORANGE)
+                    mainLut.orangeClass.addVoxel(tempVox)
 
                 #Add to the 1d array
                 tempLut2.append(tempVox)
