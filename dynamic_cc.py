@@ -338,9 +338,10 @@ def main():
 
     #Fill images with images in test folder
     images = []
-    for photo in os.listdir('PhotoData'):
-        print "adding photo"
-        images.append(cv2.imread(photo))
+    for photo in os.listdir('PhotoDataSmall'):
+        filename = "PhotoDataSmall/"+str(photo)
+        print "adding photo " + str(filename)
+        images.append(cv2.imread(filename))
 
     for image in images:
         mainLUT.updateLUT(image, ORANGE)
