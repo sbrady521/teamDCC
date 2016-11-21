@@ -260,7 +260,7 @@ class LookUpTable:
                 #Check for unclassified pixels similar to observed color class
                 if currentVox != None:
                     if currentVox.getClassification() == ORANGE:
-                        print str(xval) + " " + str(yval)
+                        print str(xval) + " " + str(yval) + " ORANGE"
                 if not currentVox and isNeighbour(self, yuv, colorClass):
                     print
                     print "(adding voxel)"
@@ -331,6 +331,7 @@ def isNeighbour(mainLUT, yuv, colorClass):
     for currNeighbour in neighbours:
         if currNeighbour != None:
             if currNeighbour.getClassification() == colorClass:
+                print
                 print "Voxel has classified neighbour"
                 yuv = currNeighbour.getYUV()
                 print "with YUV: " + str(yuv[0]) + " " + str(yuv[1]) + " " + str(yuv[2])
