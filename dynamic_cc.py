@@ -250,6 +250,7 @@ class LookUpTable:
         #Loop through every pixel in the image
         for xval in xrange(0,width):
             for yval in xrange(0, height):
+                print "checking " + str(xval) + " " + str(yval)
 
                 #Analyse pixels yuv color and check LUT
                 bgr = image[xval,yval]
@@ -299,6 +300,7 @@ def initialiseLUT(orangeArr):
         for u in xrange(257):
             tempLut2 = []
             for v in xrange(257):
+                print "adding voxel at " + str(y) + " " + str(u) + " " + str(v)
                 tempVox = Voxel([y,u,v]);
 
                 #Check if voxel lies in parameter space
@@ -344,6 +346,7 @@ def main():
     #Fill images with images in test folder
     images = []
     for photo in os.listdir('PhotoData'):
+        print "adding photo"
         images.append(cv2.imread(photo))
 
     for image in images:
