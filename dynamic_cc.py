@@ -226,7 +226,6 @@ class LookUpTable:
     def getNeighbours(self, yuv_coords): #GARY TODO
         #returns a list of the neighbouring voxels of the voxel
         #two voxels are considered neighbours if they share a face
-        print yuv_coords
         y = yuv_coords[0]
         u = yuv_coords[1]
         v = yuv_coords[2]
@@ -250,8 +249,6 @@ class LookUpTable:
         #Loop through every pixel in the image
         for xval in xrange(0,width):
             for yval in xrange(0, height):
-                print "checking " + str(xval) + " " + str(yval)
-
                 #Analyse pixels yuv color and check LUT
                 bgr = image[xval,yval]
                 yuv = convertToYUV(bgr)
@@ -260,7 +257,7 @@ class LookUpTable:
                 #Check for unclassified pixels similar to observed color class
                 if not currentVox and isNeighbour(self, yuv, colorClass):
                     print "adding voxel YUV: "
-                    print currentVox.yuv
+                    print yuv
                     currentVox.setClassification(colorClass)
                     currentVox.setVotes(0)
 
