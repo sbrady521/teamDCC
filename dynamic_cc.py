@@ -146,7 +146,7 @@ class LookUpTable:
 
     #returns whether a voxel is internal - ie 6 neighbouring voxels of the same class TODO
     def isInternal(self, voxel):
-        neighbours = self.getNeighbours(voxel)
+        neighbours = self.getNeighbours(voxel.getYUV())
         classification = voxel.getClassification()
         for neighbour in neighbours:
             if neighbour.getClassification() != classification:
@@ -161,7 +161,7 @@ class LookUpTable:
             internalCnt = 0 #count of internal neighbours
 
             #check rule 1
-            neighbours = self.getNeighbours(voxel)
+            neighbours = self.getNeighbours(voxel.getYUV())
             internalNeighbours = list() #List of Internal Neighbours, for rule 2
                                         #filled during rule 1 checking for performance
             for neighbour in neighbours:
@@ -188,8 +188,8 @@ class LookUpTable:
             #Find neighbours which share a common neighbour with another neighbour
             #which isn't the original voxel
             for voxel1, voxel2 in itertools.permutations(validNeighbours, 2):
-                voxel1Neighbours = self.getNeighbours(voxel1)
-                voxel2Neighbours = self.getNeighbours(voxel2)
+                voxel1Neighbours = self.getNeighbours(voxel1.getYUV())
+                voxel2Neighbours = self.getNeighbours(voxel2.getYUV())
                 for neighbour in voxel1Neighbours:
                     if neighbour != voxel and neighbour in voxel2Neighbours:
                         validNeighbours.append(neighbour)
