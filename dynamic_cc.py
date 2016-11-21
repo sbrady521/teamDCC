@@ -258,6 +258,9 @@ class LookUpTable:
                 currentVox = self.LUT[yuv[0]][yuv[1]][yuv[2]]
 
                 #Check for unclassified pixels similar to observed color class
+                if currentVox != None:
+                    if currentVox.getClassification() == ORANGE:
+                        print currentVox.getYUV()
                 if not currentVox and isNeighbour(self, yuv, colorClass):
                     print
                     print "(adding voxel)"
@@ -346,15 +349,19 @@ def main():
 
     #Fill images with images in test folder
     images = []
-    for photo in os.listdir('PhotoDataSmall'):
+    dirList = os.listdir('PhotoDataSmall')
+    dirList.sort()
+    for photo in dirList:
         filename = "PhotoDataSmall/"+str(photo)
         images.append(cv2.imread(filename))
 
     i = 0
     for image in images:
+        height, width = image.shape[:2]
         print
         print
         print "analysing image " + str(i)
+        print "%d x %d" % (width, height)
         print
         print
         mainLUT.updateLUT(image, ORANGE)
