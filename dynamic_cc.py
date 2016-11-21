@@ -30,7 +30,7 @@ class Voxel:
         self.classification = UNCLASS
         self.incVal = 1
         self.decVal = 1
-        self.maxvotes = 10
+        self.maxvotes = 100
 
     def getClassification(self):
         #returns the color classification of the voxel (or unclassified)
@@ -261,7 +261,7 @@ def initialiseLUT(orangeYmax, orangeYmin, orangUmax, orangeUmin, orangeVmax, ora
         #Add to the 3d array
         mainLut.append(tempLut1)
 
-def updateLUT(mainLUT, image, colorClass): #SEAN TODO
+def updateLUT(mainLUT, image, colorClass):
     #Get image height and width
     height, width = image.shape[:2]
 
