@@ -2,7 +2,6 @@ import numpy
 import cv2
 import itertools
 
-MAXVOTES = 10
 UNCLASS = 0
 WHITE = 1
 GREEN = 2
@@ -269,7 +268,7 @@ def updateLUT(mainLUT, image, colorClass): #SEAN TODO
     curSA = classObject.getSurfaceArea
 
     if curVol > MAXCLASSVOL or curSA > MAXCLASSA:
-        performShedding(colorClass)
+        mainLUT.performShedding(colorClass)
 
     return mainLUT
 
