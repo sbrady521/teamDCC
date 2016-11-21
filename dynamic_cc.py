@@ -208,7 +208,7 @@ class LookUpTable:
         #unclassify them if so
         for voxel in removableVoxels:
             if voxel.getVotes() < averageVotes:
-                voxel.setClassification(None)
+                voxel.setClassification(UNCLASS)
                 voxel.setVotes(0)
         return
 
