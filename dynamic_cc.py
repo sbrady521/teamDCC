@@ -149,12 +149,14 @@ class LookUpTable:
         neighbours = self.getNeighbours(voxel.getYUV())
         classification = voxel.getClassification()
         for neighbour in neighbours:
+            if not neighbour:
+                return False
             if neighbour.getClassification() != classification:
                 return False
         return True
 
     def getRemovableVoxels(self, colorClass): #Gary TODO
-        voxels = getVoxelsInClass(colorClass)
+        voxels = self.getVoxelsInClass(colorClass)
         removableVoxels = list()
         for voxel in voxels:
             rule1 = True
@@ -165,8 +167,10 @@ class LookUpTable:
             internalNeighbours = list() #List of Internal Neighbours, for rule 2
                                         #filled during rule 1 checking for performance
             for neighbour in neighbours:
+                if not neighbour:
+                    continue
                 if neighbour.getClassification() == voxel.getClassification() \
-                 and neighbour.oppositeVoxel(voxel, neighbour) in neighbours:
+                 and self.oppositeVoxel(voxel, neighbour) in neighbours:
                     rule1 = False
                 if self.isInternal(neighbour):
                     internalCnt += 1
@@ -200,7 +204,7 @@ class LookUpTable:
 
     #Perform shedding on the given class
     def performShedding(self, colorClass): #GARY TODO
-        removableVoxels = getRemovableVoxels(colorClass)
+        removableVoxels = self.getRemovableVoxels(colorClass)
 
         averageVotes = 0
         for voxel in removableVoxels:
@@ -277,7 +281,7 @@ class LookUpTable:
         curVol = classObject.getVolume
         curSA = classObject.getSurfaceArea
 
-        if curVol > MAXCLASSVOL or curSA > MAXCLASSA:
+        if curVol > classObject.maxVol or curSA > classObject.maxSA:
             self.performShedding(colorClass)
 
 
