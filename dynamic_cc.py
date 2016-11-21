@@ -265,7 +265,7 @@ class LookUpTable:
                     currentVox.setVotes(0)
 
                 #Increment votes of seen class
-                elif currentVox.classification == colorClass:
+                elif currentVox and currentVox.classification == colorClass:
                     currentVox.incrementVote()
 
         #Check class volume and surface area
