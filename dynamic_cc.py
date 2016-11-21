@@ -223,10 +223,9 @@ class LookUpTable:
                     self.greenClass.removeVoxel(voxel)
         return
 
-    def getNeighbours(self, voxel): #GARY TODO
+    def getNeighbours(self, yuv_coords): #GARY TODO
         #returns a list of the neighbouring voxels of the voxel
         #two voxels are considered neighbours if they share a face
-        yuv_coords = voxel.getYUV() #get the coordinates of the specified voxel
         y = yuv_coords[0]
         u = yuv_coords[1]
         v = yuv_coords[2]
@@ -324,8 +323,9 @@ def decrementVotes(mainLUT, colorClass):
 def isNeighbour(mainLUT, vox, colorClass):
     neighbours = mainLUT.getNeighbours(vox)
     for currNeighbour in neighbours:
-        if currNeighbour.getClassification == colorClass:
-            return True
+        if currNeighbour != None:
+            if currNeighbour.getClassification() == colorClass:
+                return True
     return False
 
 def tests():
