@@ -311,6 +311,8 @@ def initialiseLUT(mainLut, orangeArr):
     if not LUT[0][0][0]:
         print "no"
 
+    return LUT
+
 #Decrement all the votes in a color class
 def decrementVotes(mainLUT, colorClass):
     voxelArr = mainLUT.getVoxelsInClass(colorClass)
