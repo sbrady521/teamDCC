@@ -8,6 +8,8 @@ WHITE = 1
 GREEN = 2
 ORANGE = 3
 
+MAXVOTES=100
+
 def convertToYUV(BGR):
     B = BGR[0]
     G = BGR[1]
@@ -107,11 +109,11 @@ class Classification:
 
 class LookUpTable:
     def __init__(self, orangeRanges):
-        self.LUT = initialiseLUT(orangeRanges)
         self.greenClass = Classification()
         self.whiteClass = Classification()
         self.orangeClass = Classification()
         self.unclassifiedClass = Classification()
+        self.LUT = initialiseLUT(self, orangeRanges)
 
     #returns a list of voxels in a specified class
     def getVoxelsInClass(self, colorClass):
@@ -285,8 +287,8 @@ class LookUpTable:
 #This function needs to initialise a 3d array of voxels
 #The voxels in the coordinate range specified by the parameters should be
 #classified orange
-def initialiseLUT(orangeArr):
-    mainLut = []
+def initialiseLUT(mainLut, orangeArr):
+    LUT = numpy.empty([256,256,256], object)
     orangeYmax = orangeArr[0]
     orangeYmin = orangeArr[1]
     orangeUmax = orangeArr[2]
@@ -295,11 +297,9 @@ def initialiseLUT(orangeArr):
     orangeVmin = orangeArr[5]
 
     #Create 3d array of voxels for LUT
-    for y in xrange(257):
-        tempLut1 = []
-        for u in xrange(257):
-            tempLut2 = []
-            for v in xrange(257):
+    for y in xrange(orangeYmin, orangeYmax):
+        for u in xrange(orangeUmin, orangeUmax):
+            for v in xrange(orangeVmin, orangeVmax):
                 print "adding voxel at " + str(y) + " " + str(u) + " " + str(v)
                 tempVox = Voxel([y,u,v]);
 
@@ -308,15 +308,10 @@ def initialiseLUT(orangeArr):
                     tempVox.setVotes(MAXVOTES)
                     tempVox.setClassification(ORANGE)
                     mainLut.orangeClass.addVoxel(tempVox)
+                LUT[y,u,v] = tempVox
 
-                #Add to the 1d array
-                tempLut2.append(tempVox)
-
-            #Add to the 2d array
-            tempLut1.append(tempLut2)
-
-        #Add to the 3d array
-        mainLut.append(tempLut1)
+    if not LUT[0][0][0]:
+        print "no"
 
 #Decrement all the votes in a color class
 def decrementVotes(mainLUT, colorClass):
