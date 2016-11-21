@@ -212,6 +212,12 @@ class LookUpTable:
             if voxel.getVotes() < averageVotes:
                 voxel.setClassification(UNCLASS)
                 voxel.setVotes(0)
+                if colorClass == ORANGE:
+                    self.orangeClass.removeVoxel(voxel)
+                elif colorClass == WHITE:
+                    self.whiteClass.removeVoxel(voxel)
+                elif colorClass == GREEN:
+                    self.greenClass.removeVoxel(voxel)
         return
 
     def getNeighbours(self, voxel): #GARY TODO
