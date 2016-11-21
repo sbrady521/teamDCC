@@ -1,6 +1,7 @@
 import numpy
 import cv2
 import itertools
+import os
 
 UNCLASS = 0
 WHITE = 1
@@ -210,6 +211,8 @@ class LookUpTable:
         #unclassify them if so
         for voxel in removableVoxels:
             if voxel.getVotes() < averageVotes:
+                print "removing voxel YUV:"
+                print voxel.yuv
                 voxel.setClassification(UNCLASS)
                 voxel.setVotes(0)
                 if colorClass == ORANGE:
@@ -259,6 +262,8 @@ class LookUpTable:
 
                 #Check for unclassified pixels similar to observed color class
                 elif currentVox.classification == UNCLASS and isNeighbour(self, currentVox, colorClass):
+                    print "adding voxel YUV: "
+                    print currentVox.yuv
                     currentVox.setClassification(colorClass)
                     currentVox.setVotes(0)
 
@@ -338,13 +343,14 @@ def main():
 
     #Fill images with images in test folder
     images = []
+    for photo in os.listdir('PhotoData'):
+        images.append(cv2.imread(photo))
 
     for image in images:
         mainLUT.updateLUT(image, ORANGE)
-        mainLUT.showTable()
 
 
-    tests()
+    #tests()
 
 
 main()
