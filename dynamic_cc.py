@@ -329,6 +329,9 @@ def isNeighbour(mainLUT, yuv, colorClass):
     for currNeighbour in neighbours:
         if currNeighbour != None:
             if currNeighbour.getClassification() == colorClass:
+                print "Voxel has classified neighbour"
+                yuv = currNeighbour.getYUV()
+                print "with YUV: " + str(yuv[0]) + " " + str(yuv[1]) + " " + str(yuv[2])
                 return True
     return False
 
