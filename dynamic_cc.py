@@ -94,7 +94,7 @@ class Classification:
         for currVoxel in self.classVoxels:
             if(currVoxel.getYUV() == voxel.getYUV()):
                 self.classVoxels.pop(i)
-                break;
+                break
             i += 1
 
     def getClassVoxels(self):
