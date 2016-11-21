@@ -75,6 +75,8 @@ class Classification:
     def __init__(self):
         #Initialisation
         self.Volume = 0
+        self.maxVol = 3300
+        self.maxSA = 7000
         self.SurfaceArea = 0
         self.classVoxels = []
 
