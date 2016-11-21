@@ -104,7 +104,12 @@ class LookUpTable:
 
     #returns whether a voxel is internal - ie 6 neighbouring voxels of the same class TODO
     def isInternal(self, voxel):
-        return False
+        neighbours = self.getNeighbours(voxel)
+        classification = voxel.getClassification()
+        for neighbour in neighbours:
+            if neighbour.getClassification() != classification:
+                return False
+        return True
 
     def getRemovableVoxels(self, colorClass): #Gary TODO
         voxels = getVoxelsInClass(colorClass)
@@ -135,7 +140,7 @@ class LookUpTable:
             #check rule 2
             validNeighbours = list()
             for neighbour in internalNeighbours:
-                if self.oppositeVoxel(voxel, neighbour).getClassification() not in validNeighbours:
+                if self.oppositeVoxel(voxel, neighbour) not in validNeighbours:
                     validNeighbours.append(neighbour)
 
             #Find neighbours which share a common neighbour with another neighbour
