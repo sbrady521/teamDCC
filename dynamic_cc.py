@@ -348,8 +348,11 @@ def main():
         print "adding photo " + str(filename)
         images.append(cv2.imread(filename))
 
+    imgcnt = 0
     for image in images:
+        print "Image " + str(imgcnt)
         mainLUT.updateLUT(image, ORANGE)
+        imgcnt += 1
 
 
     #tests()
