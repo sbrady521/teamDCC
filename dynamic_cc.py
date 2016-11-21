@@ -100,7 +100,21 @@ class LookUpTable:
 
     #returns the voxel opposite to voxel in reference to reference TODO
     def oppositeVoxel(self, reference, voxel):
-        return
+        voxelYUV = voxel.getYUV()
+        referenceYUV = reference.getYUV()
+        if voxelYUV[0] != referenceYUV[0]:
+            if referenceYUV[0] == 255:
+                return None
+            return self.LUT[referenceYUV[0] - (voxelYUV[0] - referenceYUV[0])][voxelYUV[1]][voxelYUV[2]]
+        elif voxelYUV[1] != referenceYUV[1]:
+            if referenceYUV[1] == 255:
+                return None
+            return self.LUT[voxelYUV[0]][referenceYUV[1] - (voxelYUV[1] - referenceYUV[1])][voxelYUV[2]]
+        else:
+            if referenceYUV[2] == 255:
+                return None
+            return self.LUT[voxelYUV[0]][voxelYUV[1]][referenceYUV[2] - (voxelYUV[2] - referenceYUV[2])]
+        return None
 
     #returns whether a voxel is internal - ie 6 neighbouring voxels of the same class TODO
     def isInternal(self, voxel):
