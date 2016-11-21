@@ -260,7 +260,12 @@ class LookUpTable:
 
                 #Check for unclassified pixels similar to observed color class
                 if not currentVox and isNeighbour(self, yuv, colorClass):
-                    print str(xval) + " " + str(yval)
+                    print
+                    print "(adding voxel)"
+                    print "YUV: " + str(yuv[0]) + " " + str(yuv[1]) + " " + str(yuv[2])
+                    print "pixel: " + str(xval) + " " + str(yval)
+                    print
+
                     self.LUT[yuv[0]][yuv[1]][yuv[2]] = Voxel(yuv)
                     currentVox = self.LUT[yuv[0]][yuv[1]][yuv[2]]
                     currentVox.setClassification(colorClass)
@@ -300,7 +305,6 @@ def initialiseLUT(mainLut, orangeArr):
     for y in xrange(orangeYmin, orangeYmax):
         for u in xrange(orangeUmin, orangeUmax):
             for v in xrange(orangeVmin, orangeVmax):
-                print "adding voxel at " + str(y) + " " + str(u) + " " + str(v)
                 tempVox = Voxel([y,u,v]);
 
                 #Check if voxel lies in parameter space
@@ -309,9 +313,6 @@ def initialiseLUT(mainLut, orangeArr):
                     tempVox.setClassification(ORANGE)
                     mainLut.orangeClass.addVoxel(tempVox)
                 LUT[y,u,v] = tempVox
-
-    if not LUT[0][0][0]:
-        print "no"
 
     return LUT
 
@@ -345,12 +346,17 @@ def main():
     images = []
     for photo in os.listdir('PhotoDataSmall'):
         filename = "PhotoDataSmall/"+str(photo)
-        print "adding photo " + str(filename)
         images.append(cv2.imread(filename))
 
-    for i, image in enumerate(images):
-        print "Image " + str(i)
+    i = 0
+    for image in images:
+        print
+        print
+        print "analysing image " + str(i)
+        print
+        print
         mainLUT.updateLUT(image, ORANGE)
+        i+=1
 
 
     #tests()
