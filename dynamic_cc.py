@@ -258,6 +258,8 @@ class LookUpTable:
                 if not currentVox and isNeighbour(self, yuv, colorClass):
                     print "adding voxel YUV: "
                     print yuv
+                    self.LUT[yuv[0]][yuv[1]][yuv[2]] = Voxel(yuv)
+                    currentVox = self.LUT[yuv[0]][yuv[1]][yuv[2]]
                     currentVox.setClassification(colorClass)
                     currentVox.setVotes(0)
 
