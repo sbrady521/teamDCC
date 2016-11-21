@@ -327,7 +327,7 @@ def tests():
 
 def main():
     #range values [Ymax, Ymin, Umax, Umin, Vmax, Vmin]
-    orangeArray = []
+    orangeArray = [153, 87, 99, 93, 197, 187]
     mainLUT = LookUpTable(orangeArray)
 
     #Fill images with images in test folder
