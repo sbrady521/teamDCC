@@ -260,7 +260,7 @@ class LookUpTable:
                 #Check for unclassified pixels similar to observed color class
                 if currentVox != None:
                     if currentVox.getClassification() == ORANGE:
-                        print currentVox.getYUV()
+                        print str(xval) + " " + str(yval)
                 if not currentVox and isNeighbour(self, yuv, colorClass):
                     print
                     print "(adding voxel)"
@@ -344,7 +344,7 @@ def tests():
 
 def main():
     #range values [Ymax, Ymin, Umax, Umin, Vmax, Vmin]
-    orangeArray = [184, 111, 100, 94, 194, 177]
+    orangeArray = [227, 132, 81, 74, 207, 147]
     mainLUT = LookUpTable(orangeArray)
 
     #Fill images with images in test folder
