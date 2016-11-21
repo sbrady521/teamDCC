@@ -105,8 +105,8 @@ class Classification:
 
 
 class LookUpTable:
-    def __init__(self):
-        self.LUT = initialiseLUT()
+    def __init__(self, orangeRanges):
+        self.LUT = initialiseLUT(orangeRanges)
         self.greenClass = Classification()
         self.whiteClass = Classification()
         self.orangeClass = Classification()
@@ -273,8 +273,14 @@ class LookUpTable:
 #This function needs to initialise a 3d array of voxels
 #The voxels in the coordinate range specified by the parameters should be
 #classified orange
-def initialiseLUT(orangeYmax, orangeYmin, orangUmax, orangeUmin, orangeVmax, orangeVmin):
+def initialiseLUT(orangeArr):
     mainLut = []
+    orangeYmax = orangeArr[0]
+    orangeYmin = orangeArr[1]
+    orangeUmax = orangeArr[2]
+    orangeUmin = orangeArr[3]
+    orangeVmax = orangeArr[4]
+    orangeVmin = orangeArr[5]
 
     #Create 3d array of voxels for LUT
     for y in xrange(257):
@@ -320,6 +326,18 @@ def tests():
     return
 
 def main():
+    #range values [Ymax, Ymin, Umax, Umin, Vmax, Vmin]
+    orangeArray = []
+    mainLUT = LookUpTable(orangeArray)
+
+    #Fill images with images in test folder
+    images = []
+
+    for image in images:
+        mainLUT.updateLUT(image, ORANGE)
+        mainLUT.showTable()
+
+
     tests()
 
 
