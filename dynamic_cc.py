@@ -118,15 +118,13 @@ class LookUpTable:
     #returns a list of voxels in a specified class
     def getVoxelsInClass(self, colorClass):
         if colorClass == WHITE:
-            returnVal = self.whiteClass.getVoxelsInClass()
+            returnVal = self.whiteClass.getClassVoxels()
         elif colorClass == GREEN:
-            returnVal = self.greenClass.getVoxelsInClass()
+            returnVal = self.greenClass.getClassVoxels()
         elif colorClass == ORANGE:
-            returnVal = self.orangeClass.getVoxelsInClass()
-        else:
-            returnVal = self.unclassifiedClass.getVoxelsInClass()
+            returnVal = self.orangeClass.getClassVoxels()
 
-        return returnVals
+        return returnVal
 
     #returns the voxel opposite to voxel in reference to reference TODO
     def oppositeVoxel(self, reference, voxel):
@@ -259,16 +257,22 @@ class LookUpTable:
                 yuv = convertToYUV(bgr)
                 currentVox = self.LUT[yuv[0]][yuv[1]][yuv[2]]
 
-                #Increment votes of seen class
-                if currentVox.classification == colorClass:
-                    currentVox.incrementVote()
-
                 #Check for unclassified pixels similar to observed color class
-                elif currentVox.classification == UNCLASS and isNeighbour(self, currentVox, colorClass):
+                if not currentVox and isNeighbour(self, currentVox, colorClass):
                     print "adding voxel YUV: "
                     print currentVox.yuv
                     currentVox.setClassification(colorClass)
                     currentVox.setVotes(0)
+
+                elif currentVox and currentVox.getClassification() == UNCLASS and isNeighbour(self, currentVox, colorClass):
+                    print "adding voxel YUV: "
+                    print currentVox.yuv
+                    currentVox.setClassification(colorClass)
+                    currentVox.setVotes(0)
+
+                #Increment votes of seen class
+                elif currentVox.classification == colorClass:
+                    currentVox.incrementVote()
 
         #Check class volume and surface area
         if colorClass == ORANGE:
