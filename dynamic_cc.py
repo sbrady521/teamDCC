@@ -112,7 +112,6 @@ class LookUpTable:
         self.greenClass = Classification()
         self.whiteClass = Classification()
         self.orangeClass = Classification()
-        self.unclassifiedClass = Classification()
         self.LUT = initialiseLUT(self, orangeRanges)
 
     #returns a list of voxels in a specified class
