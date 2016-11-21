@@ -231,6 +231,44 @@ class LookUpTable:
                     neighbours.append(self.LUT[i][j][k])
         return neighbours
 
+    def updateLUT(self, image, colorClass):
+        #Get image height and width
+        height, width = image.shape[:2]
+
+        #Decrement all votes in the specified color class
+        decrementVotes(self, colorClass)
+
+        #Loop through every pixel in the image
+        for xval in xrange(0,width):
+            for yval in xrange(0, height):
+
+                #Analyse pixels yuv color and check LUT
+                bgr = image[xval,yval]
+                yuv = convertToYUV(bgr)
+                currentVox = self.LUT[yuv[0]][yuv[1]][yuv[2]]
+
+                #Increment votes of seen class
+                if currentVox.classification == colorClass:
+                    currentVox.incrementVote()
+
+                #Check for unclassified pixels similar to observed color class
+                elif currentVox.classification == UNCLASS and isNeighbour(self, currentVox, colorClass):
+                    currentVox.setClassification(colorClass)
+                    currentVox.setVotes(0)
+
+        #Check class volume and surface area
+        if colorClass == ORANGE:
+            classObject = self.orangeClass
+        elif colorClass == WHITE:
+            classObject = self.whiteClass
+        else:
+            classObject = self.greenClass
+        curVol = classObject.getVolume
+        curSA = classObject.getSurfaceArea
+
+        if curVol > MAXCLASSVOL or curSA > MAXCLASSA:
+            self.performShedding(colorClass)
+
 
 #This function needs to initialise a 3d array of voxels
 #The voxels in the coordinate range specified by the parameters should be
@@ -261,46 +299,6 @@ def initialiseLUT(orangeYmax, orangeYmin, orangUmax, orangeUmin, orangeVmax, ora
         #Add to the 3d array
         mainLut.append(tempLut1)
 
-def updateLUT(mainLUT, image, colorClass):
-    #Get image height and width
-    height, width = image.shape[:2]
-
-    #Decrement all votes in the specified color class
-    decrementVotes(mainLUT, colorClass)
-
-    #Loop through every pixel in the image
-    for xval in xrange(0,width):
-        for yval in xrange(0, height):
-
-            #Analyse pixels yuv color and check LUT
-            bgr = image[xval,yval]
-            yuv = convertToYUV(bgr)
-            currentVox = mainLUT.LUT[yuv[0]][yuv[1]][yuv[2]]
-
-            #Increment votes of seen class
-            if currentVox.classification == colorClass:
-                currentVox.incrementVote()
-
-            #Check for unclassified pixels similar to observed color class
-            elif currentVox.classification == UNCLASS and isNeighbour(mainLUT, currentVox, colorClass):
-                currentVox.setClassification(colorClass)
-                currentVox.setVotes(0)
-
-    #Check class volume and surface area
-    if colorClass == ORANGE:
-        classObject = LookUpTable.orangeClass
-    elif colorClass == WHITE:
-        classObject = LookUpTable.whiteClass
-    else:
-        classObject = LookUpTable.greenClass
-    curVol = classObject.getVolume
-    curSA = classObject.getSurfaceArea
-
-    if curVol > MAXCLASSVOL or curSA > MAXCLASSA:
-        mainLUT.performShedding(colorClass)
-
-    return mainLUT
-
 #Decrement all the votes in a color class
 def decrementVotes(mainLUT, colorClass):
     voxelArr = mainLUT.getVoxelsInClass(colorClass)
@@ -317,6 +315,8 @@ def isNeighbour(mainLUT, vox, colorClass):
     return False
 
 def tests():
+    #153 93 197
+    #87 99 187
     return
 
 def main():
