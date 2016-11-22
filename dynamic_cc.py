@@ -110,11 +110,11 @@ class Classification:
 
 
 class LookUpTable:
-    def __init__(self, orangeRanges):
+    def __init__(self, firstImage):
         self.greenClass = Classification()
         self.whiteClass = Classification()
         self.orangeClass = Classification()
-        self.LUT = initialiseLUT(self, orangeRanges)
+        self.LUT = initialiseLUT(self, firstImage)
 
     #returns a list of voxels in a specified class
     def getVoxelsInClass(self, colorClass):
@@ -249,7 +249,7 @@ class LookUpTable:
         height, width = image.shape[:2]
 
         #Decrement all votes in the specified color class
-        decrementVotes(self, colorClass) 
+        decrementVotes(self, colorClass)
 
         #Loop through every pixel in the image
         for xval in xrange(0,width):
@@ -299,28 +299,21 @@ class LookUpTable:
 #This function needs to initialise a 3d array of voxels
 #The voxels in the coordinate range specified by the parameters should be
 #classified orange
-def initialiseLUT(mainLut, orangeArr):
+def initialiseLUT(mainLut, firstImage):
     LUT = numpy.empty([256,256,256], object)
-    orangeYmax = orangeArr[0]
-    orangeYmin = orangeArr[1]
-    orangeUmax = orangeArr[2]
-    orangeUmin = orangeArr[3]
-    orangeVmax = orangeArr[4]
-    orangeVmin = orangeArr[5]
-
-    #Create 3d array of voxels for LUT
-    for y in xrange(orangeYmin, orangeYmax):
-        for u in xrange(orangeUmin, orangeUmax):
-            for v in xrange(orangeVmin, orangeVmax):
-                tempVox = Voxel([y,u,v]);
-
-                #Check if voxel lies in parameter space
-                if (orangeYmin < y < orangeYmax) and (orangeUmin < u < orangeUmax) and (orangeVmin < v < orangeVmax):
-                    tempVox.setVotes(MAXVOTES)
-                    tempVox.setClassification(ORANGE)
-                    mainLut.orangeClass.addVoxel(tempVox)
-                LUT[y,u,v] = tempVox
-
+    calImage = cv2.imread(firstImage)
+    height, width = calImage.shape[:2]
+    for xval in xrange(0,width):
+        for yval in xrange(0, height):
+            #Analyse pixels yuv color and check LUT
+            bgr = calImage[xval,yval]
+            if not max(bgr) == bgr[1]:
+                yuv = convertToYUV(bgr)
+                newVox = Voxel(yuv)
+                newVox.setClassification(ORANGE)
+                newVox.setVotes(newVox.maxvotes)
+                LUT[yuv[0]][yuv[1]][yuv[2]] = newVox
+                mainLut.orangeClass.addVoxel(newVox)
     return LUT
 
 #Decrement all the votes in a color class
@@ -350,13 +343,12 @@ def tests():
 
 def main():
     #range values [Ymax, Ymin, Umax, Umin, Vmax, Vmin]
-    orangeArray = [227, 132, 81, 74, 207, 147]
-    mainLUT = LookUpTable(orangeArray)
 
     #Fill images with images in test folder
     images = []
     dirList = os.listdir('PhotoDataSmall')
     dirList.sort()
+    mainLUT = LookUpTable("PhotoDataSmall/" + str(dirList[0]))
     for photo in dirList:
         filename = "PhotoDataSmall/"+str(photo)
         images.append(cv2.imread(filename))
@@ -364,10 +356,10 @@ def main():
     i = 0
     for image in images:
         height, width = image.shape[:2]
-        
+
         # Create new image for highlighting calibration
         new_img = class_out.ClassifiedImage(height, width, str(i))
-        
+
         print
         print
         print "analysing image " + str(i)
