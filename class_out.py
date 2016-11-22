@@ -20,7 +20,7 @@ class ClassifiedImage:
     def __init__(self, height, width, original_file_name):
         self.img = numpy.zeros((height, width, 3), numpy.uint8)
         self.img[:,:] = UNCLASS_BGR
-        self.path = original_file_name.rstrip('.jpg') + '.classified.jpg'
+        self.path = original_file_name.rstrip('.jpg') + '.classified.png'
         pass
 
     
