@@ -2,6 +2,8 @@ import numpy
 import cv2
 import itertools
 import os
+import class_out
+
 #lul
 UNCLASS = 0
 WHITE = 1
@@ -242,12 +244,12 @@ class LookUpTable:
                     neighbours.append(self.LUT[i][j][k])
         return neighbours
 
-    def updateLUT(self, image, colorClass):
+    def updateLUT(self, image, colorClass, class_img):
         #Get image height and width
         height, width = image.shape[:2]
 
         #Decrement all votes in the specified color class
-        decrementVotes(self, colorClass)
+        decrementVotes(self, colorClass) 
 
         #Loop through every pixel in the image
         for xval in xrange(0,width):
@@ -276,6 +278,9 @@ class LookUpTable:
                 #Increment votes of seen class
                 elif currentVox and currentVox.classification == colorClass:
                     currentVox.incrementVote()
+
+                # Add pixel classification to output image
+                class_img.classify(xval, yval, currentVox.getClassification() if currentVox != None else UNCLASS)
 
         #Check class volume and surface area
         if colorClass == ORANGE:
@@ -359,13 +364,18 @@ def main():
     i = 0
     for image in images:
         height, width = image.shape[:2]
+        
+        # Create new image for highlighting calibration
+        new_img = class_out.ClassifiedImage(height, width, str(i))
+        
         print
         print
         print "analysing image " + str(i)
         print "%d x %d" % (width, height)
         print
         print
-        mainLUT.updateLUT(image, ORANGE)
+        mainLUT.updateLUT(image, ORANGE, new_img)
+        new_img.write()
         i+=1
 
 
