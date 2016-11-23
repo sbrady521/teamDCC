@@ -80,8 +80,8 @@ class Classification:
     def __init__(self):
         #Initialisation
         self.Volume = 0
-        self.maxVol = 3300
-        self.maxSA = 7000
+        self.maxVol = 9999
+        self.maxSA = 15000
         self.SurfaceArea = 0
         self.classVoxels = []
 
@@ -311,13 +311,13 @@ def initialiseLUT(mainLut, firstImage):
         if(xval == 0 or xval == width - 1):
             for yval in xrange(0, height):
                 bgr = calImage[xval,yval]
-                r += bgr[2]
-                g += bgr[1]
-                b += bgr[0]
+                r += int(bgr[2])
+                g += int(bgr[1])
+                b += int(bgr[0])
                 numPix += 1
-    r /= numPix
-    g /= numPix
-    b /= numPix
+    r /= float(numPix)
+    g /= float(numPix)
+    b /= float(numPix)
 
     total = r + g + b
     greenPerc = float(g/total)
@@ -329,8 +329,8 @@ def initialiseLUT(mainLut, firstImage):
             #Analyse pixels yuv color and check LUT
             bgr = calImage[xval,yval]
             total = sum(bgr)
-            currGreenPerc = float(bgr[1]/total)
-            limit = greenPerc - 10
+            currGreenPerc = (bgr[1]/float(total))
+            limit = greenPerc - 0.05
             if currGreenPerc < limit:
                 yuv = convertToYUV(bgr)
                 newVox = Voxel(yuv)
