@@ -303,11 +303,35 @@ def initialiseLUT(mainLut, firstImage):
     LUT = numpy.empty([256,256,256], object)
     calImage = cv2.imread(firstImage)
     height, width = calImage.shape[:2]
+    numPix = 0
+    r = 0
+    g = 0
+    b = 0
+    for xval in xrange(0, width):
+        if(xval == 0 or xval == width - 1):
+            for yval in xrange(0, height):
+                bgr = calImage[xval,yval]
+                r += bgr[2]
+                g += bgr[1]
+                b += bgr[0]
+                numPix += 1
+    r /= numPix
+    g /= numPix
+    b /= numPix
+
+    total = r + g + b
+    greenPerc = float(g/total)
+
+
+
     for xval in xrange(0,width):
         for yval in xrange(0, height):
             #Analyse pixels yuv color and check LUT
             bgr = calImage[xval,yval]
-            if not max(bgr) == bgr[1]:
+            total = sum(bgr)
+            currGreenPerc = float(bgr[1]/total)
+            limit = greenPerc - 10
+            if currGreenPerc < limit:
                 yuv = convertToYUV(bgr)
                 newVox = Voxel(yuv)
                 newVox.setClassification(ORANGE)
