@@ -80,7 +80,7 @@ class Classification:
     def __init__(self):
         #Initialisation
         self.Volume = 0
-        self.maxVol = 9999
+        self.maxVol = 1500
         self.maxSA = 15000
         self.SurfaceArea = 0
         self.classVoxels = []
@@ -95,12 +95,14 @@ class Classification:
 
     def addVoxel(self, voxel):
         self.classVoxels.append(voxel)
+        self.Volume += 1
 
     def removeVoxel(self, voxel):
         i = 0
         for currVoxel in self.classVoxels:
             if(currVoxel.getYUV() == voxel.getYUV()):
                 self.classVoxels.pop(i)
+                self.Volume -= 1
                 break
             i += 1
 
@@ -215,6 +217,7 @@ class LookUpTable:
         #check every removable voxel to see if their votes are too low
         #unclassify them if so
         for voxel in removableVoxels:
+            #print "removing"
             if voxel.getVotes() < averageVotes:
                 #print "removing voxel YUV:"
                 #print voxel.yuv
@@ -236,9 +239,9 @@ class LookUpTable:
         v = yuv_coords[2]
         neighbours = list() #of voxels
         #iterate through neighbours and append them to the list
-        for i in xrange(y-1,y+1):
-            for j in xrange(u-1,u+1):
-                for k in xrange(v-1,v+1):
+        for i in xrange(y-2,y+2):
+            for j in xrange(u-2,u+2):
+                for k in xrange(v-2,v+2):
                     if i == y and j == u and k == v:
                         continue
                     neighbours.append(self.LUT[i][j][k])
@@ -260,9 +263,9 @@ class LookUpTable:
                 currentVox = self.LUT[yuv[0]][yuv[1]][yuv[2]]
 
                 #Check for unclassified pixels similar to observed color class
-                if currentVox != None:
-                    if currentVox.getClassification() == ORANGE:
-                        print str(xval) + " " + str(yval) + " ORANGE"
+                #if currentVox != None:
+                #    if currentVox.getClassification() == ORANGE:
+                #        print str(xval) + " " + str(yval) + " ORANGE"
                 if not currentVox and isNeighbour(self, yuv, colorClass):
                     print
                     print "(adding voxel)"
@@ -274,6 +277,8 @@ class LookUpTable:
                     currentVox = self.LUT[yuv[0]][yuv[1]][yuv[2]]
                     currentVox.setClassification(colorClass)
                     currentVox.setVotes(0)
+                    if(colorClass == ORANGE):
+                        self.orangeClass.Volume += 1
 
                 #Increment votes of seen class
                 elif currentVox and currentVox.classification == colorClass:
@@ -289,11 +294,15 @@ class LookUpTable:
             classObject = self.whiteClass
         else:
             classObject = self.greenClass
-        curVol = classObject.getVolume
-        curSA = classObject.getSurfaceArea
+        curVol = classObject.getVolume()
+        curSA = classObject.getSurfaceArea()
 
         if curVol > classObject.maxVol or curSA > classObject.maxSA:
-            self.performShedding(colorClass)
+            while classObject.getVolume() > classObject.maxVol:
+                print "triggered"
+                print classObject.getVolume()
+                print classObject.maxVol
+                self.performShedding(colorClass)
 
 
 #This function needs to initialise a 3d array of voxels
@@ -327,17 +336,19 @@ def initialiseLUT(mainLut, firstImage):
     for xval in xrange(0,width):
         for yval in xrange(0, height):
             #Analyse pixels yuv color and check LUT
-            bgr = calImage[xval,yval]
+            bgr = calImage[xval,yval] #this seems to give the color for (yval, xval)
             total = sum(bgr)
             currGreenPerc = (bgr[1]/float(total))
             limit = greenPerc - 0.05
             if currGreenPerc < limit:
                 yuv = convertToYUV(bgr)
-                newVox = Voxel(yuv)
-                newVox.setClassification(ORANGE)
-                newVox.setVotes(newVox.maxvotes)
-                LUT[yuv[0]][yuv[1]][yuv[2]] = newVox
-                mainLut.orangeClass.addVoxel(newVox)
+                if yuv[0] >= 100:
+                    newVox = Voxel(yuv)
+                    newVox.setClassification(ORANGE)
+                    newVox.setVotes(newVox.maxvotes)
+                    LUT[yuv[0]][yuv[1]][yuv[2]] = newVox
+                    #print "adding" + str(yuv) + " from " + str(xval) + " " + str(yval)
+                    mainLut.orangeClass.addVoxel(newVox)
     return LUT
 
 #Decrement all the votes in a color class
@@ -370,11 +381,12 @@ def main():
 
     #Fill images with images in test folder
     images = []
-    dirList = os.listdir('PhotoDataSmall')
+    dirList = os.listdir('photoData')
     dirList.sort()
-    mainLUT = LookUpTable("PhotoDataSmall/" + str(dirList[0]))
+    print "calibrating from image " + str(dirList[0])
+    mainLUT = LookUpTable("photoData/" + str(dirList[0]))
     for photo in dirList:
-        filename = "PhotoDataSmall/"+str(photo)
+        filename = "photoData/"+str(photo)
         images.append(cv2.imread(filename))
 
     i = 0
@@ -391,6 +403,7 @@ def main():
         print
         print
         mainLUT.updateLUT(image, ORANGE, new_img)
+        print "volume is now " + str(mainLUT.orangeClass.getVolume())
         new_img.write()
         i+=1
 
