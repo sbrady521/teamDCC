@@ -3,3 +3,6 @@ dynamic_cc.iml
 *.iml
 .idea/.name
 *.so
+*.bmp
+*.png
+video1.zip
