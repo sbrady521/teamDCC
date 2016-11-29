@@ -2,6 +2,7 @@ import numpy, cv2
 import matplotlib.pyplot as pyplot
 import sys
 import os
+import subprocess
 
 # Converts an image file to rg chroma and writes it
 # also returns a list of g values
@@ -46,6 +47,7 @@ def convertToRGChroma(filedir):
 
     return g_values
 
+# plots a list of g_values using matplotlib in python
 def plot_g_values(g_list, filename):
     # Clear plot
     pyplot.clf()
@@ -57,9 +59,19 @@ def plot_g_values(g_list, filename):
     plot_filename = filename + '_g_values.png'
     pyplot.savefig(plot_filename)
 
+# plots a list of g_values using R
 def R_plot_g_values(g_list, filename):
-    
+    # write the list to a temporary file
+    new_file = open("g_list", 'w')
+    for val in g_list:
+        new_file.write(str(val) + "\n")
 
+    new_file.close()
+
+    filename = filename + '_g_values.png'
+    #call the R script
+    #os.system("./plot_g_values.R " + "g_list" + " " + filename)
+    subprocess.call("Rscript " + " plot_g_values.R " + "g_list" + " " + filename)
 
 def main(args):
     if len(args) != 2:
