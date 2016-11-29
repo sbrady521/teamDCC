@@ -4,6 +4,14 @@ import sys
 import os
 import subprocess
 
+# ATTN:
+# Currently uses R to plot the range of g chroma values
+# because R has more powerful plotting facilities than python
+# but if you don't have R installed you can comment out the last line
+# in main() - R_plot_g_values call
+# and uncomment the plot_g_values call above it
+# This will plot a shittier graph with matplotlib.pyplot
+
 # Converts an image file to rg chroma and writes it
 # also returns a list of g values
 def convertToRGChroma(filedir):
@@ -37,8 +45,11 @@ def convertToRGChroma(filedir):
             # save chromatic values to the new image
             new_img[xval, yval] = [b_chroma, g_chroma, r_chroma]
 
-            # add g values to g value list
-            g_values.append(g_chroma)
+            # add g values to g value list if the pixel is mostly green
+            if (g_chroma/255.0 > 0.2):
+                g_values.append(g_chroma)
+            else:
+                print "skipped adding pixel " + str(xval) + " " + str(yval)
 
 
     new_filename = filedir + "_rgchroma.png"
