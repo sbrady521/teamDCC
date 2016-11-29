@@ -3,7 +3,7 @@ import matplotlib.pyplot as pyplot
 import sys
 import os
 import subprocess
-
+from rpy2.robjects import r
 # ATTN:
 # Currently uses R to plot the range of g chroma values
 # because R has more powerful plotting facilities than python
@@ -80,9 +80,10 @@ def R_plot_g_values(g_list, filename):
     new_file.close()
 
     filename = filename + '_g_values.png'
-    #call the R script
-    #os.system("./plot_g_values.R " + "g_list" + " " + filename)
-    subprocess.call("Rscript " + " plot_g_values.R " + "g_list" + " " + filename)
+    r('g_vals <- read.table("g_list")')
+    r('png(filename = "' + filename + '", width=1000, height = 255)')
+    r('smoothScatter(g_vals[[1]], y = NULL, ylab = "g_chroma values", xlab = "pixel number")')
+    r('dev.off()')
 
 def main(args):
     if len(args) != 2:
