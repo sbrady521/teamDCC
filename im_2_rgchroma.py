@@ -3,6 +3,7 @@ import matplotlib.pyplot as pyplot
 import sys
 import os
 import subprocess
+import random
 #from rpy2.robjects import r
 # ATTN:
 # Currently uses R to plot the range of g chroma values
@@ -136,6 +137,35 @@ def three_strips_sample(filename):
 
     return g_values
 
+def random_sample(filename):
+    img = cv2.imread(filename, cv2.IMREAD_COLOR)
+
+    if img is None:
+        print "Failed to read or load the image at" + str(filedir)
+        return
+
+    # Get Image dimensions
+    img_h, img_w = img.shape[:2]
+
+    # Initialize an array to store g values for analysis purposes
+    g_values = list()
+
+    cnt = 0
+    while cnt < 20000:
+        xval = random.randint(0, img_w - 1)
+        yval = random.randint(0, img_h - 1)
+
+        rgb_sum = float(sum(img[yval,xval]))
+        if rgb_sum == 0:
+            continue
+        g_chroma = (float(img[yval, xval, 1])/rgb_sum) * 255.0
+
+        g_values.append(g_chroma)
+
+        cnt += 1
+
+    return g_values
+
 # plots a list of g_values using matplotlib in python
 def plot_g_values(g_list, filename):
     # Clear plot
@@ -255,7 +285,7 @@ def main(args):
             # skip converted files and graphs
             continue
         filename = args[1] + '/' + file
-        g_values = three_strips_sample(filename)
+        g_values = random_sample(filename)
         #plot_g_values(g_values, filename)
         R_plot_g_values(g_values, filename)
 
