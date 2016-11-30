@@ -128,7 +128,7 @@ def classify(g_list, filename):
 # Gets the minimum and maximum bin values for a g_list
 def get_g_range(g_list):
     # If the bin density is above a threshold it is a valid bin
-    threshold = 0.04
+    threshold = 0.035
 
     min_g = None
     max_g = None
@@ -148,6 +148,11 @@ def get_g_range(g_list):
                 max_index = cnt
 
         cnt += 1
+
+    if max_g is None:
+        max_g = 120
+    if min_g is None:
+        min_g = 100
     # Feather the mininum / maximum sligthly
     return min_g - 7, max_g + 7
 
