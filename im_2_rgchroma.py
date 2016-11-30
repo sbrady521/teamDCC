@@ -2,7 +2,8 @@ import numpy, cv2
 import matplotlib.pyplot as pyplot
 import sys
 import os
-from rpy2.robjects import r
+import subprocess
+#from rpy2.robjects import r
 # ATTN:
 # Currently uses R to plot the range of g chroma values
 # because R has more powerful plotting facilities than python
@@ -30,26 +31,31 @@ def convertToRGChroma(filedir):
     # Initialize an array to store g values for analysis purposes
     g_values = list()
 
-    for xval in xrange(0, img_w):
-        for yval in xrange(0, img_h):
-            # iterate through every pixel and get the sum of the b,g,r values
-            rgb_sum = float(sum(img[xval,yval]))
+    print img_w
+    print img_h
 
+    for yval in xrange(0, img_h):
+        for xval in xrange(0, img_w):
+            # iterate through every pixel and get the sum of the b,g,r values
+            rgb_sum = float(sum(img[yval,xval]))
+            if rgb_sum == 0:
+                continue
             # calculate the new chromatic value for each channel
             # 255 is a magic number which scales the image value so it can be displayed
             # in an rgb format
             # TODO remove magic number?
-            b_chroma = (float(img[xval, yval, 0])/rgb_sum) * 255.0
-            g_chroma = (float(img[xval, yval, 1])/rgb_sum) * 255.0
-            r_chroma = (float(img[xval, yval, 2])/rgb_sum) * 255.0
+            b_chroma = (float(img[yval, xval, 0])/rgb_sum) * 255.0
+            g_chroma = (float(img[yval, xval, 1])/rgb_sum) * 255.0
+            r_chroma = (float(img[yval, xval, 2])/rgb_sum) * 255.0
             # save chromatic values to the new image
-            new_img[xval, yval] = [b_chroma, g_chroma, r_chroma]
+            new_img[yval, xval] = [b_chroma, g_chroma, r_chroma]
 
             # add g values to g value list if the pixel is mostly green
             if (g_chroma/255.0 > 0.2):
                 g_values.append(g_chroma)
             else:
-                print "skipped adding pixel " + str(xval) + " " + str(yval)
+                pass
+                #print "skipped adding pixel " + str(xval) + " " + str(yval)
 
 
     new_filename = filedir + "_rgchroma.png"
@@ -81,10 +87,14 @@ def R_plot_g_values(g_list, filename):
 
     # plot graph using R
     filename = filename + '_g_values.png'
-    r('g_vals <- read.table("g_list")')
-    r('png(filename = "' + filename + '", width=1000, height = 255)')
-    r('smoothScatter(g_vals[[1]], y = NULL, ylab = "g_chroma values", xlab = "pixel number")')
-    r('dev.off()')
+    #r('g_vals <- read.table("g_list")')
+    #r('png(filename = "' + filename + '", width=1000, height = 255)')
+    #r('smoothScatter(g_vals[[1]], y = NULL, ylab = "g_chroma values", xlab = "pixel number")')
+    #r('dev.off()')
+
+    #call the R script
+    #os.system("./plot_g_values.R " + "g_list" + " " + filename)
+    subprocess.call("Rscript " + " plot_g_values.R " + "g_list" + " " + filename)
 
 def main(args):
     if len(args) != 2:
