@@ -38,9 +38,9 @@ def sample(filedir):
             # 255 is a magic number which scales the image value so it can be displayed
             # in an rgb format
             # TODO remove magic number?
-            b_chroma = (float(img[yval, xval, 0])/rgb_sum) * 255.0
+            # b_chroma = (float(img[yval, xval, 0])/rgb_sum) * 255.0
             g_chroma = (float(img[yval, xval, 1])/rgb_sum) * 255.0
-            r_chroma = (float(img[yval, xval, 2])/rgb_sum) * 255.0
+            # r_chroma = (float(img[yval, xval, 2])/rgb_sum) * 255.0
 
             # add g values to g value list if the pixel is mostly green
             if (g_chroma/255.0 > 0.2):
@@ -48,6 +48,91 @@ def sample(filedir):
             else:
                 pass
                 #print "skipped adding pixel " + str(xval) + " " + str(yval)
+
+    return g_values
+
+def diagonal_sample(filename):
+    img = cv2.imread(filename, cv2.IMREAD_COLOR)
+
+    if img is None:
+        print "Failed to read or load the image at" + str(filedir)
+        return
+
+    # Get Image dimensions
+    img_h, img_w = img.shape[:2]
+
+    # Initialize an array to store g values for analysis purposes
+    g_values = list()
+
+    ycnt = int(img_h*0.2)
+    xcnt = 0
+    ratio = int(img_w/img_h)
+
+    while ycnt < img_h:
+        xstart = ycnt*ratio
+        xend = xstart + 20 if (xstart + 20) < img_w else img_w
+        xcnt = xstart
+        while xcnt < xend:
+            # iterate through every pixel and get the sum of the b,g,r values
+            rgb_sum = float(sum(img[ycnt,xcnt]))
+            if rgb_sum == 0:
+                continue
+            # calculate the new chromatic value for each channel
+            # 255 is a magic number which scales the image value so it can be displayed
+            # in an rgb format
+            # TODO remove magic number?
+            # b_chroma = (float(img[yval, xval, 0])/rgb_sum) * 255.0
+            g_chroma = (float(img[ycnt, xcnt, 1])/rgb_sum) * 255.0
+            # r_chroma = (float(img[yval, xval, 2])/rgb_sum) * 255.0
+
+            g_values.append(g_chroma)
+            xcnt += 1
+        ycnt += 1
+
+    return g_values
+
+def three_strips_sample(filename):
+    img = cv2.imread(filename, cv2.IMREAD_COLOR)
+
+    if img is None:
+        print "Failed to read or load the image at" + str(filedir)
+        return
+
+    # Get Image dimensions
+    img_h, img_w = img.shape[:2]
+
+    # Initialize an array to store g values for analysis purposes
+    g_values = list()
+
+    for yval in xrange(int(img_h*0.2), int(img_h*0.3)):
+        for xval in xrange(0, img_w):
+            # iterate through every pixel and get the sum of the b,g,r values
+            rgb_sum = float(sum(img[yval,xval]))
+            if rgb_sum == 0:
+                continue
+            g_chroma = (float(img[yval, xval, 1])/rgb_sum) * 255.0
+
+            g_values.append(g_chroma)
+
+    for yval in xrange(int(img_h*0.5), int(img_h*0.6)):
+        for xval in xrange(0, img_w):
+            # iterate through every pixel and get the sum of the b,g,r values
+            rgb_sum = float(sum(img[yval,xval]))
+            if rgb_sum == 0:
+                continue
+            g_chroma = (float(img[yval, xval, 1])/rgb_sum) * 255.0
+
+            g_values.append(g_chroma)
+
+    for yval in xrange(int(img_h*0.8), int(img_h*0.9)):
+        for xval in xrange(0, img_w):
+            # iterate through every pixel and get the sum of the b,g,r values
+            rgb_sum = float(sum(img[yval,xval]))
+            if rgb_sum == 0:
+                continue
+            g_chroma = (float(img[yval, xval, 1])/rgb_sum) * 255.0
+
+            g_values.append(g_chroma)
 
     return g_values
 
@@ -170,7 +255,7 @@ def main(args):
             # skip converted files and graphs
             continue
         filename = args[1] + '/' + file
-        g_values = sample(filename)
+        g_values = three_strips_sample(filename)
         #plot_g_values(g_values, filename)
         R_plot_g_values(g_values, filename)
 
