@@ -148,8 +148,8 @@ def get_g_range(g_list):
                 max_index = cnt
 
         cnt += 1
-
-    return min_g - 5, max_g + 5
+    # Feather the mininum / maximum sligthly
+    return min_g - 7, max_g + 7
 
 def main(args):
     if len(args) != 2:
