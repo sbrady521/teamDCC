@@ -13,9 +13,9 @@ import subprocess
 # This will plot a shittier graph with matplotlib.pyplot
 # You also need to install rpy2 (pip install rpy2 should be sufficient)
 
-# Converts an image file to rg chroma and writes it
-# also returns a list of g values
-def convertToRGChroma(filedir):
+# Samples the bottom 20% of the image and returns
+# a list of g chromacity values from that sample
+def sample(filedir):
     img = cv2.imread(filedir, cv2.IMREAD_COLOR)
 
     if img is None:
@@ -25,16 +25,10 @@ def convertToRGChroma(filedir):
     # Get Image dimensions
     img_h, img_w = img.shape[:2]
 
-    # Initialize a new blank (black) image
-    new_img = numpy.zeros((img_h, img_w, 3), numpy.uint8)
-
     # Initialize an array to store g values for analysis purposes
     g_values = list()
 
-    print img_w
-    print img_h
-
-    for yval in xrange(0, img_h):
+    for yval in xrange(int(img_h*0.8), img_h):
         for xval in xrange(0, img_w):
             # iterate through every pixel and get the sum of the b,g,r values
             rgb_sum = float(sum(img[yval,xval]))
@@ -47,8 +41,6 @@ def convertToRGChroma(filedir):
             b_chroma = (float(img[yval, xval, 0])/rgb_sum) * 255.0
             g_chroma = (float(img[yval, xval, 1])/rgb_sum) * 255.0
             r_chroma = (float(img[yval, xval, 2])/rgb_sum) * 255.0
-            # save chromatic values to the new image
-            new_img[yval, xval] = [b_chroma, g_chroma, r_chroma]
 
             # add g values to g value list if the pixel is mostly green
             if (g_chroma/255.0 > 0.2):
@@ -56,11 +48,6 @@ def convertToRGChroma(filedir):
             else:
                 pass
                 #print "skipped adding pixel " + str(xval) + " " + str(yval)
-
-
-    new_filename = filedir + "_rgchroma.png"
-
-    cv2.imwrite(new_filename, new_img)
 
     return g_values
 
@@ -70,8 +57,10 @@ def plot_g_values(g_list, filename):
     pyplot.clf()
 
     # plot g values into a 1d scatter
-    pyplot.plot(g_list)
+    #pyplot.plot(g_list)
 
+    hist = numpy.histogram(g_list, bins='sturges', density=True)
+    print hist
     # save plot
     plot_filename = filename + '_g_values.png'
     pyplot.savefig(plot_filename)
@@ -96,6 +85,72 @@ def R_plot_g_values(g_list, filename):
     #os.system("./plot_g_values.R " + "g_list" + " " + filename)
     subprocess.call("Rscript " + " plot_g_values.R " + "g_list" + " " + filename)
 
+# Uses g_list sampled from image to classify the whole image
+def classify(g_list, filename):
+    # Convert the g_list to a histogram
+    hist = numpy.histogram(g_list, bins='doane', density=True)
+
+    # Get the minimum and maximum ranges of the histogram
+    min_g, max_g = get_g_range(hist)
+
+    print min_g, max_g
+
+    img = cv2.imread(filename, cv2.IMREAD_COLOR)
+
+    if img is None:
+        print "Failed to read or load the image at" + str(filedir)
+        return
+
+    # Get Image dimensions
+    img_h, img_w = img.shape[:2]
+
+    # Initialize a new blank (black) image
+    new_img = numpy.zeros((img_h, img_w, 3), numpy.uint8)
+
+    for yval in xrange(0, img_h):
+        for xval in xrange(0, img_w):
+            # iterate through every pixel and get the sum of the b,g,r values
+            rgb_sum = float(sum(img[yval,xval]))
+            if rgb_sum == 0:
+                continue
+            g_chroma = (float(img[yval, xval, 1])/rgb_sum) * 255.0
+
+            # if the pixels green chromaticity values lie within the range
+            # classify it by making it blue
+            if min_g <= g_chroma <= max_g:
+                new_img[yval, xval] = [255, 112, 132]
+
+    # write the classified image
+    new_filename = filename + "_rgchroma.png"
+
+    cv2.imwrite(new_filename, new_img)
+
+# Gets the minimum and maximum bin values for a g_list
+def get_g_range(g_list):
+    # If the bin density is above a threshold it is a valid bin
+    threshold = 0.04
+
+    min_g = None
+    max_g = None
+    max_index = None
+
+    cnt = 0
+    while cnt < len(g_list[0]):
+        if g_list[0][cnt] > threshold:
+            if min_g is None:
+                min_g = g_list[1][cnt]
+            elif max_g is not None and g_list[0][cnt] > g_list[0][max_index]:
+                min_g = g_list[1][cnt]
+                max_g = None
+        else:
+            if min_g is not None and max_g is None:
+                max_g = g_list[1][cnt]
+                max_index = cnt
+
+        cnt += 1
+
+    return min_g - 5, max_g + 5
+
 def main(args):
     if len(args) != 2:
         print "Usage: ./im_2_rgchroma [image directory]"
@@ -110,9 +165,11 @@ def main(args):
             # skip converted files and graphs
             continue
         filename = args[1] + '/' + file
-        g_values = convertToRGChroma(filename)
+        g_values = sample(filename)
         #plot_g_values(g_values, filename)
         R_plot_g_values(g_values, filename)
+
+        classify(g_values, filename)
 
 
 if __name__ == '__main__':
