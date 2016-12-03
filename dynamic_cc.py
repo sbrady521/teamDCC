@@ -60,8 +60,8 @@ class Voxel:
         self.votes += self.incVal
 
         #ensure votes don't exceed max
-        if self.votes > 10:
-            self.votes = 10
+        if self.votes > self.maxvotes:
+            self.votes = self.maxvotes
 
     def decrementVote(self):
         self.votes -= self.decVal
@@ -218,9 +218,8 @@ class LookUpTable:
         #unclassify them if so
         for voxel in removableVoxels:
             #print "removing"
-            if voxel.getVotes() < averageVotes:
-                #print "removing voxel YUV:"
-                #print voxel.yuv
+            if voxel.getVotes() <= averageVotes:
+                print voxel.yuv
                 yuv = voxel.getYUV()
                 self.LUT[yuv[0],yuv[1],yuv[2]] = None
                 if colorClass == ORANGE:
@@ -278,7 +277,7 @@ class LookUpTable:
                     currentVox.setClassification(colorClass)
                     currentVox.setVotes(0)
                     if(colorClass == ORANGE):
-                        self.orangeClass.Volume += 1
+                        self.orangeClass.addVoxel(currentVox)
 
                 #Increment votes of seen class
                 elif currentVox and currentVox.classification == colorClass:

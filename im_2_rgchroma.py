@@ -29,7 +29,7 @@ def sample(filedir):
     # Initialize an array to store g values for analysis purposes
     g_values = list()
 
-    for yval in xrange(int(img_h*0.8), img_h):
+    for yval in xrange(int(img_h*0.625), img_h):
         for xval in xrange(0, img_w):
             # iterate through every pixel and get the sum of the b,g,r values
             rgb_sum = float(sum(img[yval,xval]))
@@ -276,20 +276,24 @@ def main(args):
         print "Usage: ./im_2_rgchroma [image directory]"
         sys.exit(1)
 
-    dir_list = os.listdir(args[1])
-    dir_list.sort()
+    dir_list_bot = os.listdir(args[1] + str("/bottom_camera"))
+    dir_list_top = os.listdir(args[1] + str("/top_camera"))
+    dir_list_bot.sort()
+    dir_list_top.sort()
 
     # Iterate through files in the given dir
-    for file in dir_list:
-        if file.endswith('_rgchroma.png') or file.endswith('g_values.png'):
+    for i in xrange(0, len(dir_list_bot)):
+        file_bot = dir_list_bot[i]
+        file_top = dir_list_top[i]
+        if file_bot.endswith('_rgchroma.png') or file_bot.endswith('g_values.png'):
             # skip converted files and graphs
             continue
-        filename = args[1] + '/' + file
-        g_values = random_sample(filename)
+        filename = args[1] + '/bottom_camera/' + file_bot
+        g_values = sample(filename)
         #plot_g_values(g_values, filename)
-        R_plot_g_values(g_values, filename)
-
-        classify(g_values, filename)
+        #R_plot_g_values(g_values, filename)
+        topFileName = args[1] + "/top_camera/" + file_top
+        classify(g_values, topFileName)
 
 
 if __name__ == '__main__':
