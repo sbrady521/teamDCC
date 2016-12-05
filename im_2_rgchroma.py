@@ -64,27 +64,29 @@ def sample_top(filedir, g_min, g_max):
 
     top_values = []
 
-    mid_x = img_w/2
-    mid_y = img_h/2
-    for x in xrange(0, img_w):
-        rgb_sum = float(sum(img[mid_y, x]))
-        if rgb_sum == 0:
-            continue
-        g_chroma = (float(img[mid_y, x, 1])/rgb_sum) * 255.0
+    x_quarts = [img_w/4, img_w/2, img_w*3/4]
+    y_quarts = [img_h/4, img_h/2, img_h*3/4]
+    for quart_x in xrange(0, len(x_quarts)):
+        for x in xrange(0, img_w):
+            rgb_sum = float(sum(img[y_quarts[quart_x], x]))
+            if rgb_sum == 0:
+                continue
+            g_chroma = (float(img[y_quarts[quart_x], x, 1])/rgb_sum) * 255.0
 
-        if (g_max < g_chroma < g_max + 2) or (g_min - 2 < g_chroma < g_min):
-            top_values.append(g_chroma)
-            #print "adding " + str(g_chroma) + " from horizontal top"
+            if (g_max < g_chroma < g_max + 2) or (g_min - 2 < g_chroma < g_min):
+                top_values.append(g_chroma)
+                #print "adding " + str(g_chroma) + " from horizontal top"
 
-    for y in xrange(img_h - 1, -1, -1):
-        rgb_sum = float(sum(img[y,mid_x]))
-        if rgb_sum == 0:
-            continue
-        g_chroma = (float(img[y, mid_x, 1])/rgb_sum) * 255.0
+    for quart_y in xrange(0, len(y_quarts)):
+        for y in xrange(img_h - 1, -1, -1):
+            rgb_sum = float(sum(img[y,x_quarts[quart_y]]))
+            if rgb_sum == 0:
+                continue
+            g_chroma = (float(img[y, x_quarts[quart_y], 1])/rgb_sum) * 255.0
 
-        if (g_max < g_chroma < g_max + 5) or (g_min - 5 < g_chroma < g_min):
-            top_values.append(g_chroma)
-            #print "adding " + str(g_chroma) + " from top vertical scan"
+            if (g_max < g_chroma < g_max + 5) or (g_min - 5 < g_chroma < g_min):
+                top_values.append(g_chroma)
+                #print "adding " + str(g_chroma) + " from top vertical scan"
     return top_values
 
 
