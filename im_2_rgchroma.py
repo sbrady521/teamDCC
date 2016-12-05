@@ -52,6 +52,42 @@ def sample(filedir):
 
     return g_values
 
+def sample_top(filedir, g_min, g_max):
+    img = cv2.imread(filedir, cv2.IMREAD_COLOR)
+
+    if img is None:
+        print "Failed to read or load the image at" + str(filedir)
+        return
+
+    # Get Image dimensions
+    img_h, img_w = img.shape[:2]
+
+    top_values = []
+
+    mid_x = img_w/2
+    mid_y = img_h/2
+    for x in xrange(0, img_w):
+        rgb_sum = float(sum(img[mid_y, x]))
+        if rgb_sum == 0:
+            continue
+        g_chroma = (float(img[mid_y, x, 1])/rgb_sum) * 255.0
+
+        if (g_max < g_chroma < g_max + 2) or (g_min - 2 < g_chroma < g_min):
+            top_values.append(g_chroma)
+            #print "adding " + str(g_chroma) + " from horizontal top"
+
+    for y in xrange(img_h - 1, -1, -1):
+        rgb_sum = float(sum(img[y,mid_x]))
+        if rgb_sum == 0:
+            continue
+        g_chroma = (float(img[y, mid_x, 1])/rgb_sum) * 255.0
+
+        if (g_max < g_chroma < g_max + 5) or (g_min - 5 < g_chroma < g_min):
+            top_values.append(g_chroma)
+            #print "adding " + str(g_chroma) + " from top vertical scan"
+    return top_values
+
+
 def diagonal_sample(filename):
     img = cv2.imread(filename, cv2.IMREAD_COLOR)
 
@@ -208,6 +244,21 @@ def classify(g_list, filename):
     # Get the minimum and maximum ranges of the histogram
     min_g, max_g = get_g_range(hist)
 
+    #Examine top image for lighter values
+    top_values = sample_top(filename, min_g, max_g)
+    min_top = min(top_values)
+    max_top = max(top_values)
+
+    if min_top < min_g:
+        print "min was " + str(min_g)
+        min_g = min_top
+    if max_top > max_g:
+        max_g = max_top
+
+    #chromaticity value of 84 means white is allowed, must be higher
+    if min_g < 87:
+        min_g = 87
+
     print min_g, max_g
 
     img = cv2.imread(filename, cv2.IMREAD_COLOR)
@@ -269,7 +320,14 @@ def get_g_range(g_list):
     if min_g is None:
         min_g = 100
     # Feather the mininum / maximum sligthly
-    return min_g - 7, max_g + 7
+    return min_g - 7, max_g + 100
+
+def flattedArray(oldArray):
+    newArray = []
+    for i in xrange(0, len(oldArray)):
+        for x in xrange(0, len(oldArray[i])):
+            newArray.append(oldArray[i][x])
+    return newArray
 
 def main(args):
     if len(args) != 2:
@@ -282,18 +340,27 @@ def main(args):
     dir_list_top.sort()
 
     # Iterate through files in the given dir
+    ranges = []
     for i in xrange(0, len(dir_list_bot)):
         file_bot = dir_list_bot[i]
         file_top = dir_list_top[i]
-        if file_bot.endswith('_rgchroma.png') or file_bot.endswith('g_values.png'):
+        if file_top.endswith('_rgchroma.png') or file_top.endswith('g_values.png'):
             # skip converted files and graphs
             continue
         filename = args[1] + '/bottom_camera/' + file_bot
+        filename_top = args[1] + "/top_camera/" + file_top
         g_values = sample(filename)
+        ranges.append(g_values)
+        if len(ranges) > 5:
+            ranges.pop(0)
+        top_values = []
+        top_values = sample_top(filename_top, min(g_values), max(g_values))
+        g_values = flattedArray(ranges)
+        if len(top_values) > 0:
+            g_values.extend(top_values)
         #plot_g_values(g_values, filename)
         #R_plot_g_values(g_values, filename)
-        topFileName = args[1] + "/top_camera/" + file_top
-        classify(g_values, topFileName)
+        classify(g_values, filename_top)
 
 
 if __name__ == '__main__':
