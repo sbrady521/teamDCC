@@ -52,6 +52,7 @@ def sample(filedir):
 
     return g_values
 
+#Scan the top images colors with 3 strips vertically and horizontally
 def sample_top(filedir, g_min, g_max):
     img = cv2.imread(filedir, cv2.IMREAD_COLOR)
 
@@ -64,8 +65,11 @@ def sample_top(filedir, g_min, g_max):
 
     top_values = []
 
+    #split the images into 3 pieces both horizontally and vertically
     x_quarts = [img_w/4, img_w/2, img_w*3/4]
     y_quarts = [img_h/4, img_h/2, img_h*3/4]
+
+    #search for green pixels in 3 horizontal strips
     for quart_x in xrange(0, len(x_quarts)):
         for x in xrange(0, img_w):
             rgb_sum = float(sum(img[y_quarts[quart_x], x]))
@@ -73,10 +77,12 @@ def sample_top(filedir, g_min, g_max):
                 continue
             g_chroma = (float(img[y_quarts[quart_x], x, 1])/rgb_sum) * 255.0
 
-            if (g_max < g_chroma < g_max + 2) or (g_min - 2 < g_chroma < g_min):
+            #add the green pixel if it is within 3 chroma values from the current maximum or minimum
+            if (g_max < g_chroma < g_max + 3) or (g_min - 3 < g_chroma < g_min):
                 top_values.append(g_chroma)
                 #print "adding " + str(g_chroma) + " from horizontal top"
 
+    #Do the same vertically
     for quart_y in xrange(0, len(y_quarts)):
         for y in xrange(img_h - 1, -1, -1):
             rgb_sum = float(sum(img[y,x_quarts[quart_y]]))
@@ -84,7 +90,7 @@ def sample_top(filedir, g_min, g_max):
                 continue
             g_chroma = (float(img[y, x_quarts[quart_y], 1])/rgb_sum) * 255.0
 
-            if (g_max < g_chroma < g_max + 5) or (g_min - 5 < g_chroma < g_min):
+            if (g_max < g_chroma < g_max + 3) or (g_min - 3 < g_chroma < g_min):
                 top_values.append(g_chroma)
                 #print "adding " + str(g_chroma) + " from top vertical scan"
     return top_values
@@ -251,6 +257,7 @@ def classify(g_list, filename):
     min_top = min(top_values)
     max_top = max(top_values)
 
+    #check if we found some pixels on the top image outside the range we currently haave
     if min_top < min_g:
         print "min was " + str(min_g)
         min_g = min_top
@@ -258,6 +265,7 @@ def classify(g_list, filename):
         max_g = max_top
 
     #chromaticity value of 84 means white is allowed, must be higher
+    #chromaticity of 84 = 33% green
     if min_g < 87:
         min_g = 87
 
@@ -355,11 +363,11 @@ def main(args):
         ranges.append(g_values)
         if len(ranges) > 5:
             ranges.pop(0)
-        top_values = []
-        top_values = sample_top(filename_top, min(g_values), max(g_values))
+        #top_values = []
+        #top_values = sample_top(filename_top, min(g_values), max(g_values))
         g_values = flattedArray(ranges)
-        if len(top_values) > 0:
-            g_values.extend(top_values)
+        #if len(top_values) > 0:
+        #    g_values.extend(top_values)
         #plot_g_values(g_values, filename)
         #R_plot_g_values(g_values, filename)
         classify(g_values, filename_top)
