@@ -13,7 +13,7 @@ class Sample {
 private:
 
     std::vector<int> green_chroma_vals_;
-    Histogram<int> histogram_;
+    Histogram<int> *histogram_;
     void getChromaticityRange(int &min, int &max);
 
 public:

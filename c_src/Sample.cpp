@@ -14,13 +14,13 @@ Sample::Sample() {
 }
 
 void Sample::createHistogram() {
-    Histogram<int> histogram(this->green_chroma_vals_);
+    Histogram<int> *histogram = new Histogram<int>(this->green_chroma_vals_);
 
     this->histogram_ = histogram;
 }
 
 void Sample::showHistogram() {
-    this->histogram_.showHistogram();
+    this->histogram_->showHistogram();
 }
 
 void Sample::SampleImage(const std::string &path) {
