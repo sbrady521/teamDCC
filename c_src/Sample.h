@@ -14,17 +14,19 @@ private:
 
     std::vector<int> green_chroma_vals_;
     Histogram<int> *histogram_;
-    void getChromaticityRange(int &min, int &max);
 
 public:
     // Constructor
     Sample();
 
+    // Destructor
+    ~Sample();
+
     // Samples an image
     void SampleImage(const std::string&path);
 
     // Classify an image according to this sample
-    void classifyImage(const std::string&path, const std::string&out_path);
+    void classifyImage(const std::string &path, const std::string &out_path);
 
     // Create / recreate a histogram according to the g_vals
     void createHistogram();

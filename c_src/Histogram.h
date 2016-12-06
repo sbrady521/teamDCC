@@ -31,7 +31,7 @@ public:
     void showHistogram();
 
     // get the bin range for the maximum peak in the histogram
-    void getPeakRange(T &min, T &max);
+    void getPeakRange(double threshold, T &minRange, T &maxRange);
 };
 
 template <typename T>
@@ -90,6 +90,7 @@ Histogram<T>::Histogram(std::vector<T> &values) {
 
 template <typename T>
 Histogram<T>::~Histogram() {
+    std::cerr << "Destructing histogram..." << std::endl;
     delete[] this->bins_; delete[] this->counts_; delete[] this->density_;
 }
 
@@ -101,8 +102,34 @@ void Histogram<T>::showHistogram() {
 }
 
 template <typename T>
-void Histogram<T>::getPeakRange(T &min, T &max) {
+void Histogram<T>::getPeakRange(double threshold, T &minRange, T &maxRange) {
+    T min = -1; T max = -1;
+    int max_index = -1;
 
+    int cnt = 0;
+
+    while (cnt < this->size_) {
+        if (this->density_[cnt] > threshold) {
+            if (min == -1) {
+                min = this->bins_[cnt];
+            } else if (max != -1 && this->density_[cnt] > this->density_[max_index]) {
+                // TODO: change min to be this->bins[cnt] - 1/2/3?
+                min = this->bins_[cnt];
+                max = -1;
+            }
+        } else {
+            if (min != -1 && max == -1) {
+                max = this->bins_[cnt];
+                max_index = cnt;
+            }
+        }
+        cnt++;
+    }
+
+    if (max == -1) max = 120;
+    if (min == -1) min = 100;
+
+    minRange = min; maxRange = max;
 }
 
 #endif //CHROMATICITY_HISTOGRAM_H

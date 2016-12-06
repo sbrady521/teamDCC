@@ -16,3 +16,4 @@ c_src/Makefile
 test_g_list
 g_list
 c_src/cmake_install.cmake
+*.zip
