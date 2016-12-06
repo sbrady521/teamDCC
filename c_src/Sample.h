@@ -6,15 +6,15 @@
 #define CHROMATICITY_SAMPLE_H
 
 #include <vector>
+#include <stdexcept>
 #include "Histogram.h"
 
 class Sample {
 private:
+
     std::vector<int> green_chroma_vals_;
-
+    Histogram<int> histogram_;
     void getChromaticityRange(int &min, int &max);
-
-    Histogram<int> createHistogram();
 
 public:
     // Constructor
@@ -25,6 +25,27 @@ public:
 
     // Classify an image according to this sample
     void classifyImage(const std::string&path, const std::string&out_path);
+
+    // Create / recreate a histogram according to the g_vals
+    void createHistogram();
+
+    // Print the histogram to cout
+    void showHistogram();
+};
+
+class no_img_data : public std::runtime_error {
+private:
+    std::string what_;
+
+public:
+    explicit no_img_data(const std::string& err) :
+            std::runtime_error(err), what_(err) {}
+
+    virtual const char* what() const throw() {
+        return what_.c_str();
+    }
+
+    virtual ~no_img_data() throw() {}
 };
 
 #endif //CHROMATICITY_SAMPLE_H

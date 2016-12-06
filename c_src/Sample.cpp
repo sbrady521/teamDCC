@@ -13,16 +13,21 @@ Sample::Sample() {
     std::cout << "Constructing Sample..." << std::endl;
 }
 
-Histogram<int> Sample::createHistogram() {
+void Sample::createHistogram() {
     Histogram<int> histogram(this->green_chroma_vals_);
-    histogram.showHistogram();
+
+    this->histogram_ = histogram;
+}
+
+void Sample::showHistogram() {
+    this->histogram_.showHistogram();
 }
 
 void Sample::SampleImage(const std::string &path) {
     std::cout << "Sampling Image..." << std::endl;
     cv::Mat img = cv::imread(path, cv::IMREAD_COLOR);
 
-    if (!img.data) std::cerr << "No image data..." << std::endl;
+    if (!img.data) throw no_img_data("No Image Data...");
 
     int n_rows = img.rows;
     int n_cols = img.cols;
@@ -44,8 +49,6 @@ void Sample::SampleImage(const std::string &path) {
             this->green_chroma_vals_.push_back(static_cast<int>(g_chroma*255));
         }
     }
-
-    createHistogram();
 }
 
 void Sample::classifyImage(const std::string &path, const std::string &out_path) {

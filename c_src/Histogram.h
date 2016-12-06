@@ -53,9 +53,7 @@ Histogram<T>::Histogram(std::vector<T> &values) {
     }
 
     for (typename std::vector<T>::iterator it = values.begin(); it != values.end(); it++) {
-
         int bin_pos = (*it - min)/interval;
-        std::cerr << "Value " << *it << ";Position " << bin_pos << std::endl;
         counts_[bin_pos]++;
     }
 
