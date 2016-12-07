@@ -13,13 +13,20 @@ Sample::Sample() {
 }
 
 Sample::~Sample() {
-    delete this->histogram_;
+    std::cerr << "destructing sample..." << std::endl;
 }
 
 void Sample::createHistogram() {
     Histogram<int> *histogram = new Histogram<int>(this->green_chroma_vals_);
-
     this->histogram_ = histogram;
+}
+
+void Sample::showChromaVals() {
+    for (std::vector<int>::iterator it = this->green_chroma_vals_.begin();
+            it != this->green_chroma_vals_.end(); it++) {
+        std::cout << *it << ' ';
+    }
+    std::cout << std::endl;
 }
 
 void Sample::showHistogram() {
@@ -55,10 +62,12 @@ void Sample::SampleImage(const std::string &path) {
             this->green_chroma_vals_.push_back(static_cast<int>(g_chroma*255));
         }
     }
+
+    img.release();
 }
 
-void Sample::classifyImage(const std::string &path, const std::string &out_path) {
-    std::cerr << "Classifying image" << std::endl;
+void Sample::classifyImage(std::string path, std::string out_path) {
+    std::cout << "Classifying image" << std::endl;
     int minRange; int maxRange;
     this->histogram_->getPeakRange(0.035, minRange, maxRange);
 
@@ -73,12 +82,12 @@ void Sample::classifyImage(const std::string &path, const std::string &out_path)
     // avoid white values / clearly not green values
     if (minRange < 87) minRange = 87;
 
-    std::cout << minRange << " " << maxRange << std::endl;
-
     int n_rows = img.rows;
     int n_cols = img.cols;
 
     cv::Mat new_img(n_rows, n_cols, CV_8UC3, cv::Scalar(0,0,0));
+
+    std::cout << minRange << " " << maxRange << std::endl;
 
     for (int y_val = n_rows; y_val < n_rows; y_val++) {
         for (int x_val = 0; x_val < n_cols; x_val++) {

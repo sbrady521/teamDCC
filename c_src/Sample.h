@@ -26,7 +26,10 @@ public:
     void SampleImage(const std::string&path);
 
     // Classify an image according to this sample
-    void classifyImage(const std::string &path, const std::string &out_path);
+    void classifyImage(std::string path, std::string out_path);
+
+    // Show green_chroma_vals_ vector
+    void showChromaVals();
 
     // Create / recreate a histogram according to the g_vals
     void createHistogram();

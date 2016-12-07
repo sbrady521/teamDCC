@@ -18,6 +18,8 @@ private:
     double *density_; //holds the density of each bin
     int size_; //number of bins
 
+    void createHistogram(std::vector<T> &values);
+
 public:
     //constructors
     Histogram();
@@ -35,12 +37,7 @@ public:
 };
 
 template <typename T>
-Histogram<T>::Histogram() {
-
-}
-
-template <typename T>
-Histogram<T>::Histogram(std::vector<T> &values) {
+void Histogram<T>::createHistogram(std::vector <T> &values) {
     // get the number of data points (length of values)
     int data_points = values.size();
 
@@ -89,6 +86,17 @@ Histogram<T>::Histogram(std::vector<T> &values) {
 }
 
 template <typename T>
+Histogram<T>::Histogram() {
+    std::vector<int> newVec = {0};
+    createHistogram(newVec);
+}
+
+template <typename T>
+Histogram<T>::Histogram(std::vector<T> &values) {
+    createHistogram(values);
+}
+
+template <typename T>
 Histogram<T>::~Histogram() {
     std::cerr << "Destructing histogram..." << std::endl;
     delete[] this->bins_; delete[] this->counts_; delete[] this->density_;
@@ -103,6 +111,7 @@ void Histogram<T>::showHistogram() {
 
 template <typename T>
 void Histogram<T>::getPeakRange(double threshold, T &minRange, T &maxRange) {
+    std::cout << "Getting Peak Range..." << std::endl;
     T min = -1; T max = -1;
     int max_index = -1;
 
