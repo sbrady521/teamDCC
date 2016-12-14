@@ -112,7 +112,7 @@ void Sample::classifyImage(std::string path, std::string out_path) {
             if (rgb_sum == 0) continue;
 
             float g_chroma = (img.at<cv::Vec3b>(y_val, x_val)[1]/rgb_sum)*255;
-            if (g_chroma >= minRange && g_chroma <= maxRange) {
+            if (g_chroma >= minRange) {
                 new_img.at<cv::Vec3b>(y_val, x_val)[0] = 255;
                 new_img.at<cv::Vec3b>(y_val, x_val)[1] = 112;
                 new_img.at<cv::Vec3b>(y_val, x_val)[2] = 132;
