@@ -3,8 +3,10 @@
 //
 #include <iostream>
 #include <vector>
+#include <deque>
 #include <cmath>
 #include <algorithm>
+#include <fstream>
 #include <opencv2/opencv.hpp>
 #include "Sample.h"
 #include "Histogram.h"
@@ -17,12 +19,14 @@ Sample::~Sample() {
 }
 
 void Sample::createHistogram() {
-    Histogram<int> histogram = Histogram<int>(this->green_chroma_vals_);
+    //std::vector<float> values;
+    //std::copy(this->green_chroma_vals_.begin(), this->green_chroma_vals_.end(), std::back_inserter(values));
+    Histogram<float> histogram = Histogram<float>(this->green_chroma_vals_);
     this->histogram_ = histogram;
 }
 
 void Sample::showChromaVals() {
-    for (std::vector<int>::iterator it = this->green_chroma_vals_.begin();
+    for (std::deque<float>::iterator it = this->green_chroma_vals_.begin();
             it != this->green_chroma_vals_.end(); it++) {
         std::cout << *it << ' ';
     }
@@ -63,12 +67,11 @@ void Sample::sampleImage(const std::string &path) {
 
             // If the sample vector has exceeded its max size remove the oldest datapoint
             if (green_chroma_vals_.size() > MAX_SAMPLE_SIZE) {
-                std::swap(this->green_chroma_vals_.front(), this->green_chroma_vals_.back());
-                this->green_chroma_vals_.pop_back();
+                this->green_chroma_vals_.pop_front();
             }
 
             // append g_chroma value to vector for future analysis
-            this->green_chroma_vals_.push_back(static_cast<int>(g_chroma*255));
+            this->green_chroma_vals_.push_back(g_chroma*255);
         }
     }
 
@@ -76,7 +79,7 @@ void Sample::sampleImage(const std::string &path) {
 }
 
 void Sample::classifyImage(std::string path, std::string out_path) {
-    int minRange; int maxRange;
+    float minRange; float maxRange;
     this->histogram_.getPeakRange(GREEN_DENSITY_THRESHOLD, minRange, maxRange);
 
     // make the range more generous
@@ -124,4 +127,15 @@ void Sample::classifyImage(std::string path, std::string out_path) {
 
     bool status = imwrite(out_path, new_img, compression_params);
     if (!status) std::cerr << "Failed to write image '" << out_path << "'" << std::endl;
+}
+
+void Sample::writeChromaVals(std::string path) {
+    std::ofstream out;
+    out.open(path.c_str());
+    for (std::deque<float>::iterator it = this->green_chroma_vals_.begin();
+         it != this->green_chroma_vals_.end(); it++) {
+        out << *it << ' ';
+    }
+    out << std::endl;
+    out.close();
 }

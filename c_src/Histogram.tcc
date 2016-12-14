@@ -63,6 +63,65 @@ Histogram<T>::Histogram(std::vector<T> &values) {
 }
 
 template <typename T>
+Histogram<T>::Histogram(std::deque<T> &values) {
+    // get the number of data points (length of values)
+    int data_points = values.size();
+
+    // get the range of the values
+    T min = *std::min_element(values.begin(), values.end());
+    T max = *std::max_element(values.begin(), values.end());
+    T range = max - min;
+
+    // The number of bins will be equal to the floor of the range (for now)
+    int bin_num = sqrt(data_points);
+
+    // Initialize member vectors
+    try {
+        this->bins_ = std::vector<double>(bin_num);
+        this->density_ = std::vector<double>(bin_num);
+        this->counts_ = std::vector<int>(bin_num);
+    } catch (std::bad_alloc &ex) {
+        std::cerr << ex.what() << std::endl;
+        throw;
+    }
+
+    this->size_ = bin_num;
+
+    // Fill density with zeroes
+    //std::fill(this->density_.begin(), this->density_.end(), 0);
+
+    // calculate the interval between each bin
+    double interval = static_cast<double>(range) /static_cast<double>(bin_num);
+
+    // iterate through the bin intervals. Set each element of bins_
+    // to be the upper bound of the bin.
+    // For example if you have 1,2,3,4,5; 5 bins of interval 1
+    // bins_[0] = 2; bins_[1] = 3; ... bins_[4] = 6;
+    double bin_ubound = min + interval;
+    for (int bin_cnt = 0; bin_cnt < bin_num; bin_cnt++) {
+        this->bins_[bin_cnt] = bin_ubound;
+        bin_ubound += interval;
+    }
+
+    // calculate how much each data point contributes to the density
+    double density_incr = 1.0/static_cast<double>(data_points);
+
+    // iterate through data points and increment counts_ and density_ appropriately
+    for (typename std::deque<T>::iterator it = values.begin(); it != values.end(); it++) {
+        int bin_pos = static_cast<int>((*it - min)/interval);
+        if (bin_pos == bin_num) bin_pos--;
+        try {
+            this->density_.at(bin_pos) += density_incr;
+            this->counts_.at(bin_pos)++;
+        } catch (std::exception &ex) {
+            std::cout << ex.what() << std::endl;
+            std::cout << "Bin_pos = " << bin_pos << std::endl;
+            throw;
+        }
+    }
+}
+
+template <typename T>
 Histogram<T>::Histogram(const Histogram &obj) {
     std::vector<double> bins(obj.bins_);
     std::vector<double> density(obj.density_);
@@ -139,8 +198,14 @@ void Histogram<T>::getPeakRange(double threshold, T &minRange, T &maxRange) {
     // If for some reason either peak bound has not been detected, set it to a reasonable range
     // for green chromaticity values
     // If this is used for anything else, will need to change this to something more general
-    if (max == -1) max = 120;
-    if (min == -1) min = 90;
+    if (max == -1) {
+        std::cerr << "Max peak not found, defaulting to 120..." << std::endl;
+        max = 120;
+    }
+    if (min == -1) {
+        std::cerr << "Min peak not found, defaulting to 90..." << std::endl;
+        min = 90;
+    }
 
     minRange = min; maxRange = max;
 }

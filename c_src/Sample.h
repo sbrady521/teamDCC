@@ -6,17 +6,18 @@
 #define CHROMATICITY_SAMPLE_H
 
 #include <vector>
+#include <deque>
 #include <stdexcept>
 #include "Histogram.h"
 
 #define MAX_SAMPLE_SIZE 537600
-#define GREEN_DENSITY_THRESHOLD 0.030
+#define GREEN_DENSITY_THRESHOLD 0.010
 
 class Sample {
 private:
 
-    std::vector<int> green_chroma_vals_;
-    Histogram<int> histogram_;
+    std::deque<float> green_chroma_vals_;
+    Histogram<float> histogram_;
 
 public:
     // Constructor
@@ -39,6 +40,9 @@ public:
 
     // Print the histogram to cout
     void showHistogram();
+
+    // Write green_chroma_vals_ to file
+    void writeChromaVals(std::string path);
 };
 
 class no_img_data : public std::runtime_error {

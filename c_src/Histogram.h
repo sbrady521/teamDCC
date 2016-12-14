@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <vector>
+#include <deque>
 #include <cmath>
 #include <algorithm>
 
@@ -23,6 +24,8 @@ public:
     Histogram();
 
     Histogram(std::vector<T> &values);
+
+    Histogram(std::deque<T> &values);
 
     Histogram(const Histogram &obj);
 

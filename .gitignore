@@ -7,6 +7,7 @@ dynamic_cc.iml
 *.png
 video1.zip
 *.jpg
+c_src/out/
 c_src/.idea/
 c_src/CMakeFiles
 c_src/Chromaticity

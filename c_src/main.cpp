@@ -2,6 +2,7 @@
 #include <dirent.h>
 #include <stdio.h>
 #include <string.h>
+#include <sstream>
 #include "Sample.h"
 
 int main(int argc, char** argv ) {
@@ -53,7 +54,10 @@ int main(int argc, char** argv ) {
 
         std::string out_file = outPath + classifyFiles[i] + std::string(".png");
         green.createHistogram();
-        green.showHistogram();
+        //green.showHistogram();
+        std::ostringstream intstr;
+        intstr << i;
+        //green.writeChromaVals(outPath + std::string("chroma_vals/") + intstr.str() + ".txt");
         green.classifyImage(classifyFiles[i], out_file);
     }
 
