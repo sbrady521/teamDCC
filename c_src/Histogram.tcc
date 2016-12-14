@@ -53,6 +53,7 @@ Histogram<T>::Histogram(std::vector<T> &values) {
         if (bin_pos == bin_num) bin_pos--;
         try {
             this->density_.at(bin_pos) += density_incr;
+            this->counts_.at(bin_pos)++;
         } catch (std::exception &ex) {
             std::cout << ex.what() << std::endl;
             std::cout << "Bin_pos = " << bin_pos << std::endl;
@@ -93,7 +94,8 @@ Histogram<T>::~Histogram() {
 template <typename T>
 void Histogram<T>::showHistogram() {
     for (int i = 0; i < this->size_; i++) {
-        std::cout << "Bin maximum: " << this->bins_[i] << "; Bin Density: " << this->density_[i] << std::endl;
+        std::cout << "Bin maximum: " << this->bins_[i] << "; Bin Density: " << this->density_[i] <<
+                  "; Bin Count: " << this->counts_[i] << std::endl;
     }
 }
 

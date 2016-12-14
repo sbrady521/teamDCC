@@ -9,11 +9,14 @@
 #include <stdexcept>
 #include "Histogram.h"
 
+#define MAX_SAMPLE_SIZE 537600
+#define GREEN_DENSITY_THRESHOLD 0.030
+
 class Sample {
 private:
 
     std::vector<int> green_chroma_vals_;
-    Histogram<int> *histogram_;
+    Histogram<int> histogram_;
 
 public:
     // Constructor
@@ -23,7 +26,7 @@ public:
     ~Sample();
 
     // Samples an image
-    void SampleImage(const std::string&path);
+    void sampleImage(const std::string&path);
 
     // Classify an image according to this sample
     void classifyImage(std::string path, std::string out_path);

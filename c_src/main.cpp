@@ -12,7 +12,7 @@ int main(int argc, char** argv ) {
 
     char *samplePath = argv[1];
     char *classifyPath = argv[2];
-    char *outPath = argv[3];
+    std::string outPath = std::string(argv[3]);
 
     std::vector<std::string> sampleFiles;
     std::vector<std::string> classifyFiles;
@@ -23,7 +23,7 @@ int main(int argc, char** argv ) {
         /* print all the files and directories within directory */
         while ((ent = readdir (dir)) != NULL) {
             if (strcmp(ent->d_name,".") == 0 || strcmp(ent->d_name,"..") == 0) continue;
-            sampleFiles.push_back(std::string(ent->d_name));
+            sampleFiles.push_back(std::string(samplePath) + std::string(ent->d_name));
         }
         closedir (dir);
     } else {
@@ -35,7 +35,7 @@ int main(int argc, char** argv ) {
         /* print all the files and directories within directory */
         while ((ent = readdir (dir)) != NULL) {
             if (strcmp(ent->d_name,".") == 0 || strcmp(ent->d_name,"..") == 0) continue;
-            classifyFiles.push_back(std::string(ent->d_name));
+            classifyFiles.push_back(std::string(classifyPath) + std::string(ent->d_name));
         }
         closedir (dir);
     } else {
@@ -45,9 +45,17 @@ int main(int argc, char** argv ) {
 
     int num_files = sampleFiles.size() < classifyFiles.size() ? sampleFiles.size() : classifyFiles.size();
 
-    for (int i = 0; i < num_files; i++) std::cout << sampleFiles[i] << std::endl;
+    //for (int i = 0; i < num_files; i++) std::cout << sampleFiles[i] << std::endl;
 
-    int samplecnt = 0;
+    Sample green = Sample();
+    for (int i = 0; i < num_files; i++) {
+        green.sampleImage(sampleFiles[i]);
+
+        std::string out_file = outPath + classifyFiles[i] + std::string(".png");
+        green.createHistogram();
+        green.showHistogram();
+        green.classifyImage(classifyFiles[i], out_file);
+    }
 
     /*
     Sample test = Sample();

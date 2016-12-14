@@ -4,6 +4,7 @@
 #include <iostream>
 #include <vector>
 #include <cmath>
+#include <algorithm>
 #include <opencv2/opencv.hpp>
 #include "Sample.h"
 #include "Histogram.h"
@@ -13,11 +14,10 @@ Sample::Sample() {
 }
 
 Sample::~Sample() {
-    std::cerr << "destructing sample..." << std::endl;
 }
 
 void Sample::createHistogram() {
-    Histogram<int> *histogram = new Histogram<int>(this->green_chroma_vals_);
+    Histogram<int> histogram = Histogram<int>(this->green_chroma_vals_);
     this->histogram_ = histogram;
 }
 
@@ -30,21 +30,24 @@ void Sample::showChromaVals() {
 }
 
 void Sample::showHistogram() {
-    this->histogram_->showHistogram();
+    this->histogram_.showHistogram();
 }
 
-void Sample::SampleImage(const std::string &path) {
+void Sample::sampleImage(const std::string &path) {
     // Load image using OpenCV
     cv::Mat img = cv::imread(path, cv::IMREAD_COLOR);
 
-    if (!img.data) throw no_img_data("No Image Data...");
+    if (!img.data) {
+        std::cerr << "Exception at classifyImage for file,'" << path << "'" << std::endl;
+        throw no_img_data("No Image Data...");
+    }
 
     // Get im dimensions
     int n_rows = img.rows;
     int n_cols = img.cols;
 
     // Loop through each pixel and calculate g_chroma value
-    for (int y_val = n_rows*0.625; y_val < n_rows; y_val++) {
+    for (int y_val = n_rows*0.65; y_val < n_rows; y_val++) {
         for (int x_val = 0; x_val < n_cols; x_val++) {
             float rgb_sum = 0;
 
@@ -58,6 +61,12 @@ void Sample::SampleImage(const std::string &path) {
 
             if (g_chroma <= 0.2) continue;
 
+            // If the sample vector has exceeded its max size remove the oldest datapoint
+            if (green_chroma_vals_.size() > MAX_SAMPLE_SIZE) {
+                std::swap(this->green_chroma_vals_.front(), this->green_chroma_vals_.back());
+                this->green_chroma_vals_.pop_back();
+            }
+
             // append g_chroma value to vector for future analysis
             this->green_chroma_vals_.push_back(static_cast<int>(g_chroma*255));
         }
@@ -67,17 +76,17 @@ void Sample::SampleImage(const std::string &path) {
 }
 
 void Sample::classifyImage(std::string path, std::string out_path) {
-    std::cout << "Classifying image" << std::endl;
     int minRange; int maxRange;
-    this->histogram_->getPeakRange(0.035, minRange, maxRange);
+    this->histogram_.getPeakRange(GREEN_DENSITY_THRESHOLD, minRange, maxRange);
 
     // make the range more generous
     minRange = minRange - 7; maxRange = maxRange + 100;
 
     cv::Mat img = cv::imread(path, cv::IMREAD_COLOR);
-    if (!img.data) throw no_img_data("No Image Data...");
-
-    // TODO sample this image too (ie sample top image)
+    if (!img.data) {
+        std::cerr << "Exception at classifyImage for file,'" << path << "'" << std::endl;
+        throw no_img_data("No Image Data...");
+    }
 
     // avoid white values / clearly not green values
     if (minRange < 87) minRange = 87;
@@ -113,5 +122,6 @@ void Sample::classifyImage(std::string path, std::string out_path) {
     compression_params.push_back(9);
 
 
-    imwrite(out_path, new_img, compression_params);
+    bool status = imwrite(out_path, new_img, compression_params);
+    if (!status) std::cerr << "Failed to write image '" << out_path << "'" << std::endl;
 }
