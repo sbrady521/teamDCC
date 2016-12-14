@@ -14,11 +14,11 @@ Histogram<T>::Histogram(std::vector<T> &values) {
     T range = max - min;
 
     // The number of bins will be equal to the floor of the range (for now)
-    int bin_num = range;
+    int bin_num = sqrt(data_points);
 
     // Initialize member vectors
     try {
-        this->bins_ = std::vector<T>(bin_num);
+        this->bins_ = std::vector<double>(bin_num);
         this->density_ = std::vector<double>(bin_num);
         this->counts_ = std::vector<int>(bin_num);
     } catch (std::bad_alloc &ex) {
@@ -38,7 +38,7 @@ Histogram<T>::Histogram(std::vector<T> &values) {
     // to be the upper bound of the bin.
     // For example if you have 1,2,3,4,5; 5 bins of interval 1
     // bins_[0] = 2; bins_[1] = 3; ... bins_[4] = 6;
-    int bin_ubound = min + interval;
+    double bin_ubound = min + interval;
     for (int bin_cnt = 0; bin_cnt < bin_num; bin_cnt++) {
         this->bins_[bin_cnt] = bin_ubound;
         bin_ubound += interval;
@@ -64,7 +64,7 @@ Histogram<T>::Histogram(std::vector<T> &values) {
 
 template <typename T>
 Histogram<T>::Histogram(const Histogram &obj) {
-    std::vector<T> bins(obj.bins_);
+    std::vector<double> bins(obj.bins_);
     std::vector<double> density(obj.density_);
     std::vector<int> counts(obj.counts_);
     this->bins_ = bins;
@@ -76,7 +76,7 @@ Histogram<T>::Histogram(const Histogram &obj) {
 template <typename T>
 Histogram<T>& Histogram<T>::operator=(const Histogram& obj) {
     if (this != &obj) {
-        std::vector<T> bins(obj.bins_);
+        std::vector<double> bins(obj.bins_);
         std::vector<double> density(obj.density_);
         std::vector<int> counts(obj.counts_);
         this->bins_ = bins;

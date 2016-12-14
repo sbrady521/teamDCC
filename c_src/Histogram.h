@@ -13,7 +13,7 @@
 template <typename T>
 class Histogram {
 private:
-    std::vector<T> bins_; //holds upper bounds for each bin
+    std::vector<double> bins_; //holds upper bounds for each bin
     std::vector<int> counts_; //holds the count for each bin
     std::vector<double> density_; //holds the density of each bin
     int size_; //number of bins
