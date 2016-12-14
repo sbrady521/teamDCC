@@ -89,7 +89,7 @@ void Sample::classifyImage(std::string path, std::string out_path) {
 
     std::cout << minRange << " " << maxRange << std::endl;
 
-    for (int y_val = n_rows; y_val < n_rows; y_val++) {
+    for (int y_val = 0; y_val < n_rows; y_val++) {
         for (int x_val = 0; x_val < n_cols; x_val++) {
             float rgb_sum = 0;
 
@@ -99,8 +99,7 @@ void Sample::classifyImage(std::string path, std::string out_path) {
 
             if (rgb_sum == 0) continue;
 
-            float g_chroma = img.at<cv::Vec3b>(y_val, x_val)[1]/rgb_sum;
-
+            float g_chroma = (img.at<cv::Vec3b>(y_val, x_val)[1]/rgb_sum)*255;
             if (g_chroma >= minRange && g_chroma <= maxRange) {
                 new_img.at<cv::Vec3b>(y_val, x_val)[0] = 255;
                 new_img.at<cv::Vec3b>(y_val, x_val)[1] = 112;
