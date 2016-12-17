@@ -6,7 +6,7 @@
 #include "Sample.h"
 
 int main(int argc, char** argv ) {
-    if (argc != 4) {
+    if (argc < 2 || argc > 3 ) {
         std::cerr << "Usage: ./Chromaticity sampleDir classifyDir outputDir" << std::endl;
         return 1;
     }
@@ -52,7 +52,7 @@ int main(int argc, char** argv ) {
     for (int i = 0; i < num_files; i++) {
         green.sampleImage(sampleFiles[i]);
 
-        std::string out_file = outPath + classifyFiles[i] + std::string(".png");
+        std::string out_file = classifyFiles[i] + std::string("_classified.png");
         green.createHistogram();
         green.classifyImage(classifyFiles[i], out_file);
     }
