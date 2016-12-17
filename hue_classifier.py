@@ -26,29 +26,18 @@ def sample(filedir):
     # Get Image dimensions
     img_h, img_w = img.shape[:2]
 
+    # Convert to HSV
+    cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+
     # Initialize an array to store g values for analysis purposes
     g_values = list()
 
     for yval in xrange(int(img_h*0.625), img_h):
         for xval in xrange(0, img_w):
-            # iterate through every pixel and get the sum of the b,g,r values
-            rgb_sum = float(sum(img[yval,xval]))
-            if rgb_sum == 0:
-                continue
-            # calculate the new chromatic value for each channel
-            # 255 is a magic number which scales the image value so it can be displayed
-            # in an rgb format
-            # TODO remove magic number?
-            # b_chroma = (float(img[yval, xval, 0])/rgb_sum) * 255.0
-            g_chroma = (float(img[yval, xval, 1])/rgb_sum) * 255.0
-            # r_chroma = (float(img[yval, xval, 2])/rgb_sum) * 255.0
 
             # add g values to g value list if the pixel is mostly green
-            if (g_chroma/255.0 > 0.2):
-                g_values.append(g_chroma)
-            else:
-                pass
-                #print "skipped adding pixel " + str(xval) + " " + str(yval)
+            h = img[yval, xval, 0]
+            g_values.append(h)
 
     return g_values
 
@@ -235,6 +224,7 @@ def R_plot_g_values(g_list, filename):
 
     # plot graph using R
     filename = filename + '_g_values.png'
+    print filename
     #r('g_vals <- read.table("g_list")')
     #r('png(filename = "' + filename + '", width=1000, height = 255)')
     #r('smoothScatter(g_vals[[1]], y = NULL, ylab = "g_chroma values", xlab = "pixel number")')
@@ -252,23 +242,6 @@ def classify(g_list, filename):
     # Get the minimum and maximum ranges of the histogram
     min_g, max_g = get_g_range(hist)
 
-    #Examine top image for lighter values
-    top_values = sample_top(filename, min_g, max_g)
-    min_top = min(top_values)
-    max_top = max(top_values)
-
-    #check if we found some pixels on the top image outside the range we currently haave
-    if min_top < min_g:
-        print "min was " + str(min_g)
-        min_g = min_top
-    if max_top > max_g:
-        max_g = max_top
-
-    #chromaticity value of 84 means white is allowed, must be higher
-    #chromaticity of 84 = 33% green
-    if min_g < 87:
-        min_g = 87
-
     print min_g, max_g
 
     img = cv2.imread(filename, cv2.IMREAD_COLOR)
@@ -280,20 +253,19 @@ def classify(g_list, filename):
     # Get Image dimensions
     img_h, img_w = img.shape[:2]
 
+    # Convert to HSV
+    cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+
     # Initialize a new blank (black) image
     new_img = numpy.zeros((img_h, img_w, 3), numpy.uint8)
 
     for yval in xrange(0, img_h):
         for xval in xrange(0, img_w):
-            # iterate through every pixel and get the sum of the b,g,r values
-            rgb_sum = float(sum(img[yval,xval]))
-            if rgb_sum == 0:
-                continue
-            g_chroma = (float(img[yval, xval, 1])/rgb_sum) * 255.0
-
+            # iterate through every pixel and get the hue
+            hue = img[yval, xval, 0]
             # if the pixels green chromaticity values lie within the range
             # classify it by making it blue
-            if min_g <= g_chroma <= max_g:
+            if min_g <= hue <= max_g:
                 new_img[yval, xval] = [255, 112, 132]
 
     # write the classified image
@@ -365,11 +337,11 @@ def main(args):
             ranges.pop(0)
         #top_values = []
         #top_values = sample_top(filename_top, min(g_values), max(g_values))
-        g_values = flattedArray(ranges)
+        # g_values = flattedArray(ranges)
         #if len(top_values) > 0:
         #    g_values.extend(top_values)
         #plot_g_values(g_values, filename)
-        #R_plot_g_values(g_values, filename)
+        R_plot_g_values(g_values, filename)
         classify(g_values, filename_top)
 
 
