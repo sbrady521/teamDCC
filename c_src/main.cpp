@@ -7,7 +7,7 @@
 
 int main(int argc, char** argv ) {
     if (argc != 4) {
-        std::cerr << "Usage: ./Chromaticity sampleDir classifyDir outputDir" << std::endl;
+        std::cerr << "Usage: ./Chromaticity sampleDir classifyDir <rgchroma|hsv>" << std::endl;
         return 1;
     }
 

@@ -1,11 +1,10 @@
 //
-// Created by red on 06-Dec-16.
+// Created by red on 18-Dec-16.
 //
 
-#ifndef CHROMATICITY_SAMPLE_H
-#define CHROMATICITY_SAMPLE_H
+#ifndef CHROMATICITY_HSVSAMPLE_H
+#define CHROMATICITY_HSVSAMPLE_H
 
-#include <vector>
 #include <deque>
 #include <stdexcept>
 #include "Histogram.h"
@@ -13,10 +12,9 @@
 #define MAX_SAMPLE_SIZE 537600
 #define GREEN_DENSITY_THRESHOLD 0.003
 
-class Sample {
+class HSVSample {
 private:
-
-    std::deque<float> green_chroma_vals_;
+    std::deque<float> hsv_hue_vals_;
     Histogram<float> histogram_;
 
 public:
@@ -60,4 +58,4 @@ public:
     virtual ~no_img_data() throw() {}
 };
 
-#endif //CHROMATICITY_SAMPLE_H
+#endif //CHROMATICITY_HSVSAMPLE_H
