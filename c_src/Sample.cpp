@@ -98,7 +98,7 @@ void Sample::classifyImage(std::string path, std::string out_path) {
     cv::Mat new_img(n_rows, n_cols, CV_8UC3, cv::Scalar(0,0,0));
 
     std::cout << minRange << " " << maxRange << std::endl;
-
+    minRange = 90;
     for (int y_val = 0; y_val < n_rows; y_val++) {
         for (int x_val = 0; x_val < n_cols; x_val++) {
             float rgb_sum = 0;
@@ -124,7 +124,10 @@ void Sample::classifyImage(std::string path, std::string out_path) {
 
 
     bool status = imwrite(out_path, new_img, compression_params);
-    if (!status) std::cerr << "Failed to write image '" << out_path << "'" << std::endl;
+    if (!status) {
+        std::cerr << "Failed to write image '" << out_path << "'" << std::endl;
+        std::cerr << "Perhaps the output folder hasn't been created?" << std::endl;
+    }
 }
 
 void Sample::writeChromaVals(std::string path) {
