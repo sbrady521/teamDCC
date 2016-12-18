@@ -19,10 +19,10 @@ private:
 
 public:
     // Constructor
-    Sample();
+    HSVSample();
 
     // Destructor
-    ~Sample();
+    ~HSVSample();
 
     // Samples an image
     void sampleImage(const std::string&path);
@@ -41,21 +41,6 @@ public:
 
     // Write green_chroma_vals_ to file
     void writeChromaVals(std::string path);
-};
-
-class no_img_data : public std::runtime_error {
-private:
-    std::string what_;
-
-public:
-    explicit no_img_data(const std::string& err) :
-            std::runtime_error(err), what_(err) {}
-
-    virtual const char* what() const throw() {
-        return what_.c_str();
-    }
-
-    virtual ~no_img_data() throw() {}
 };
 
 #endif //CHROMATICITY_HSVSAMPLE_H

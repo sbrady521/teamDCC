@@ -9,22 +9,23 @@
 #include <algorithm>
 #include <fstream>
 #include <opencv2/opencv.hpp>
+#include "Sample.h"
 #include "HSVSample.h"
 #include "Histogram.h"
 
 // constructor for sample
-Sample::Sample() {
+HSVSample::HSVSample() {
 }
 
-Sample::~Sample() {
+HSVSample::~HSVSample() {
 }
 
-void Sample::createHistogram() {
+void HSVSample::createHistogram() {
     Histogram<float> histogram = Histogram<float>(this->hsv_hue_vals_);
     this->histogram_ = histogram;
 }
 
-void Sample::showChromaVals() {
+void HSVSample::showChromaVals() {
     for (std::deque<float>::iterator it = this->hsv_hue_vals_.begin();
          it != this->hsv_hue_vals_.end(); it++) {
         std::cout << *it << ' ';
@@ -32,11 +33,11 @@ void Sample::showChromaVals() {
     std::cout << std::endl;
 }
 
-void Sample::showHistogram() {
+void HSVSample::showHistogram() {
     this->histogram_.showHistogram();
 }
 
-void Sample::sampleImage(const std::string &path) {
+void HSVSample::sampleImage(const std::string &path) {
     // Load image using OpenCV
     cv::Mat img = cv::imread(path, cv::IMREAD_COLOR);
 
@@ -54,22 +55,21 @@ void Sample::sampleImage(const std::string &path) {
     // Loop through each pixel and calculate g_chroma value
     for (int y_val = n_rows*0.65; y_val < n_rows; y_val++) {
         for (int x_val = 0; x_val < n_cols; x_val++) {
-            hue_val = img.at<cv::Vec3b>(y_val, x_val)[0];
+            int hue_val = img.at<cv::Vec3b>(y_val, x_val)[0];
 
             // If the sample vector has exceeded its max size remove the oldest datapoint
             if (hsv_hue_vals_.size() > MAX_SAMPLE_SIZE) {
                 this->hsv_hue_vals_.pop_front();
             }
-
             // append g_chroma value to vector for future analysis
-            this->hsv_hue_vals_.push_back(hue_val*255);
+            this->hsv_hue_vals_.push_back(hue_val);
         }
     }
 
     img.release();
 }
 
-void Sample::classifyImage(std::string path, std::string out_path) {
+void HSVSample::classifyImage(std::string path, std::string out_path) {
     float minRange; float maxRange;
     this->histogram_.getPeakRange(GREEN_DENSITY_THRESHOLD, minRange, maxRange);
 
@@ -91,7 +91,7 @@ void Sample::classifyImage(std::string path, std::string out_path) {
 
     for (int y_val = 0; y_val < n_rows; y_val++) {
         for (int x_val = 0; x_val < n_cols; x_val++) {
-            hue_val = img.at<cv::Vec3b>(y_val, x_val)[0];
+            int hue_val = img.at<cv::Vec3b>(y_val, x_val)[0];
 
             if (hue_val >= minRange && hue_val <= maxRange) {
                 new_img.at<cv::Vec3b>(y_val, x_val)[0] = 255;
@@ -110,7 +110,7 @@ void Sample::classifyImage(std::string path, std::string out_path) {
     if (!status) std::cerr << "Failed to write image '" << out_path << "'" << std::endl;
 }
 
-void Sample::writeChromaVals(std::string path) {
+void HSVSample::writeChromaVals(std::string path) {
     std::ofstream out;
     out.open(path.c_str());
     for (std::deque<float>::iterator it = this->hsv_hue_vals_.begin();
