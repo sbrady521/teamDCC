@@ -61,7 +61,7 @@ int main(int argc, char** argv ) {
         for (int i = 0; i < num_files; i++) {
             green.sampleImage(sampleFiles[i]);
 
-            std::string out_file = classifyFiles[i] + std::string("_classified.png");
+            std::string out_file = classifyFiles[i] + std::string("_rgchroma_classified_.png");
             green.createHistogram();
             green.classifyImage(classifyFiles[i], out_file);
         }
@@ -70,7 +70,7 @@ int main(int argc, char** argv ) {
         for (int i = 0; i < num_files; i++) {
             green.sampleImage(sampleFiles[i]);
 
-            std::string out_file = classifyFiles[i] + std::string("_classified.png");
+            std::string out_file = classifyFiles[i] + std::string("_hsv_classified.png");
             green.createHistogram();
             green.classifyImage(classifyFiles[i], out_file);
         }

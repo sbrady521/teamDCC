@@ -87,6 +87,8 @@ void HSVSample::classifyImage(std::string path, std::string out_path) {
 
     cv::Mat new_img(n_rows, n_cols, CV_8UC3, cv::Scalar(0,0,0));
 
+    // Feathering
+    minRange = minRange - 15; maxRange = maxRange + 15;
     std::cout << minRange << " " << maxRange << std::endl;
 
     for (int y_val = 0; y_val < n_rows; y_val++) {
