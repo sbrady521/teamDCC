@@ -52,7 +52,7 @@ void HSVSample::sampleImage(const std::string &path) {
 
     cv::cvtColor(img, img, cv::COLOR_BGR2HSV);
 
-    // Loop through each pixel and calculate g_chroma value
+    // Loop through each pixel and calculate hue value
     for (int y_val = n_rows*0.65; y_val < n_rows; y_val++) {
         for (int x_val = 0; x_val < n_cols; x_val++) {
             int hue_val = img.at<cv::Vec3b>(y_val, x_val)[0];
@@ -112,7 +112,7 @@ void HSVSample::classifyImage(std::string path, std::string out_path) {
     if (!status) std::cerr << "Failed to write image '" << out_path << "'" << std::endl;
 }
 
-void HSVSample::writeChromaVals(std::string path) {
+void HSVSample::writeHueVals(std::string path) {
     std::ofstream out;
     out.open(path.c_str());
     for (std::deque<float>::iterator it = this->hsv_hue_vals_.begin();

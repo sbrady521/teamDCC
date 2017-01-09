@@ -40,7 +40,7 @@ public:
     void showHistogram();
 
     // Write green_chroma_vals_ to file
-    void writeChromaVals(std::string path);
+    void writeHueVals(std::string path);
 };
 
 #endif //CHROMATICITY_HSVSAMPLE_H
