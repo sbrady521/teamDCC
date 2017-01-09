@@ -7,6 +7,7 @@ template <typename T>
 Histogram<T>::Histogram(std::vector<T> &values) {
     // get the number of data points (length of values)
     int data_points = values.size();
+    this->num_data_ = data_points;
 
     // get the range of the values
     T min = *std::min_element(values.begin(), values.end());
@@ -130,6 +131,7 @@ Histogram<T>::Histogram(const Histogram &obj) {
     this->density_ = density;
     this->counts_ = counts;
     this->size_ = obj.size_;
+    this->num_data_ = obj.num_data_;
 }
 
 template <typename T>
@@ -142,6 +144,7 @@ Histogram<T>& Histogram<T>::operator=(const Histogram& obj) {
         this->density_ = density;
         this->counts_ = counts;
         this->size_ = obj.size_;
+        this->num_data_ = obj.num_data_;
     }
     return *this;
 }
@@ -208,4 +211,75 @@ void Histogram<T>::getPeakRange(double threshold, T &minRange, T &maxRange) {
     }
 
     minRange = min; maxRange = max;
+}
+
+template <typename T>
+void Histogram<T>::appendData(std::vector<T> &values) {
+    // Get the mininum and maximum values in the values to be appended
+    T min_of_new_vals = *std::min_element(values.begin(), values.end());
+    T max_of_new_vals = *std::max_element(values.begin(), values.end());
+
+    double min_of_bins = this->bins_[0];
+    double max_of_bins = this->bins_[this->size_ - 1];
+
+    double bin_interval;
+
+    if (this->size_ <= 1) bin_interval = 1;
+    else bin_interval = this->bins_[1] - this->bins_[0];
+
+    // Check if we need to add bins
+    if (min_of_new_vals < min_of_bins) {
+        for (double i = min_of_bins - bin_interval; min_of_new_vals < i; i -= bin_interval) {
+            std::vector<double>::iterator bins_start = this->bins_.begin();
+            std::vector<double>::iterator density_start = this->density_.begin();
+            std::vector<int>::iterator counts_start = this->counts_.begin();
+
+            this->bins_.insert(bins_start, i);
+            this->density_.insert(density_start, 0);
+            this->counts_.insert(counts_start, 0);
+        }
+    }
+
+    if (max_of_new_vals > max_of_bins) {
+        for (double i = max_of_bins + bin_interval; i <= max_of_new_vals; i += bin_interval) {
+            std::vector<double>::iterator bins_end = this->bins_.end();
+            std::vector<double>::iterator density_end = this->density_.end();
+            std::vector<int>::iterator counts_end = this->counts_.end();
+
+            this->bins_.insert(bins_end, i);
+            this->density_.insert(density_end, 0);
+            this->counts_.insert(counts_end, 0);
+        }
+    }
+
+    // Multiply the density of each old value by a multiplier to adjust density correctly
+    double density_multiplier = static_cast<double>(this->num_data_)/static_cast<double>(values.size() + this->num_data_);
+
+    for (int i = 0; i < this->density_.size(); i++) {
+        this->density_[i] *= density_multiplier;
+    }
+
+    // calculate how much each data point contributes to the density
+    double density_incr = 1.0/static_cast<double>(this->num_data_ + values.size());
+
+    double min = min_of_bins < min_of_new_vals ? min_of_bins : min_of_new_vals;
+
+    // iterate through data points and increment and density_ appropriately
+    for (typename std::vector<T>::iterator it = values.begin(); it != values.end(); it++) {
+        int bin_pos = (*it - min)/bin_interval;
+        if (bin_pos == this->bins_.size()) bin_pos--;
+        try {
+            this->density_.at(bin_pos) += density_incr;
+            this->counts_.at(bin_pos)++;
+        } catch (std::exception &ex) {
+            std::cerr << ex.what() << std::endl;
+            std::cout << "Bin_pos = " << bin_pos << std::endl;
+            throw;
+        }
+
+    }
+
+    // Update size variables
+    this->size_ = this->bins_.size();
+    this->num_data_ = this->num_data_ + values.size();
 }

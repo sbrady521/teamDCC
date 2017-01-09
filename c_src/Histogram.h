@@ -18,6 +18,7 @@ private:
     std::vector<int> counts_; //holds the count for each bin
     std::vector<double> density_; //holds the density of each bin
     int size_; //number of bins
+    int num_data_; // number of data points
 
 public:
     // constructors
@@ -39,6 +40,9 @@ public:
 
     // get the bin range for the maximum peak in the histogram
     void getPeakRange(double threshold, T &minRange, T &maxRange);
+
+    // append data to the histogram
+    void appendData(std::vector<T> &values);
 };
 
 #include "Histogram.tcc"
