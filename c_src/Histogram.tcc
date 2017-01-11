@@ -1,3 +1,8 @@
+template <typename T>
+struct histogramRange {
+    T min; T max;
+    int min_index; int max_index;
+};
 
 template <typename T>
 Histogram<T>::Histogram() {
@@ -164,35 +169,42 @@ void Histogram<T>::showHistogram() {
 template <typename T>
 void Histogram<T>::getPeakRange(double threshold, T &minRange, T &maxRange) {
     // Initialize min and max, max index as -1 (to mean None)
-    T min = -1; T max = -1;
-    int min_index = -1; int max_index = -1;
+    struct histogramRange<T> bestRange;
+    struct histogramRange<T> currRange;
+    currRange.min = -1; currRange.max = -1;
+    currRange.min_index = -1; currRange.max_index = -1;
+
+    bestRange.min = -1; bestRange.max = -1;
+    bestRange.min_index = -1; bestRange.max_index = -1;
 
     int cnt = 0;
 
     // Loop through each bin
     while (cnt < this->size_) {
-        // If the density of the bin is greater than the threshold
-        // set mininum to be that bin if min doesn't exist (== -1)
-        // If both a min and a max exist (ie, a peak has already been found),
-        // And the current bin has a greater density than the first bin
-        // of the previously detected peak, then this marks the new peak
-
-        // If the density is smaller than the threshold and we have a min, then set the
-        // current bin to max, ending the peak range.
+        // Loop through the histogram and look for ranges.
+        // Ranges are defined by their start and end - the start is a
+        // bin with density greater than threshold, and the end
+        // is the first bin after the start with density less than the threshold
+        // Compare each range to the best range - the "best range" is the widest range found so far
+        // and if the new range is wider, set it to the bestRange.
         if (this->density_[cnt] > threshold) {
-            if (min == -1) {
-                min = this->bins_[cnt];
-                min_index = cnt;
-            } else if (max != -1 && this->density_[cnt] > this->density_[min_index]) {
-                min = this->bins_[cnt] - 3;
-                min_index = cnt;
-                max = -1;
-                max_index = -1;
+            if (currRange.min == -1) {
+                currRange.min = this->bins_[cnt];
+                currRange.min_index = cnt;
             }
         } else {
-            if (min != -1 && max == -1) {
-                max = this->bins_[cnt];
-                max_index = cnt;
+            if (currRange.min != -1 && currRange.max == -1) {
+                currRange.max = this->bins_[cnt];
+                currRange.max_index = cnt;
+
+                if (currRange.max_index - currRange.min_index >= bestRange.max_index - bestRange.min_index) {
+                    // memcpy won't compile here for some reason
+                    bestRange.min = currRange.min; bestRange.max = currRange.max;
+                    bestRange.min_index = currRange.min_index; bestRange.max_index = currRange.max_index;
+                }
+
+                currRange.min = -1; currRange.max = -1;
+                currRange.min_index = -1; currRange.max_index = -1;
             }
         }
         cnt++;
@@ -201,16 +213,16 @@ void Histogram<T>::getPeakRange(double threshold, T &minRange, T &maxRange) {
     // If for some reason either peak bound has not been detected, set it to a reasonable range
     // for green chromaticity values
     // If this is used for anything else, will need to change this to something more general
-    if (max == -1) {
+    if (bestRange.max == -1) {
         std::cerr << "Max peak not found, defaulting to 120..." << std::endl;
-        max = 120;
+        bestRange.max = 120;
     }
-    if (min == -1) {
+    if (bestRange.min == -1) {
         std::cerr << "Min peak not found, defaulting to 90..." << std::endl;
-        min = 90;
+        bestRange.min = 90;
     }
 
-    minRange = min; maxRange = max;
+    minRange = bestRange.min; maxRange = bestRange.max;
 }
 
 template <typename T>
@@ -241,7 +253,7 @@ void Histogram<T>::appendData(std::vector<T> &values) {
     }
 
     if (max_of_new_vals > max_of_bins) {
-        for (double i = max_of_bins + bin_interval; i <= max_of_new_vals; i += bin_interval) {
+        for (double i = max_of_bins + bin_interval; i <= max_of_new_vals + bin_interval; i += bin_interval) {
             std::vector<double>::iterator bins_end = this->bins_.end();
             std::vector<double>::iterator density_end = this->density_.end();
             std::vector<int>::iterator counts_end = this->counts_.end();

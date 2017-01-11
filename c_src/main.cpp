@@ -119,54 +119,18 @@ void tests(void) {
     for (int i = 100; i < 1000; i++) vec3.push_back(i);
 
     Histogram<int> test1 = Histogram<int>(vec1);
+
+    std::vector<int> vec4;
+    vec4.push_back(6);
+    test1.appendData(vec4);
+
+    std::vector<int> vec5;
+    vec5.push_back(8); vec5.push_back(8); vec5.push_back(8); vec5.push_back(8);
+    test1.appendData(vec5);
     test1.showHistogram();
 
-    Histogram<int> test2 = Histogram<int>(vec2);
-
-    test2.showHistogram();
-
-    int min, max;
-    test2.getPeakRange(0.1, min, max);
+    int min; int max;
+    test1.getPeakRange(0.15, min, max);
     std::cout << min << " " << max << std::endl;
-
-    Histogram<int> *test3 = new Histogram<int>(vec3);
-
-    test3->showHistogram();
-    test3->getPeakRange(0.01, min, max);
-    std::cout << min << " " << max << std::endl;
-    delete test3;
-
-    Histogram<int> assigned = test2;
-    assigned.showHistogram();
-
-    assigned.getPeakRange(0.1, min, max);
-    std::cout << min << " " << max << std::endl;
-
-    std::vector<int> vec4 = std::vector<int>();
-    vec4.push_back(1);
-    assigned.appendData(vec4);
-
-    assigned.showHistogram();
-
-    vec4.push_back(2);
-    assigned.appendData(vec4);
-
-    std::cout << std::endl;
-
-    assigned.showHistogram();
-
-    std::vector<int> vec5 = std::vector<int>();
-    vec5.push_back(10);
-    assigned.appendData(vec5);
-    std::cout << std::endl;
-
-    assigned.showHistogram();
-
-    std::vector<int> vec6 = std::vector<int>();
-    vec6.push_back(12);
-    assigned.appendData(vec6);
-    std::cout << std::endl;
-
-    assigned.showHistogram();
     return;
 }
