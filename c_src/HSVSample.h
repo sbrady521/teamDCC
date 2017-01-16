@@ -10,12 +10,15 @@
 #include "Histogram.h"
 
 #define MAX_SAMPLE_SIZE 537600
-#define GREEN_DENSITY_THRESHOLD 0.003
+#define HSV_GREEN_DENSITY_THRESHOLD 0.03
+#define HSV_SAT_GREEN_DENSITY_THRESHOLD 0.1
 
 class HSVSample {
 private:
     std::deque<float> hsv_hue_vals_;
-    Histogram<float> histogram_;
+    std::deque<float> hsv_sat_vals_;
+    Histogram<float> hue_histogram_;
+    Histogram<float> sat_histogram_;
 
 public:
     // Constructor
@@ -37,7 +40,8 @@ public:
     void createHistogram();
 
     // Print the histogram to cout
-    void showHistogram();
+    void showSatHistogram();
+    void showHueHistogram();
 
     // Write green_chroma_vals_ to file
     void writeHueVals(std::string path);

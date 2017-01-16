@@ -79,7 +79,7 @@ Histogram<T>::Histogram(std::deque<T> &values) {
     T range = max - min;
 
     // The number of bins will be equal to the floor of the range (for now)
-    int bin_num = sqrt(data_points);
+    int bin_num = sqrt(sqrt(data_points));
 
     // Initialize member vectors
     try {

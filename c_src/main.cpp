@@ -75,10 +75,11 @@ int main(int argc, char** argv ) {
     } else {
         HSVSample green = HSVSample();
         for (int i = 0; i < num_files; i++) {
-            green.sampleImage(sampleFiles[i]);
+            green.sampleImage(classifyFiles[i]);
 
             std::string out_file = classifyFiles[i] + std::string("_hsv_classified.png");
             green.createHistogram();
+            //green.showHueHistogram();
             green.classifyImage(classifyFiles[i], out_file);
         }
     }

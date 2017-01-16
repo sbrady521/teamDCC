@@ -21,20 +21,28 @@ HSVSample::~HSVSample() {
 }
 
 void HSVSample::createHistogram() {
-    Histogram<float> histogram = Histogram<float>(this->hsv_hue_vals_);
-    this->histogram_ = histogram;
+    Histogram<float> hue_histogram = Histogram<float>(this->hsv_hue_vals_);
+    Histogram<float> sat_histogram = Histogram<float>(this->hsv_sat_vals_);
+    this->hue_histogram_ = hue_histogram;
+    this->sat_histogram_ = sat_histogram;
 }
 
 void HSVSample::showChromaVals() {
-    for (std::deque<float>::iterator it = this->hsv_hue_vals_.begin();
-         it != this->hsv_hue_vals_.end(); it++) {
+    for (std::deque<float>::iterator it = this->hsv_sat_vals_.begin();
+         it != this->hsv_sat_vals_.end(); it++) {
         std::cout << *it << ' ';
     }
     std::cout << std::endl;
 }
 
-void HSVSample::showHistogram() {
-    this->histogram_.showHistogram();
+void HSVSample::showSatHistogram() {
+    std::cout << "Showing Saturation Histogram" << std::endl;
+    this->sat_histogram_.showHistogram();
+}
+
+void HSVSample::showHueHistogram() {
+    std::cout << "Showing Hue Histogram" << std::endl;
+    this->hue_histogram_.showHistogram();
 }
 
 void HSVSample::sampleImage(const std::string &path) {
@@ -53,16 +61,19 @@ void HSVSample::sampleImage(const std::string &path) {
     cv::cvtColor(img, img, cv::COLOR_BGR2HSV);
 
     // Loop through each pixel and calculate hue value
-    for (int y_val = n_rows*0.65; y_val < n_rows; y_val++) {
+    for (int y_val = 0; y_val < n_rows; y_val++) {
         for (int x_val = 0; x_val < n_cols; x_val++) {
             int hue_val = img.at<cv::Vec3b>(y_val, x_val)[0];
+            int sat_val = img.at<cv::Vec3b>(y_val, x_val)[1];
 
             // If the sample vector has exceeded its max size remove the oldest datapoint
             if (hsv_hue_vals_.size() > MAX_SAMPLE_SIZE) {
                 this->hsv_hue_vals_.pop_front();
+                this->hsv_sat_vals_.pop_front();
             }
             // append g_chroma value to vector for future analysis
             this->hsv_hue_vals_.push_back(hue_val);
+            this->hsv_sat_vals_.push_back(sat_val);
         }
     }
 
@@ -71,7 +82,10 @@ void HSVSample::sampleImage(const std::string &path) {
 
 void HSVSample::classifyImage(std::string path, std::string out_path) {
     float minRange; float maxRange;
-    this->histogram_.getPeakRange(GREEN_DENSITY_THRESHOLD, minRange, maxRange);
+    this->hue_histogram_.getPeakRange(HSV_GREEN_DENSITY_THRESHOLD, minRange, maxRange);
+
+    float minSatRange; float maxSatRange;
+    this->sat_histogram_.getPeakRange(HSV_SAT_GREEN_DENSITY_THRESHOLD, minSatRange, maxSatRange);
 
     // make the range more generous
     cv::Mat img = cv::imread(path, cv::IMREAD_COLOR);
@@ -88,14 +102,15 @@ void HSVSample::classifyImage(std::string path, std::string out_path) {
     cv::Mat new_img(n_rows, n_cols, CV_8UC3, cv::Scalar(0,0,0));
 
     // Feathering
-    minRange = minRange - 15; maxRange = maxRange + 15;
-    std::cout << minRange << " " << maxRange << std::endl;
+    std::cout << "Hue Range " << minRange << " " << maxRange << std::endl;
+    std::cout << "Mininum Sat " << minSatRange << std::endl;
 
     for (int y_val = 0; y_val < n_rows; y_val++) {
         for (int x_val = 0; x_val < n_cols; x_val++) {
             int hue_val = img.at<cv::Vec3b>(y_val, x_val)[0];
+            int sat_val = img.at<cv::Vec3b>(y_val, x_val)[1];
 
-            if (hue_val >= minRange && hue_val <= maxRange) {
+            if (hue_val >= minRange && hue_val <= maxRange && sat_val > minSatRange) {
                 new_img.at<cv::Vec3b>(y_val, x_val)[0] = 255;
                 new_img.at<cv::Vec3b>(y_val, x_val)[1] = 112;
                 new_img.at<cv::Vec3b>(y_val, x_val)[2] = 132;
