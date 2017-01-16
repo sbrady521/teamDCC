@@ -5,6 +5,7 @@
 #include <sstream>
 #include "Sample.h"
 #include "HSVSample.h"
+#include "Polynomial.h"
 
 void tests(void);
 
@@ -88,6 +89,7 @@ int main(int argc, char** argv ) {
 
 
 void tests(void) {
+    /*
     std::cout << "Testing building histograms..." << std::endl;
 
     std::vector<int> vec1;
@@ -134,4 +136,15 @@ void tests(void) {
     test1.getPeakRange(0.15, min, max);
     std::cout << min << " " << max << std::endl;
     return;
+     */
+
+    std::cout << "Testing Polynomial Fitting..." << std::endl;
+    std::vector<double> x1 = std::vector<double>();
+    std::vector<double> y1 = std::vector<double>();
+
+    for (int i = 1; i <= 4; i++) x1.push_back(i);
+    y1.push_back(6); y1.push_back(5); y1.push_back(7); y1.push_back(10);
+
+    Polynomial1V p1 = polyFit(x1, y1, 1);
+    p1.showPolynomial();
 }
