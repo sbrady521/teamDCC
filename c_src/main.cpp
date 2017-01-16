@@ -80,7 +80,7 @@ int main(int argc, char** argv ) {
 
             std::string out_file = classifyFiles[i] + std::string("_hsv_classified.png");
             green.createHistogram();
-            //green.showHueHistogram();
+            green.showHueHistogram();
             green.classifyImage(classifyFiles[i], out_file);
         }
     }
@@ -145,6 +145,10 @@ void tests(void) {
     for (int i = 1; i <= 4; i++) x1.push_back(i);
     y1.push_back(6); y1.push_back(5); y1.push_back(7); y1.push_back(10);
 
-    Polynomial1V p1 = polyFit(x1, y1, 1);
+    Polynomial1V p1 = polyFit(x1, y1, 3);
     p1.showPolynomial();
+
+    double min; double max;
+    p1.maxAreaWindow(0, 5, 1, min, max);
+    std::cout << "Min area " << min << "max area " << max << std::endl;
 }

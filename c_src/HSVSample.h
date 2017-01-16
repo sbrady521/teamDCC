@@ -8,6 +8,7 @@
 #include <deque>
 #include <stdexcept>
 #include "Histogram.h"
+#include "Polynomial.h"
 
 #define MAX_SAMPLE_SIZE 537600
 #define HSV_GREEN_DENSITY_THRESHOLD 0.03

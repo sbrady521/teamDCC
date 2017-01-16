@@ -20,7 +20,7 @@ Histogram<T>::Histogram(std::vector<T> &values) {
     T range = max - min;
 
     // The number of bins will be equal to the floor of the range (for now)
-    int bin_num = sqrt(data_points);
+    int bin_num = sqrt(sqrt(data_points));
 
     // Initialize member vectors
     try {
@@ -167,6 +167,16 @@ void Histogram<T>::showHistogram() {
 }
 
 template <typename T>
+double Histogram<T>::getMinBin() {
+    return this->bins_.at(0);
+}
+
+template <typename T>
+double Histogram<T>::getMaxBin() {
+    return this->bins_.at(this->size_ - 1);
+}
+
+template <typename T>
 void Histogram<T>::getPeakRange(double threshold, T &minRange, T &maxRange) {
     // Initialize min and max, max index as -1 (to mean None)
     struct histogramRange<T> bestRange;
@@ -294,4 +304,9 @@ void Histogram<T>::appendData(std::vector<T> &values) {
     // Update size variables
     this->size_ = this->bins_.size();
     this->num_data_ = this->num_data_ + values.size();
+}
+
+template <typename T>
+Polynomial1V Histogram<T>::fitPolynomial(int degree) {
+    return polyFit(this->bins_, std::vector<double>(this->counts_.begin(), this->counts_.end()), degree);
 }

@@ -10,6 +10,7 @@
 #include <deque>
 #include <cmath>
 #include <algorithm>
+#include "Polynomial.h"
 
 template <typename T>
 class Histogram {
@@ -38,11 +39,20 @@ public:
     // print histogram data to cout
     void showHistogram();
 
+    // Get min bin
+    double getMinBin();
+
+    // Get max bin
+    double getMaxBin();
+
     // get the bin range for the maximum peak in the histogram
     void getPeakRange(double threshold, T &minRange, T &maxRange);
 
     // append data to the histogram
     void appendData(std::vector<T> &values);
+
+    // Fit polynomial to histogram
+    Polynomial1V fitPolynomial(int degree);
 };
 
 #include "Histogram.tcc"

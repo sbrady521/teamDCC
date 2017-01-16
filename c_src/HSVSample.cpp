@@ -12,6 +12,7 @@
 #include "Sample.h"
 #include "HSVSample.h"
 #include "Histogram.h"
+#include "Polynomial.h"
 
 // constructor for sample
 HSVSample::HSVSample() {
@@ -81,13 +82,15 @@ void HSVSample::sampleImage(const std::string &path) {
 }
 
 void HSVSample::classifyImage(std::string path, std::string out_path) {
-    float minRange; float maxRange;
-    this->hue_histogram_.getPeakRange(HSV_GREEN_DENSITY_THRESHOLD, minRange, maxRange);
+    double minRange; double maxRange;
+    //this->hue_histogram_.getPeakRange(HSV_GREEN_DENSITY_THRESHOLD, minRange, maxRange);
+    Polynomial1V model = this->hue_histogram_.fitPolynomial(2);
+    model.maxAreaWindow(this->hue_histogram_.getMinBin(), \
+                        this->hue_histogram_.getMaxBin(), 20, minRange, maxRange );
 
     float minSatRange; float maxSatRange;
     this->sat_histogram_.getPeakRange(HSV_SAT_GREEN_DENSITY_THRESHOLD, minSatRange, maxSatRange);
 
-    // make the range more generous
     cv::Mat img = cv::imread(path, cv::IMREAD_COLOR);
     if (!img.data) {
         std::cerr << "Exception at classifyImage for file,'" << path << "'" << std::endl;
@@ -103,6 +106,8 @@ void HSVSample::classifyImage(std::string path, std::string out_path) {
 
     // Feathering
     std::cout << "Hue Range " << minRange << " " << maxRange << std::endl;
+    std::cout << "Hue Vector ";
+    model.showPolynomial() ;
     std::cout << "Mininum Sat " << minSatRange << std::endl;
 
     for (int y_val = 0; y_val < n_rows; y_val++) {
