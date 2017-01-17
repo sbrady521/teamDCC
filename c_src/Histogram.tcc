@@ -79,7 +79,7 @@ Histogram<T>::Histogram(std::deque<T> &values) {
     T range = max - min;
 
     // The number of bins will be equal to the floor of the range (for now)
-    int bin_num = sqrt(sqrt(data_points));
+    int bin_num = (sqrt(sqrt(data_points)) > range) ? sqrt(sqrt(data_points)) : range;
 
     // Initialize member vectors
     try {
@@ -307,16 +307,27 @@ void Histogram<T>::appendData(std::vector<T> &values) {
 }
 
 template <typename T>
-double Histogram<T>::expectedValue() {
+double Histogram<T>::expectedValue(int var_exponent) {
     double ans = 0;
     for (int i = 0; i < this->size_; i++) {
-        ans += this->bins_.at(i)*this->density_.at(i);
+        ans += pow(this->bins_.at(i), var_exponent)*this->density_.at(i);
     }
     return ans;
 }
 
 template <typename T>
+double Histogram<T>::expectedValue() {return this->expectedValue(1);}
+
+template <typename T>
 double Histogram<T>::E() {return this->expectedValue();}
+
+template <typename T>
+double Histogram<T>::variance() {
+    return this->expectedValue(2) - pow(this->expectedValue(), 2);
+}
+
+template <typename T>
+double Histogram<T>::Var() {return this->variance();}
 
 template <typename T>
 Polynomial1V Histogram<T>::fitPolynomial(int degree) {

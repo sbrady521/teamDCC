@@ -45,6 +45,7 @@ void HSVSample::showHueHistogram() {
     std::cout << "Showing Hue Histogram" << std::endl;
     this->hue_histogram_.showHistogram();
     std::cout << "Expected Value: " << this->hue_histogram_.expectedValue() << std::endl;
+    std::cout << "Variance: " << this->hue_histogram_.variance() << std::endl;
     std::cout << "-------------" << std::endl;
 }
 
@@ -84,14 +85,15 @@ void HSVSample::sampleImage(const std::string &path) {
 }
 
 void HSVSample::classifyImage(std::string path, std::string out_path) {
-    float minRange; float maxRange;
-    this->hue_histogram_.getPeakRange(HSV_GREEN_DENSITY_THRESHOLD, minRange, maxRange);
+    //float minRange; float maxRange;
+    //this->hue_histogram_.getPeakRange(HSV_GREEN_DENSITY_THRESHOLD, minRange, maxRange);
 
-    /* //Polynomial Fitting
-    Polynomial1V model = this->hue_histogram_.fitPolynomial(2);
+    //Polynomial Fitting
+    double minRange; double maxRange;
+    Polynomial1V model = this->hue_histogram_.fitPolynomial(3);
     model.maxAreaWindow(this->hue_histogram_.getMinBin(), \
                         this->hue_histogram_.getMaxBin(), 20, minRange, maxRange );
-    */
+
 
     float minSatRange; float maxSatRange;
     this->sat_histogram_.getPeakRange(HSV_SAT_GREEN_DENSITY_THRESHOLD, minSatRange, maxSatRange);
@@ -112,8 +114,8 @@ void HSVSample::classifyImage(std::string path, std::string out_path) {
     // Feathering
     std::cout << "Hue Range " << minRange << " " << maxRange << std::endl;
 
-    //std::cout << "Hue Vector ";
-    //model.showPolynomial() ;
+    std::cout << "Hue Vector ";
+    model.showPolynomial() ;
 
     std::cout << "Mininum Sat " << minSatRange << std::endl;
 
@@ -122,7 +124,7 @@ void HSVSample::classifyImage(std::string path, std::string out_path) {
             int hue_val = img.at<cv::Vec3b>(y_val, x_val)[0];
             int sat_val = img.at<cv::Vec3b>(y_val, x_val)[1];
 
-            if (hue_val >= minRange && hue_val <= maxRange && sat_val > minSatRange) {
+            if (hue_val >= minRange && hue_val <= maxRange /*&& sat_val > minSatRange*/) {
                 new_img.at<cv::Vec3b>(y_val, x_val)[0] = 255;
                 new_img.at<cv::Vec3b>(y_val, x_val)[1] = 112;
                 new_img.at<cv::Vec3b>(y_val, x_val)[2] = 132;
