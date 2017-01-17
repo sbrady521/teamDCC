@@ -88,15 +88,19 @@ void HSVSample::classifyImage(std::string path, std::string out_path) {
     //float minRange; float maxRange;
     //this->hue_histogram_.getPeakRange(HSV_GREEN_DENSITY_THRESHOLD, minRange, maxRange);
 
+    //float minSatRange; float maxSatRange;
+    //this->sat_histogram_.getPeakRange(HSV_SAT_GREEN_DENSITY_THRESHOLD, minSatRange, maxSatRange);
+
     //Polynomial Fitting
     double minRange; double maxRange;
     Polynomial1V model = this->hue_histogram_.fitPolynomial(3);
-    model.maxAreaWindow(this->hue_histogram_.getMinBin(), \
+    model.maxAreaWindow(this->hue_histogram_.getMinBin(),
                         this->hue_histogram_.getMaxBin(), 20, minRange, maxRange );
 
-
-    float minSatRange; float maxSatRange;
-    this->sat_histogram_.getPeakRange(HSV_SAT_GREEN_DENSITY_THRESHOLD, minSatRange, maxSatRange);
+    double minSatRange; double maxSatRange;
+    Polynomial1V satModel = this->sat_histogram_.fitPolynomial(3);
+    satModel.maxAreaWindow(this->sat_histogram_.getMinBin(),
+                           this->sat_histogram_.getMaxBin(), 20, minSatRange, maxSatRange);
 
     cv::Mat img = cv::imread(path, cv::IMREAD_COLOR);
     if (!img.data) {
@@ -118,13 +122,15 @@ void HSVSample::classifyImage(std::string path, std::string out_path) {
     model.showPolynomial() ;
 
     std::cout << "Mininum Sat " << minSatRange << std::endl;
+    std::cout << "Sat Vector ";
+    satModel.showPolynomial();
 
     for (int y_val = 0; y_val < n_rows; y_val++) {
         for (int x_val = 0; x_val < n_cols; x_val++) {
             int hue_val = img.at<cv::Vec3b>(y_val, x_val)[0];
             int sat_val = img.at<cv::Vec3b>(y_val, x_val)[1];
 
-            if (hue_val >= minRange && hue_val <= maxRange /*&& sat_val > minSatRange*/) {
+            if (hue_val >= minRange && hue_val <= maxRange && sat_val > minSatRange) {
                 new_img.at<cv::Vec3b>(y_val, x_val)[0] = 255;
                 new_img.at<cv::Vec3b>(y_val, x_val)[1] = 112;
                 new_img.at<cv::Vec3b>(y_val, x_val)[2] = 132;
