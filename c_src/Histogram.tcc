@@ -307,6 +307,18 @@ void Histogram<T>::appendData(std::vector<T> &values) {
 }
 
 template <typename T>
+double Histogram<T>::expectedValue() {
+    double ans = 0;
+    for (int i = 0; i < this->size_; i++) {
+        ans += this->bins_.at(i)*this->density_.at(i);
+    }
+    return ans;
+}
+
+template <typename T>
+double Histogram<T>::E() {return this->expectedValue();}
+
+template <typename T>
 Polynomial1V Histogram<T>::fitPolynomial(int degree) {
     return polyFit(this->bins_, std::vector<double>(this->counts_.begin(), this->counts_.end()), degree);
 }

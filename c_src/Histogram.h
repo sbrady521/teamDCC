@@ -51,6 +51,12 @@ public:
     // append data to the histogram
     void appendData(std::vector<T> &values);
 
+    // Find the expected value of the histogram
+    double expectedValue();
+    double E();
+    
+    // Find the variance of the histogram
+
     // Fit polynomial to histogram
     Polynomial1V fitPolynomial(int degree);
 };
