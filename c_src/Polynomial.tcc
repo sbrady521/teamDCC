@@ -96,3 +96,13 @@ Polynomial1V polyFit(std::vector<T> x_data, std::vector<T> y_data, int degree) {
     return Polynomial1V(a);
 }
 
+template <typename T>
+Polynomial1V polyFit(std::vector<T> x_data, std::vector<T> y_data, int degree, double &residualAvg) {
+    residualAvg = 0;
+    Polynomial1V model = polyFit(x_data, y_data, degree);
+    for (int i = 0; i < x_data.size(); i++) {
+        residualAvg += abs(model.eval(x_data.at(i)) - y_data.at(i));
+    }
+    residualAvg = residualAvg / x_data.size();
+    return model;
+}

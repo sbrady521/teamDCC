@@ -62,6 +62,7 @@ public:
 
     // Fit polynomial to histogram
     Polynomial1V fitPolynomial(int degree);
+    Polynomial1V fitPolynomial(int degree, double &residualAvg);
 };
 
 #include "Histogram.tcc"

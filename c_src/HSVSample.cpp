@@ -93,12 +93,14 @@ void HSVSample::classifyImage(std::string path, std::string out_path) {
 
     //Polynomial Fitting
     double minRange; double maxRange;
-    Polynomial1V model = this->hue_histogram_.fitPolynomial(3);
+    double residualAvg;
+    Polynomial1V model = this->hue_histogram_.fitPolynomial(3, residualAvg);
     model.maxAreaWindow(this->hue_histogram_.getMinBin(),
-                        this->hue_histogram_.getMaxBin(), 20, minRange, maxRange );
+                        this->hue_histogram_.getMaxBin(), 20, minRange, maxRange);
 
+    double satResidualAvg;
     double minSatRange; double maxSatRange;
-    Polynomial1V satModel = this->sat_histogram_.fitPolynomial(3);
+    Polynomial1V satModel = this->sat_histogram_.fitPolynomial(3, satResidualAvg);
     satModel.maxAreaWindow(this->sat_histogram_.getMinBin(),
                            this->sat_histogram_.getMaxBin(), 20, minSatRange, maxSatRange);
 
@@ -118,12 +120,14 @@ void HSVSample::classifyImage(std::string path, std::string out_path) {
     // Feathering
     std::cout << "Hue Range " << minRange << " " << maxRange << std::endl;
 
-    std::cout << "Hue Vector ";
+    std::cout << "Hue Vector " << std::endl;
     model.showPolynomial() ;
+    std::cout << "Model residual avg " << residualAvg << std::endl;
 
     std::cout << "Mininum Sat " << minSatRange << std::endl;
-    std::cout << "Sat Vector ";
+    std::cout << "Sat Vector " << std::endl;
     satModel.showPolynomial();
+    std::cout << "Model residual avg " << satResidualAvg << std::endl;
 
     for (int y_val = 0; y_val < n_rows; y_val++) {
         for (int x_val = 0; x_val < n_cols; x_val++) {

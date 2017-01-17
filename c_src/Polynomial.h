@@ -39,6 +39,9 @@ public:
 template <typename T>
 Polynomial1V polyFit(std::vector<T> x_data, std::vector<T> y_data, int degree);
 
+template <typename T>
+Polynomial1V polyFit(std::vector<T> x_data, std::vector<T> y_data, int degree, double &residualSum);
+
 #include "Polynomial.tcc"
 
 #endif //CHROMATICITY_POLYNOMIAL_H

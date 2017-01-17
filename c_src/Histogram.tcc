@@ -333,3 +333,8 @@ template <typename T>
 Polynomial1V Histogram<T>::fitPolynomial(int degree) {
     return polyFit(this->bins_, std::vector<double>(this->counts_.begin(), this->counts_.end()), degree);
 }
+
+template <typename T>
+Polynomial1V Histogram<T>::fitPolynomial(int degree, double &residualAvg) {
+    return polyFit(this->bins_, std::vector<double>(this->counts_.begin(), this->counts_.end()), degree, residualAvg);
+}
