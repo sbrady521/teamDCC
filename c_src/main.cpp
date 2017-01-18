@@ -79,7 +79,7 @@ int main(int argc, char** argv ) {
             green.sampleImage(classifyFiles[i]);
             std::string out_file = classifyFiles[i] + std::string("_hsv_classified.png");
             green.createHistogram();
-            green.showHueHistogram();
+            //green.showHueHistogram();
             green.classifyImage(classifyFiles[i], out_file);
         }
     }

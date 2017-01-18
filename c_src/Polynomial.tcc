@@ -34,7 +34,7 @@ inline void Polynomial1V::maxAreaWindow(double x_start, double x_end, double win
 
     // Calculate the interval between each area we evaluate
     // Note that areas should overlap, like sliding window
-    double interval = window_range/(x_end - x_start);
+    double interval = (window_range/(x_end - x_start) < 1) ? 1 : (window_range/(x_end - x_start) < 1);
 
     // Initialise best_window_area, and its min, max x_value
     double best_window_area = 0;

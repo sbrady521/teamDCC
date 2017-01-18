@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <fstream>
 #include <opencv2/opencv.hpp>
+#include <chrono>
 #include "Sample.h"
 #include "HSVSample.h"
 #include "Histogram.h"
@@ -92,17 +93,18 @@ void HSVSample::classifyImage(std::string path, std::string out_path) {
     //this->sat_histogram_.getPeakRange(HSV_SAT_GREEN_DENSITY_THRESHOLD, minSatRange, maxSatRange);
 
     //Polynomial Fitting
-    double minRange; double maxRange;
-    double residualAvg;
-    Polynomial1V model = this->hue_histogram_.fitPolynomial(3, residualAvg);
-    model.maxAreaWindow(this->hue_histogram_.getMinBin(),
-                        this->hue_histogram_.getMaxBin(), 20, minRange, maxRange);
+    auto t_start = std::chrono::high_resolution_clock::now();
 
-    double satResidualAvg;
+    double minRange; double maxRange;
+    Polynomial1V model = this->hue_histogram_.fitPolynomial(3);
+    model.maxAreaWindow(this->hue_histogram_.getMinBin(),
+                        this->hue_histogram_.getMaxBin(), 25, minRange, maxRange);
+
     double minSatRange; double maxSatRange;
-    Polynomial1V satModel = this->sat_histogram_.fitPolynomial(3, satResidualAvg);
+    Polynomial1V satModel = this->sat_histogram_.fitPolynomial(3);
     satModel.maxAreaWindow(this->sat_histogram_.getMinBin(),
                            this->sat_histogram_.getMaxBin(), 20, minSatRange, maxSatRange);
+    auto t_end = std::chrono::high_resolution_clock::now();
 
     cv::Mat img = cv::imread(path, cv::IMREAD_COLOR);
     if (!img.data) {
@@ -118,6 +120,7 @@ void HSVSample::classifyImage(std::string path, std::string out_path) {
     cv::Mat new_img(n_rows, n_cols, CV_8UC3, cv::Scalar(0,0,0));
 
     // Feathering
+    /*
     std::cout << "Hue Range " << minRange << " " << maxRange << std::endl;
 
     std::cout << "Hue Vector " << std::endl;
@@ -128,6 +131,8 @@ void HSVSample::classifyImage(std::string path, std::string out_path) {
     std::cout << "Sat Vector " << std::endl;
     satModel.showPolynomial();
     std::cout << "Model residual avg " << satResidualAvg << std::endl;
+    */
+    std::cout << "Polynomial Fitting took " << std::chrono::duration<double, std::milli>(t_end-t_start).count() << "ms\n";
 
     for (int y_val = 0; y_val < n_rows; y_val++) {
         for (int x_val = 0; x_val < n_cols; x_val++) {
