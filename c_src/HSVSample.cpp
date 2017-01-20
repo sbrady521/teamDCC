@@ -119,19 +119,6 @@ void HSVSample::classifyImage(std::string path, std::string out_path) {
 
     cv::Mat new_img(n_rows, n_cols, CV_8UC3, cv::Scalar(0,0,0));
 
-    // Feathering
-    /*
-    std::cout << "Hue Range " << minRange << " " << maxRange << std::endl;
-
-    std::cout << "Hue Vector " << std::endl;
-    model.showPolynomial() ;
-    std::cout << "Model residual avg " << residualAvg << std::endl;
-
-    std::cout << "Mininum Sat " << minSatRange << std::endl;
-    std::cout << "Sat Vector " << std::endl;
-    satModel.showPolynomial();
-    std::cout << "Model residual avg " << satResidualAvg << std::endl;
-    */
     std::cout << "Polynomial Fitting took " << std::chrono::duration<double, std::milli>(t_end-t_start).count() << "ms\n";
 
     for (int y_val = 0; y_val < n_rows; y_val++) {
