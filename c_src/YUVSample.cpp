@@ -9,7 +9,6 @@
 #include <algorithm>
 #include <fstream>
 #include <opencv2/opencv.hpp>
-#include <chrono>
 #include "Sample.h"
 #include "YUVSample.h"
 #include "Histogram.h"
@@ -63,7 +62,7 @@ void YUVSample::sampleImage(const std::string &path) {
     cv::cvtColor(img, img, cv::COLOR_BGR2YUV);
 
     // Loop through each pixel and calculate hue value
-    for (int y_val = 0; y_val < n_rows; y_val++) {
+    for (int y_val = n_rows*0.65; y_val < n_rows; y_val++) {
         for (int x_val = 0; x_val < n_cols; x_val++) {
             int u_val = img.at<cv::Vec3b>(y_val, x_val)[1];
             int v_val = img.at<cv::Vec3b>(y_val, x_val)[2];
@@ -90,18 +89,16 @@ void YUVSample::classifyImage(std::string path, std::string out_path) {
     //this->sat_histogram_.getPeakRange(HSV_SAT_GREEN_DENSITY_THRESHOLD, minSatRange, maxSatRange);
 
     //Polynomial Fitting
-    auto t_start = std::chrono::high_resolution_clock::now();
 
     double minURange; double maxURange;
-    Polynomial1V u_model = this->u_histogram_.fitPolynomial(4);
+    Polynomial1V u_model = this->u_histogram_.fitPolynomial(3);
     u_model.maxAreaWindow(this->u_histogram_.getMinBin(),
                         this->u_histogram_.getMaxBin(), 20, minURange, maxURange);
 
     double minVRange; double maxVRange;
-    Polynomial1V v_model = this->v_histogram_.fitPolynomial(4);
+    Polynomial1V v_model = this->v_histogram_.fitPolynomial(3);
     v_model.maxAreaWindow(this->v_histogram_.getMinBin(),
                            this->v_histogram_.getMaxBin(), 20, minVRange, maxVRange);
-    auto t_end = std::chrono::high_resolution_clock::now();
 
     cv::Mat img = cv::imread(path, cv::IMREAD_COLOR);
     if (!img.data) {
@@ -109,14 +106,15 @@ void YUVSample::classifyImage(std::string path, std::string out_path) {
         throw no_img_data("No Image Data...");
     }
 
+    std::cout << "U range: " << minURange << " " << maxURange << std::endl;
+    std::cout << "V range: " << minVRange << " " << maxVRange << std::endl;
+
     int n_rows = img.rows;
     int n_cols = img.cols;
 
     cv::cvtColor(img, img, cv::COLOR_BGR2YUV);
 
     cv::Mat new_img(n_rows, n_cols, CV_8UC3, cv::Scalar(0,0,0));
-
-    std::cout << "Polynomial Fitting took " << std::chrono::duration<double, std::milli>(t_end-t_start).count() << "ms\n";
 
     for (int y_val = 0; y_val < n_rows; y_val++) {
         for (int x_val = 0; x_val < n_cols; x_val++) {
