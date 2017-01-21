@@ -24,8 +24,10 @@ YUVSample::~YUVSample() {
 void YUVSample::createHistogram() {
     Histogram<float> u_histogram = Histogram<float>(this->u_vals_);
     Histogram<float> v_histogram = Histogram<float>(this->v_vals_);
+    Histogram<float> y_histogram = Histogram<float>(this->y_vals_);
     this->u_histogram_ = u_histogram;
     this->v_histogram_ = v_histogram;
+    this->y_histogram_ = y_histogram;
 }
 
 void YUVSample::showUVals() {
@@ -66,15 +68,18 @@ void YUVSample::sampleImage(const std::string &path) {
         for (int x_val = 0; x_val < n_cols; x_val++) {
             int u_val = img.at<cv::Vec3b>(y_val, x_val)[1];
             int v_val = img.at<cv::Vec3b>(y_val, x_val)[2];
+            int y_val_col = img.at<cv::Vec3b>(y_val, x_val)[0];
 
             // If the sample vector has exceeded its max size remove the oldest datapoint
             if (u_vals_.size() > MAX_SAMPLE_SIZE) {
                 this->u_vals_.pop_front();
                 this->v_vals_.pop_front();
+                this->y_vals_.pop_front();
             }
             // append g_chroma value to vector for future analysis
             this->u_vals_.push_back(u_val);
             this->v_vals_.push_back(v_val);
+            this->y_vals_.push_back(y_val_col);
         }
     }
 
@@ -99,6 +104,11 @@ void YUVSample::classifyImage(std::string path, std::string out_path) {
     Polynomial1V v_model = this->v_histogram_.fitPolynomial(3);
     v_model.maxAreaWindow(this->v_histogram_.getMinBin(),
                            this->v_histogram_.getMaxBin(), 25, minVRange, maxVRange);
+
+    double minYRange; double maxYRange;
+    Polynomial1V y_model = this->y_histogram_.fitPolynomial(3);
+    v_model.maxAreaWindow(this->y_histogram_.getMinBin(),
+                           this->y_histogram_.getMaxBin(), 25, minYRange, maxYRange);
 
     cv::Mat img = cv::imread(path, cv::IMREAD_COLOR);
     if (!img.data) {
@@ -125,7 +135,7 @@ void YUVSample::classifyImage(std::string path, std::string out_path) {
 
 
             if (u_val >= minURange && u_val <= maxURange && v_val >= minVRange && v_val <= maxVRange
-                && y_val_col < 150 && y_val_col > 65) {
+                && y_val_col < maxYRange && y_val_col > minYRange) {
                 new_img.at<cv::Vec3b>(y_val, x_val)[0] = 255;
                 new_img.at<cv::Vec3b>(y_val, x_val)[1] = 112;
                 new_img.at<cv::Vec3b>(y_val, x_val)[2] = 132;

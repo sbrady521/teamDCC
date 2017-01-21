@@ -21,8 +21,10 @@ class YUVSample {
 private:
     std::deque<float> u_vals_;
     std::deque<float> v_vals_;
+    std::deque<float> y_vals_;
     Histogram<float> u_histogram_;
     Histogram<float> v_histogram_;
+    Histogram<float> y_histogram_;
 
 public:
     // Constructor
