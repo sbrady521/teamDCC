@@ -125,7 +125,7 @@ void YUVSample::classifyImage(std::string path, std::string out_path) {
 
 
             if (u_val >= minURange && u_val <= maxURange && v_val >= minVRange && v_val <= maxVRange
-                && y_val_col < 160 && y_val_col > 75) {
+                && y_val_col < 150 && y_val_col > 65) {
                 new_img.at<cv::Vec3b>(y_val, x_val)[0] = 255;
                 new_img.at<cv::Vec3b>(y_val, x_val)[1] = 112;
                 new_img.at<cv::Vec3b>(y_val, x_val)[2] = 132;
