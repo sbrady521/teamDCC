@@ -27,14 +27,18 @@ inline double Polynomial1V::eval(double x) {
 }
 
 inline void Polynomial1V::maxAreaWindow(double x_start, double x_end, double window_range, double &min, double &max) {
-    if (window_range > x_end - x_start) throw std::runtime_error("maxArea : Area range is greater than search range!");
+    if (window_range > x_end - x_start) {
+        std::cerr << "maxArea : Area range is greater than search range!" << std::endl;
+        std::cerr << "Setting search range to " << x_end - x_start << std::endl;
+        window_range = x_end - x_start;
+    }
 
     // Integrate the Coordinate vector
     Polynomial1V integral = this->integrate();
 
     // Calculate the interval between each area we evaluate
     // Note that areas should overlap, like sliding window
-    double interval = (window_range/(x_end - x_start) < 1) ? 1 : (window_range/(x_end - x_start) < 1);
+    double interval = (window_range/(x_end - x_start) < 1) ? 1 : window_range/(x_end - x_start);
 
     // Initialise best_window_area, and its min, max x_value
     double best_window_area = 0;

@@ -20,7 +20,7 @@ Histogram<T>::Histogram(std::vector<T> &values) {
     T range = max - min;
 
     // The number of bins will be equal to the floor of the range (for now)
-    int bin_num = sqrt(sqrt(data_points));
+    int bin_num = (sqrt(sqrt(data_points)) > range) ? sqrt(sqrt(data_points)) : range;
 
     // Initialize member vectors
     try {

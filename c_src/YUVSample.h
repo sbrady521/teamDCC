@@ -16,8 +16,6 @@
 #include "Polynomial.h"
 
 #define MAX_SAMPLE_SIZE 537600
-#define HSV_GREEN_DENSITY_THRESHOLD 0.03
-#define HSV_SAT_GREEN_DENSITY_THRESHOLD 0.1
 
 class YUVSample {
 private:

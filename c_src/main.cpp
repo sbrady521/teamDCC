@@ -78,7 +78,7 @@ int main(int argc, char** argv ) {
             green.sampleImage(sampleFiles[i]);
             std::string out_file = classifyFiles[i] + std::string("_yuv_classified.png");
             green.createHistogram();
-            green.showUHistogram(); green.showVHistogram();
+            //green.showUHistogram(); green.showVHistogram();
             green.classifyImage(classifyFiles[i], out_file);
         }
     } else {

@@ -93,12 +93,12 @@ void YUVSample::classifyImage(std::string path, std::string out_path) {
     double minURange; double maxURange;
     Polynomial1V u_model = this->u_histogram_.fitPolynomial(3);
     u_model.maxAreaWindow(this->u_histogram_.getMinBin(),
-                        this->u_histogram_.getMaxBin(), 20, minURange, maxURange);
+                        this->u_histogram_.getMaxBin(), 30, minURange, maxURange);
 
     double minVRange; double maxVRange;
     Polynomial1V v_model = this->v_histogram_.fitPolynomial(3);
     v_model.maxAreaWindow(this->v_histogram_.getMinBin(),
-                           this->v_histogram_.getMaxBin(), 20, minVRange, maxVRange);
+                           this->v_histogram_.getMaxBin(), 30, minVRange, maxVRange);
 
     cv::Mat img = cv::imread(path, cv::IMREAD_COLOR);
     if (!img.data) {
@@ -106,8 +106,8 @@ void YUVSample::classifyImage(std::string path, std::string out_path) {
         throw no_img_data("No Image Data...");
     }
 
-    std::cout << "U range: " << minURange << " " << maxURange << std::endl;
-    std::cout << "V range: " << minVRange << " " << maxVRange << std::endl;
+    //std::cout << "U range: " << minURange << " " << maxURange << std::endl;
+    //std::cout << "V range: " << minVRange << " " << maxVRange << std::endl;
 
     int n_rows = img.rows;
     int n_cols = img.cols;
@@ -124,7 +124,8 @@ void YUVSample::classifyImage(std::string path, std::string out_path) {
 
 
 
-            if (u_val >= minURange && u_val <= maxURange && v_val >= minVRange && v_val <= maxVRange && y_val_col < 120 && y_val_col > 20) {
+            if (u_val >= minURange && u_val <= maxURange && v_val >= minVRange && v_val <= maxVRange
+                && y_val_col < 160 && y_val_col > 75) {
                 new_img.at<cv::Vec3b>(y_val, x_val)[0] = 255;
                 new_img.at<cv::Vec3b>(y_val, x_val)[1] = 112;
                 new_img.at<cv::Vec3b>(y_val, x_val)[2] = 132;
