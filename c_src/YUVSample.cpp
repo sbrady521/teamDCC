@@ -93,12 +93,12 @@ void YUVSample::classifyImage(std::string path, std::string out_path) {
     double minURange; double maxURange;
     Polynomial1V u_model = this->u_histogram_.fitPolynomial(3);
     u_model.maxAreaWindow(this->u_histogram_.getMinBin(),
-                        this->u_histogram_.getMaxBin(), 30, minURange, maxURange);
+                        this->u_histogram_.getMaxBin(), 25, minURange, maxURange);
 
     double minVRange; double maxVRange;
     Polynomial1V v_model = this->v_histogram_.fitPolynomial(3);
     v_model.maxAreaWindow(this->v_histogram_.getMinBin(),
-                           this->v_histogram_.getMaxBin(), 30, minVRange, maxVRange);
+                           this->v_histogram_.getMaxBin(), 25, minVRange, maxVRange);
 
     cv::Mat img = cv::imread(path, cv::IMREAD_COLOR);
     if (!img.data) {
