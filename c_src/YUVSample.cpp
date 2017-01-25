@@ -64,11 +64,15 @@ void YUVSample::sampleImage(const std::string &path) {
     cv::cvtColor(img, img, cv::COLOR_BGR2YUV);
 
     // Loop through each pixel and calculate hue value
+    double ySum = 0;
+    int pixCounter = 0;
     for (int y_val = n_rows*0.65; y_val < n_rows; y_val++) {
         for (int x_val = 0; x_val < n_cols; x_val++) {
             int u_val = img.at<cv::Vec3b>(y_val, x_val)[1];
             int v_val = img.at<cv::Vec3b>(y_val, x_val)[2];
             int y_val_col = img.at<cv::Vec3b>(y_val, x_val)[0];
+            ySum += y_val_col;
+            pixCounter++;
 
             // If the sample vector has exceeded its max size remove the oldest datapoint
             if (u_vals_.size() > MAX_SAMPLE_SIZE) {
@@ -82,6 +86,7 @@ void YUVSample::sampleImage(const std::string &path) {
             this->y_vals_.push_back(y_val_col);
         }
     }
+    std::cout << "Sample avg y: " << ySum/pixCounter << std::endl;
 
     img.release();
 }
@@ -98,17 +103,17 @@ void YUVSample::classifyImage(std::string path, std::string out_path) {
     double minURange; double maxURange;
     Polynomial1V u_model = this->u_histogram_.fitPolynomial(3);
     u_model.maxAreaWindow(this->u_histogram_.getMinBin(),
-                        this->u_histogram_.getMaxBin(), 25, minURange, maxURange);
+                        this->u_histogram_.getMaxBin(), 20, minURange, maxURange);
 
     double minVRange; double maxVRange;
     Polynomial1V v_model = this->v_histogram_.fitPolynomial(3);
     v_model.maxAreaWindow(this->v_histogram_.getMinBin(),
-                           this->v_histogram_.getMaxBin(), 25, minVRange, maxVRange);
+                           this->v_histogram_.getMaxBin(), 20, minVRange, maxVRange);
 
     double minYRange; double maxYRange;
     Polynomial1V y_model = this->y_histogram_.fitPolynomial(3);
     v_model.maxAreaWindow(this->y_histogram_.getMinBin(),
-                           this->y_histogram_.getMaxBin(), 25, minYRange, maxYRange);
+                           this->y_histogram_.getMaxBin(), 20, minYRange, maxYRange);
 
     cv::Mat img = cv::imread(path, cv::IMREAD_COLOR);
     if (!img.data) {
@@ -126,22 +131,79 @@ void YUVSample::classifyImage(std::string path, std::string out_path) {
 
     cv::Mat new_img(n_rows, n_cols, CV_8UC3, cv::Scalar(0,0,0));
 
+    std::cout << "max U: " << maxURange << std::endl;
+    std::cout << "max V: " << maxVRange << std::endl;
+
+    minYRange -= 20;
+    maxYRange += 20;
+
+    //std::cout << "min Y: " << minYRange << "    max Y: " << maxYRange << std::endl;
+    double ySum = 0;
+    int pixCounter = 0;
     for (int y_val = 0; y_val < n_rows; y_val++) {
         for (int x_val = 0; x_val < n_cols; x_val++) {
+            //std::cout << x_val << " " << y_val << std::endl;
             int u_val = img.at<cv::Vec3b>(y_val, x_val)[1];
             int v_val = img.at<cv::Vec3b>(y_val, x_val)[2];
             int y_val_col = img.at<cv::Vec3b>(y_val, x_val)[0];
 
 
 
+            //Adjust range according to luminence
+            int diff = y_val_col - 60;
+            //std::cout << diff << std::endl;
+            //std::cout << diff << std::endl;
+            int adjustment = 0;
+            if(diff < 0){ //y_val edging towards black
+                adjustment = diff/3;
+            }else{
+                adjustment = diff/7;
+                adjustment *= -1;
+            }
+            //std::cout << adjustment << std::endl
+            int newMaxURange = maxURange + adjustment;
+            int newMaxVRange = maxVRange + adjustment;
+
+            //std::cout << maxURange << " " << maxVRange << std::endl;
+
+            //std::cout << diff << std::endl
+            //int adjust = diff*0.1;
+            //maxURange -= adjust;
+            //maxVRange -= adjust;
+
+            if(v_val < newMaxVRange && u_val < newMaxURange){
+                ySum += y_val_col;
+                pixCounter++;
+                new_img.at<cv::Vec3b>(y_val, x_val)[0] = 255;
+                new_img.at<cv::Vec3b>(y_val, x_val)[1] = 112;
+                new_img.at<cv::Vec3b>(y_val, x_val)[2] = 132;
+                /*
+                new_img.at<cv::Vec3b>(y_val, x_val)[0] = 255;
+                new_img.at<cv::Vec3b>(y_val, x_val)[1] = 112;
+                new_img.at<cv::Vec3b>(y_val, x_val)[2] = 132;
+                */
+            }
+            /*
+            if(y_val_col < maxYRange && y_val_col > minYRange){
+                new_img.at<cv::Vec3b>(y_val, x_val)[0] = 255;
+                new_img.at<cv::Vec3b>(y_val, x_val)[1] = 112;
+                new_img.at<cv::Vec3b>(y_val, x_val)[2] = 132;
+            }
+            */
+
+            /*
             if (u_val >= minURange && u_val <= maxURange && v_val >= minVRange && v_val <= maxVRange
                 && y_val_col < maxYRange && y_val_col > minYRange) {
                 new_img.at<cv::Vec3b>(y_val, x_val)[0] = 255;
                 new_img.at<cv::Vec3b>(y_val, x_val)[1] = 112;
                 new_img.at<cv::Vec3b>(y_val, x_val)[2] = 132;
             }
+            */
         }
+
     }
+    ySum /= pixCounter;
+    printf("green avgY: %d\n\n", (int)ySum);
 
     std::vector<int> compression_params;
     compression_params.push_back(CV_IMWRITE_PNG_COMPRESSION);
@@ -150,4 +212,8 @@ void YUVSample::classifyImage(std::string path, std::string out_path) {
 
     bool status = imwrite(out_path, new_img, compression_params);
     if (!status) std::cerr << "Failed to write image '" << out_path << "'" << std::endl;
+    //this->y_histogram_.showHistogram();
+    //this->v_histogram_.showHistogram();
+    //std::cout << std::endl << std::endl;
+    //this->u_histogram_.showHistogram();
 }

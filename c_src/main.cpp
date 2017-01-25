@@ -75,6 +75,7 @@ int main(int argc, char** argv ) {
     } else if (strcmp(arg3, "yuv") == 0) {
         YUVSample green = YUVSample();
         for (int i = 0; i < num_files; i++) {
+            std::cout << "Image " << i + 1 << " name: " << classifyFiles[i] << std::endl;  
             green.sampleImage(sampleFiles[i]);
             std::string out_file = classifyFiles[i] + std::string("_yuv_classified.png");
             green.createHistogram();
