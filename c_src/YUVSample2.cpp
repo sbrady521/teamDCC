@@ -71,6 +71,7 @@ void YUVSample2::sampleImage(const std::string &path) {
 }
 
 void YUVSample2::classifyImage(std::string path, std::string out_path) {
+    this->uv_histogram_.filterBins(400);
 
     cv::Mat img = cv::imread(path, cv::IMREAD_COLOR);
     if (!img.data) {
@@ -89,7 +90,7 @@ void YUVSample2::classifyImage(std::string path, std::string out_path) {
             int y_val_col = img.at<cv::Vec3b>(y_val, x_val)[0];
             int u_val = img.at<cv::Vec3b>(y_val, x_val)[1];
             int v_val = img.at<cv::Vec3b>(y_val, x_val)[2];
-            if (this->uv_histogram_.getDensity(u_val, v_val) > 0.003 && y_val_col > 50 && y_val_col < 150) {
+            if (this->uv_histogram_.isFiltered(u_val, v_val)) {
                 new_img.at<cv::Vec3b>(y_val, x_val)[0] = 255;
                 new_img.at<cv::Vec3b>(y_val, x_val)[1] = 112;
                 new_img.at<cv::Vec3b>(y_val, x_val)[2] = 132;

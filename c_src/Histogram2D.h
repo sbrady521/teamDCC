@@ -19,11 +19,17 @@ private:
     std::vector<double> X2_bins_;
     std::vector<std::vector<double> > density_;
     std::vector<std::vector<int> > counts_;
+
+    bool filtered_;
+    std::vector<std::vector<bool> > filtered_bins_;
+
     // Variable X1 is the the "outer" variable in the above vectors, X2 the "inner"
     int X1_bin_num_; // Number of bins the first Variable has
     int X2_bin_num_; // Number of bins the second Variable has
 
     int num_data_; // Number of Data points
+
+    void filterVerticalPeaks(int max_bins);
 
 public:
     // constructors
@@ -43,6 +49,12 @@ public:
     void showHistogram();
 
     double getDensity(T X1_val, T X2_val);
+
+    // Filter bins with a method. Initializes private member filtered_bins_;
+    void filterBins(int max_bins, std::string method = "vertical_peak");
+
+    // Check if a value is filtered.
+    bool isFiltered(T X1_val, T X2_val);
 };
 
 #include "Histogram2D.tcc"
