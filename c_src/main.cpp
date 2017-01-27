@@ -67,7 +67,7 @@ int main(int argc, char** argv ) {
     if (strcmp(arg3, "hsv") == 0) {
         HSVSample green = HSVSample();
         for (int i = 0; i < num_files; i++) {
-            green.sampleImage(classifyFiles[i]);
+            green.sampleImage(sampleFiles[i]);
             std::string out_file = classifyFiles[i] + std::string("_hsv_classified.png");
             green.createHistogram();
             //green.showHueHistogram();
