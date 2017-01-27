@@ -17,7 +17,7 @@ int main(int argc, char** argv ) {
             tests();
             return EXIT_SUCCESS;
         } else {
-            std::cerr << "Usage: ./Chromaticity sampleDir classifyDir <rgchroma|hsv>" << std::endl;
+            std::cerr << "Usage: ./Chromatacity <dir that you want to sample on> <dir with the images you want to classify> <rgchroma|hsv|yuv>" << std::endl;
             return 1;
         }
     }
@@ -88,7 +88,7 @@ int main(int argc, char** argv ) {
         for (int i = 0; i < num_files; i++) {
             green.sampleImage(sampleFiles[i]);
 
-            std::string out_file = classifyFiles[i] + std::string("_rgchroma_classified_.png");
+            std::string out_file = classifyFiles[i] + std::string("_rgchroma_classified.png");
             green.createHistogram();
             green.classifyImage(classifyFiles[i], out_file);
         }
