@@ -7,6 +7,7 @@
 #include "HSVSample.h"
 #include "YUVSample.h"
 #include "Polynomial.h"
+#include "Histogram2D.h"
 
 void tests(void);
 
@@ -146,6 +147,7 @@ void tests(void) {
     return;
      */
 
+    /*
     std::cout << "Testing Polynomial Fitting..." << std::endl;
     std::vector<double> x1 = std::vector<double>();
     std::vector<double> y1 = std::vector<double>();
@@ -159,4 +161,19 @@ void tests(void) {
     double min; double max;
     p1.maxAreaWindow(0, 5, 1, min, max);
     std::cout << "Min area " << min << "max area " << max << std::endl;
+     */
+
+    std::cout << "Testing 2D Histogram..." << std::endl;
+
+    std::vector<double> vec1;
+
+    for (int i = 0; i < 5; i++) {
+        vec1.push_back(i);
+    }
+
+    std::vector<double> vec2;
+    vec2.push_back(2); vec2.push_back(3); vec2.push_back(1); vec2.push_back(1); vec2.push_back(4);
+
+    Histogram2D<double> test1 = Histogram2D<double>(vec1, vec2);
+    test1.showHistogram();
 }
