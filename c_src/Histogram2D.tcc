@@ -262,7 +262,15 @@ void Histogram2D<T>::filterBins(int max_bins, const std::string method) {
 
 template <typename T>
 void Histogram2D<T>::filterVerticalPeaks(int max_bins) {
-    auto t_start = std::chrono::high_resolution_clock::now();
+    /*
+     * TODO:
+     * Optimize this massively.
+     * Instead of setting an arbitrary starting density we can look for the max
+     * density in the histogram.
+     * We then add all neighbours to a vector of to be considered vertices
+     * Then we repeatedly decrement the density and search over all the to be considered vertices until we have enough
+     */
+
     // Iterate through each density , 0 < density < 1, in intervals of 0.01.
     // To find the bin with the max density.
     // Set this as a valid bin.
@@ -307,10 +315,6 @@ void Histogram2D<T>::filterVerticalPeaks(int max_bins) {
             }
         }
     }
-    auto t_end = std::chrono::high_resolution_clock::now();
-    std::cout << "filterVerticalPeaks took: "
-              << std::chrono::duration<double, std::milli>(t_end-t_start).count()
-              << std::endl;
 }
 
 template <typename T>

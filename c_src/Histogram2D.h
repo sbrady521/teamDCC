@@ -11,7 +11,6 @@
 #include <cmath>
 #include <algorithm>
 #include <Eigen/Dense>
-#include <chrono>
 
 template <typename T>
 class Histogram2D {
