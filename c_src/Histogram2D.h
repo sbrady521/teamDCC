@@ -27,6 +27,7 @@ private:
 
 public:
     // constructors
+    Histogram2D();
 
     Histogram2D(std::vector<T> &X1_values, std::vector<T> &X2_values);
 
@@ -40,6 +41,8 @@ public:
     ~Histogram2D();
 
     void showHistogram();
+
+    double getDensity(T X1_val, T X2_val);
 };
 
 #include "Histogram2D.tcc"

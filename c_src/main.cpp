@@ -6,6 +6,7 @@
 #include "Sample.h"
 #include "HSVSample.h"
 #include "YUVSample.h"
+#include "YUVSample2.h"
 #include "Polynomial.h"
 #include "Histogram2D.h"
 
@@ -74,13 +75,12 @@ int main(int argc, char** argv ) {
             green.classifyImage(classifyFiles[i], out_file);
         }
     } else if (strcmp(arg3, "yuv") == 0) {
-        YUVSample green = YUVSample();
+        YUVSample2 green = YUVSample2();
         for (int i = 0; i < num_files; i++) {
             std::cout << "Image " << i + 1 << " name: " << classifyFiles[i] << std::endl;  
             green.sampleImage(sampleFiles[i]);
             std::string out_file = classifyFiles[i] + std::string("_yuv_classified.png");
             green.createHistogram();
-            //green.showUHistogram(); green.showVHistogram();
             green.classifyImage(classifyFiles[i], out_file);
         }
     } else {

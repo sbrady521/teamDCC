@@ -1,4 +1,9 @@
 template <typename T>
+Histogram2D<T>::Histogram2D() {
+    //Empty constructor to prevent compiler errors.
+}
+
+template <typename T>
 Histogram2D<T>::Histogram2D(std::vector<T> &X1_values, std::vector<T> &X2_values) {
     // Get the size of each argument vector
     int X1_size = X1_values.size(); int X2_size = X2_values.size();
@@ -107,9 +112,9 @@ Histogram2D<T>::Histogram2D(std::deque<T> &X1_values, std::deque<T> &X2_values) 
         this->density_ = std::vector<std::vector<double> >(X1_bin_num);
         this->counts_ = std::vector<std::vector<int> >(X1_bin_num);
 
-        for (int i = 0; i < X2_bin_num; i++) {
-            this->density_.push_back(std::vector<double>(X2_bin_num));
-            this->counts_.push_back(std::vector<int>(X2_bin_num));
+        for (int i = 0; i < X1_bin_num; i++) {
+            this->density_.at(i) = (std::vector<double>(X2_bin_num));
+            this->counts_.at(i) = (std::vector<int>(X2_bin_num));
         }
 
     } catch (std::bad_alloc &ex) {
@@ -117,7 +122,7 @@ Histogram2D<T>::Histogram2D(std::deque<T> &X1_values, std::deque<T> &X2_values) 
         throw;
     }
 
-    this->X1_bin_num_ = X1_bin_num; this->X2_bin_num_ = X2_bin_num;
+    //this->X1_bin_num_ = X1_bin_num; this->X2_bin_num_ = X2_bin_num;
 
     // calculate the interval between each bin
     double X1_interval = static_cast<double>(X1_range) /static_cast<double>(X1_bin_num);
@@ -205,4 +210,30 @@ void Histogram2D<T>::showHistogram() {
         }
         std::cout << std::endl;
     }
+}
+
+template <typename T>
+double Histogram2D<T>::getDensity(T X1_val, T X2_val) {
+    // Figure out which bin each Value belongs to.
+    int X1_bin_pos;
+    int X2_bin_pos;
+
+    if (this->X1_bins_.size() == 1) X1_bin_pos = 0;
+    else {
+        double X1_interval = this->X1_bins_.at(1) - X1_bins_.at(0);
+        X1_bin_pos = static_cast<int>((X1_val - (this->X1_bins_.at(0) - X1_interval) )/X1_interval);
+    }
+
+    if (this->X2_bins_.size() == 1) X2_bin_pos = 0;
+    else {
+        double X2_interval = this->X2_bins_.at(1) - X2_bins_.at(0);
+        X2_bin_pos = static_cast<int>((X2_val - (this->X2_bins_.at(0) - X2_interval) )/X2_interval);
+    }
+
+    if (X1_bin_pos == this->X1_bins_.size()) X1_bin_pos--;
+    if (X2_bin_pos == this->X2_bins_.size()) X2_bin_pos--;
+
+    if (X1_bin_pos < 0 || X2_bin_pos < 0) return 0; // This means the value is so small that it isn't even in the histogram.
+    if (X1_bin_pos > this->X1_bins_.size() || X2_bin_pos > this->X2_bins_.size()) return 0; // Similar, but too large.
+    return this->density_.at(X1_bin_pos).at(X2_bin_pos);
 }
