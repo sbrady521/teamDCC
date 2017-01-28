@@ -47,7 +47,7 @@ void YUVSample2::sampleImage(const std::string &path) {
     // Loop through each pixel and calculate hue value
     double ySum = 0;
     int pixCounter = 0;
-    for (int y_val = n_rows*0.65; y_val < n_rows; y_val++) {
+    for (int y_val = n_rows*0.5; y_val < n_rows; y_val++) {
         for (int x_val = 0; x_val < n_cols; x_val++) {
             int u_val = img.at<cv::Vec3b>(y_val, x_val)[1];
             int v_val = img.at<cv::Vec3b>(y_val, x_val)[2];
@@ -56,10 +56,10 @@ void YUVSample2::sampleImage(const std::string &path) {
             pixCounter++;
 
             // If the sample vector has exceeded its max size remove the oldest datapoint
-            if (u_vals_.size() > MAX_SAMPLE_SIZE) {
-                this->u_vals_.pop_front();
-                this->v_vals_.pop_front();
-                this->y_vals_.pop_front();
+            if (u_vals_.size() > YUV2_MAX_SAMPLE_SIZE) {
+                this->y_vals_.erase(this->y_vals_.begin(), this->y_vals_.end());
+                this->u_vals_.erase(this->u_vals_.begin(), this->u_vals_.end());
+                this->v_vals_.erase(this->v_vals_.begin(), this->v_vals_.end());
             }
             // append g_chroma value to vector for future analysis
             this->u_vals_.push_back(u_val);
@@ -71,7 +71,7 @@ void YUVSample2::sampleImage(const std::string &path) {
 }
 
 void YUVSample2::classifyImage(std::string path, std::string out_path) {
-    this->uv_histogram_.filterBins(800);
+    this->uv_histogram_.filterBins(600);
 
     cv::Mat img = cv::imread(path, cv::IMREAD_COLOR);
     if (!img.data) {

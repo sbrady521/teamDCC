@@ -2,6 +2,8 @@
 // Created by red on 25-Jan-17.
 //
 
+// TODO typedef std::pair<int, int> to binLoc or smth
+
 #ifndef CHROMATICITY_HISTOGRAM2D_H
 #define CHROMATICITY_HISTOGRAM2D_H
 
@@ -34,8 +36,6 @@ private:
 
     std::vector<std::pair<int, int> > getBinNeighbours(std::pair<int, int> bin);
 
-    std::pair<int, int> getBinPos(T X1_val, T X2_val);
-
 public:
     // constructors
     Histogram2D();
@@ -60,6 +60,9 @@ public:
 
     // Check if a value is filtered.
     bool isFiltered(T X1_val, T X2_val);
+
+    // Get the bin pos
+    std::pair<int, int> getBinPos(T X1_val, T X2_val);
 };
 
 #include "Histogram2D.tcc"

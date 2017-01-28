@@ -15,7 +15,7 @@
 #include "Histogram2D.h"
 #include "Polynomial.h"
 
-#define MAX_SAMPLE_SIZE 537600
+#define YUV2_MAX_SAMPLE_SIZE 614400
 
 class YUVSample2 {
 private:
