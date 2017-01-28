@@ -258,23 +258,23 @@ std::vector<std::pair<int, int> > Histogram2D<T>::getBinNeighbours(std::pair<int
         neighbours.push_back(std::make_pair(X1_bin - 1, X2_bin));
 
     // Add northeast bin
-    if (bin.first != 0 && bin.second != X2_bin_num)
+    if (bin.first != 0 && bin.second != X2_bin_num - 1)
         neighbours.push_back(std::make_pair(X1_bin - 1, X2_bin + 1));
 
     // Add east bin
-    if (bin.second != X2_bin_num)
+    if (bin.second != X2_bin_num - 1)
         neighbours.push_back(std::make_pair(X1_bin, X2_bin + 1));
 
     // Add southeast bin
-    if (bin.first != X1_bin_num && bin.second != X2_bin_num)
+    if (bin.first != X1_bin_num - 1 && bin.second != X2_bin_num - 1)
         neighbours.push_back(std::make_pair(X1_bin + 1, X2_bin + 1));
 
     // Add south bin
-    if (bin.first != X1_bin_num)
+    if (bin.first != X1_bin_num - 1)
         neighbours.push_back(std::make_pair(X1_bin + 1, X2_bin));
 
     // Add southwest bin
-    if (bin.first != X1_bin_num && bin.second != 0)
+    if (bin.first != X1_bin_num - 1 && bin.second != 0)
         neighbours.push_back(std::make_pair(X1_bin + 1, X2_bin - 1));
 
     // Add west bin
@@ -372,6 +372,21 @@ bool Histogram2D<T>::isFiltered(T X1_val, T X2_val) {
     std::pair<int, int> bin = getBinPos(X1_val, X2_val);
 
     return this->filtered_bins_.at(bin.first).at(bin.second);
+}
+
+template <typename T>
+bool Histogram2D<T>::areNeighboursFiltered(T X1_val, T X2_val) {
+    std::pair<int, int> bin = getBinPos(X1_val, X2_val);
+    if (this->filtered_bins_.at(bin.first).at(bin.second)) return true;
+
+    std::vector<std::pair<int, int> > neighbours = getBinNeighbours(bin);
+
+    for (int i = 0; i < neighbours.size(); i++) {
+        std::pair<int, int> neighbour_bin = neighbours.at(i);
+        //std::cout << neighbour_bin.first << " " << neighbour_bin.second << std::endl;
+        if (this->filtered_bins_.at(neighbour_bin.first).at(neighbour_bin.second)) return true;
+    }
+    return false;
 }
 
 template <typename T>
