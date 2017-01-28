@@ -369,6 +369,13 @@ bool Histogram2D<T>::isFiltered(T X1_val, T X2_val) {
 
     // TODO refactor into getBinPos function!!
     // Figure out which bin each Value belongs to.
+    std::pair<int, int> bin = getBinPos(X1_val, X2_val);
+
+    return this->filtered_bins_.at(bin.first).at(bin.second);
+}
+
+template <typename T>
+std::pair<int, int> Histogram2D<T>::getBinPos(T X1_val, T X2_val) {
     int X1_bin_pos;
     int X2_bin_pos;
 
@@ -387,8 +394,11 @@ bool Histogram2D<T>::isFiltered(T X1_val, T X2_val) {
     if (X1_bin_pos == this->X1_bins_.size()) X1_bin_pos--;
     if (X2_bin_pos == this->X2_bins_.size()) X2_bin_pos--;
 
-    if (X1_bin_pos < 0 || X2_bin_pos < 0) return false; // This means the value is so small that it isn't even in the histogram.
-    if (X1_bin_pos > this->X1_bins_.size() || X2_bin_pos > this->X2_bins_.size()) return false; // Similar, but too large.
+    if (X1_bin_pos == 0) X1_bin_pos = 0;
+    if (X2_bin_pos == 0) X2_bin_pos = 0;
 
-    return this->filtered_bins_.at(X1_bin_pos).at(X2_bin_pos);
-}
+    if (X1_bin_pos > this->X1_bins_.size()) X1_bin_pos = 0;
+    if (X2_bin_pos > this->X2_bins_.size()) X2_bin_pos = 0;
+
+    return std::make_pair(X1_bin_pos, X2_bin_pos);
+};

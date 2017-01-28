@@ -34,6 +34,8 @@ private:
 
     std::vector<std::pair<int, int> > getBinNeighbours(std::pair<int, int> bin);
 
+    std::pair<int, int> getBinPos(T X1_val, T X2_val);
+
 public:
     // constructors
     Histogram2D();
