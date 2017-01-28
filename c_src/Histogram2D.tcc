@@ -245,6 +245,50 @@ double Histogram2D<T>::getDensity(T X1_val, T X2_val) {
 }
 
 template <typename T>
+std::vector<std::pair<int, int> > Histogram2D<T>::getBinNeighbours(std::pair<int, int> bin) {
+    std::vector<std::pair<int, int> > neighbours = std::vector<std::pair<int, int> >();
+
+    int X1_bin_num = this->X1_bins_.size();
+    int X2_bin_num = this->X2_bins_.size();
+
+    int X1_bin = bin.first; int X2_bin = bin.second;
+
+    // Add north bin
+    if (bin.first != 0)
+        neighbours.push_back(std::make_pair(X1_bin - 1, X2_bin));
+
+    // Add northeast bin
+    if (bin.first != 0 && bin.second != X2_bin_num)
+        neighbours.push_back(std::make_pair(X1_bin - 1, X2_bin + 1));
+
+    // Add east bin
+    if (bin.second != X2_bin_num)
+        neighbours.push_back(std::make_pair(X1_bin, X2_bin + 1));
+
+    // Add southeast bin
+    if (bin.first != X1_bin_num && bin.second != X2_bin_num)
+        neighbours.push_back(std::make_pair(X1_bin + 1, X2_bin + 1));
+
+    // Add south bin
+    if (bin.first != X1_bin_num)
+        neighbours.push_back(std::make_pair(X1_bin + 1, X2_bin));
+
+    // Add southwest bin
+    if (bin.first != X1_bin_num && bin.second != 0)
+        neighbours.push_back(std::make_pair(X1_bin + 1, X2_bin - 1));
+
+    // Add west bin
+    if (bin.second != 0)
+        neighbours.push_back(std::make_pair(X1_bin, X2_bin - 1));
+
+    // Add northwest bin
+    if (bin.first != 0 && bin.second != 0)
+        neighbours.push_back(std::make_pair(X1_bin - 1, X2_bin - 1));
+
+    return neighbours;
+};
+
+template <typename T>
 void Histogram2D<T>::filterBins(int max_bins, const std::string method) {
     // Initialize this->filtered_bins_
     this->filtered_bins_ = std::vector<std::vector<bool> >(this->X1_bins_.size());
@@ -270,49 +314,51 @@ void Histogram2D<T>::filterVerticalPeaks(int max_bins) {
      * We then add all neighbours to a vector of to be considered vertices
      * Then we repeatedly decrement the density and search over all the to be considered vertices until we have enough
      */
-
-    // Iterate through each density , 0 < density < 1, in intervals of 0.01.
-    // To find the bin with the max density.
-    // Set this as a valid bin.
-    // Bins which are near valid bins and are marked as valid.
     int validated_cnt = 0;
-    bool found_first = false;
 
     int X1_bin_num = this->X1_bins_.size();
     int X2_bin_num = this->X2_bins_.size();
 
-    for (double density = 0.1; density > 0 && validated_cnt <= max_bins; density -= 0.005) {
-        for (int i = 0; i < X1_bin_num; i++) {
-            for (int j = 0; j < X2_bin_num; j++) {
-                if (this->density_.at(i).at(j) >= density && this->filtered_bins_.at(i).at(j) == false) {
-                    if (found_first) {
-                        // Check if any of this bins neighbours are validated; Mark valid if so.
-                        if (
-                            ( i != X1_bin_num - 1 && this->filtered_bins_.at(i + 1).at(j) )                                 ||
-                            ( i != 0 && this->filtered_bins_.at(i - 1).at(j) )                                              ||
-                            ( j != X2_bin_num - 1 && this->filtered_bins_.at(i).at(j + 1) )                                 ||
-                            ( j != 0 && this->filtered_bins_.at(i).at(j - 1)  )                                             ||
-                            ( i != X1_bin_num - 1 && j != X2_bin_num - 1 && j != this->filtered_bins_.at(i + 1).at(j + 1) ) ||
-                            ( i != X1_bin_num - 1 && j != 0 && this->filtered_bins_.at(i + 1).at(j - 1) )                   ||
-                            ( i != 0 && j != X2_bin_num - 1 && this->filtered_bins_.at(i - 1).at(j + 1) )                   ||
-                            ( i != 0 && j!= 0 && this->filtered_bins_.at(i - 1).at(j - 1) )
-                            ) {
-                            this->filtered_bins_.at(i).at(j) = true;
-                            validated_cnt++;
-                        }
-                    } else {
-                        this->filtered_bins_.at(i).at(j) = true;
-                        validated_cnt++;
-                        found_first = true;
-                    }
+    std::pair<int, int> best_bin_loc;
+    double best_bin_density = 0;
 
-                    // Maybe we should check if validated_cnt has reached max_bins and return.
-                    // Without this, the function is slightly less efficient, and
-                    // the function can possibly validate more bins than asked for by the user.
-
-                    // On the other hand the current implement guarantees a peak with a flat base.
-                }
+    // Get the densest bin in the Histogram
+    for (int i = 0; i < X1_bin_num; i++) {
+        for (int j = 0; j < X2_bin_num; j++) {
+            if (this->density_.at(i).at(j) > best_bin_density) {
+                best_bin_loc = std::make_pair(i, j);
+                best_bin_density = this->density_.at(i).at(j);
             }
+        }
+    }
+
+    // Create vector of candidate bins
+    std::vector<std::pair<int, int> > bins_todo = std::vector<std::pair<int, int> >();
+    bins_todo.push_back(best_bin_loc);
+
+    for (double density = best_bin_density; density > 0; density -= 0.001) {
+        // For this density, starting at the best bins density, iterate through all
+        // of bins_todo
+        for (int i = 0; i < bins_todo.size();) {
+            // If this bin has greater than or equal density,
+            // Mark it as valid, then add its neighbours to bins_todo
+            std::pair<int, int> curr_bin = bins_todo.at(i);
+
+            if (this->density_.at(curr_bin.first).at(curr_bin.second) >= density) {
+                this->filtered_bins_.at(curr_bin.first).at(curr_bin.second) = true;
+                validated_cnt++;
+                std::vector<std::pair<int, int> > neighbours = getBinNeighbours(curr_bin);
+                for (int j = 0; j < neighbours.size(); j++) {
+                    if (this->filtered_bins_.at(neighbours.at(j).first).at(neighbours.at(j).second) == false)
+                        bins_todo.push_back(neighbours.at(j));
+                }
+                std::swap(bins_todo.at(i), bins_todo.back());
+                bins_todo.pop_back();
+            } else {
+                i++;
+            }
+
+            if (validated_cnt == max_bins) return;
         }
     }
 }

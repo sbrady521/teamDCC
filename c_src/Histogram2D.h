@@ -10,6 +10,7 @@
 #include <deque>
 #include <cmath>
 #include <algorithm>
+#include <utility>
 #include <Eigen/Dense>
 
 template <typename T>
@@ -30,6 +31,8 @@ private:
     int num_data_; // Number of Data points
 
     void filterVerticalPeaks(int max_bins);
+
+    std::vector<std::pair<int, int> > getBinNeighbours(std::pair<int, int> bin);
 
 public:
     // constructors
