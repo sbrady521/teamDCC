@@ -10,7 +10,6 @@
 #include <algorithm>
 #include <fstream>
 #include <opencv2/opencv.hpp>
-#include <chrono>
 #include "Sample.h"
 #include "Histogram.h"
 #include "Histogram2D.h"
@@ -72,12 +71,7 @@ void YUVSample2::sampleImage(const std::string &path) {
 }
 
 void YUVSample2::classifyImage(std::string path, std::string out_path) {
-    auto t_start = std::chrono::high_resolution_clock::now();
-    this->uv_histogram_.filterBins(400);
-    auto t_end = std::chrono::high_resolution_clock::now();
-
-    std::cout << "CPU time used: "
-              << std::chrono::duration<double, std::milli>(t_end-t_start).count() << " ms\n";
+    this->uv_histogram_.filterBins(800);
 
     cv::Mat img = cv::imread(path, cv::IMREAD_COLOR);
     if (!img.data) {
