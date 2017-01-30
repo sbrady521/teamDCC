@@ -373,6 +373,11 @@ bool Histogram2D<T>::areNeighboursFiltered(T X1_val, T X2_val) {
 }
 
 template <typename T>
+std::vector<std::vector<bool> >& Histogram2D<T>::getFilteredBins() {
+    return this->filtered_bins_;
+}
+
+template <typename T>
 std::pair<int, int> Histogram2D<T>::getBinPos(T X1_val, T X2_val) {
     int X1_bin_pos;
     int X2_bin_pos;
