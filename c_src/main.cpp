@@ -2,6 +2,7 @@
 #include <dirent.h>
 #include <stdio.h>
 #include <string.h>
+#include <algorithm>
 #include <sstream>
 #include "Sample.h"
 #include "HSVSample.h"
@@ -9,171 +10,178 @@
 #include "YUVSample2.h"
 #include "Polynomial.h"
 #include "Histogram2D.h"
+#include "Types.h"
+#include "GreenChromaClassifier.h"
 
-void tests(void);
+typedef std::vector<std::string> svtr;
+
+void openFilesTest(std::string&, svtr&, svtr&, svtr&);
+void openFilesTrain(std::string&, svtr&);
+void process_training(GreenChromaClassifier&, GreenChroma&, std::string&, std::string&);
+void process_testing(GreenChromaClassifier&, GreenChroma&, std::string&, std::string&, std::string&);
+
 
 int main(int argc, char** argv ) {
-    if (argc != 4) {
-        if (argc == 2 && strcmp(argv[1], "TEST") == 0) {
-            tests();
-            return EXIT_SUCCESS;
-        } else {
-            std::cerr << "Usage: ./Chromatacity <dir that you want to sample on> <dir with the images you want to classify> <rgchroma|hsv|yuv>" << std::endl;
-            return 1;
-        }
+
+    // Ensure the correct number arguments are passed in from command line arguments
+    if (argc != 3) {
+        std::cerr << "Usage: ./Chromatacity <training dir> <testing dir>>" << std::endl;
+        return 1;
     }
 
-    char *samplePath = argv[1];
-    char *classifyPath = argv[2];
-    char *arg3 = argv[3];
+    // Get command line arguments and create directory paths
+    std::string imgDirTrain(argv[1]);
+    std::string imgDirTestRaw(argv[2]);
+    std::string imgDirTest = imgDirTestRaw + "/";
+    std::string imgDirTrainTop = imgDirTrain + "top/";
+    std::string imgDirTrainBottom = imgDirTrain + "bottom/";
 
-    std::vector<std::string> sampleFiles;
-    std::vector<std::string> classifyFiles;
+    // Create string vectors to store file names
+    std::vector<std::string> testFilesRaw;
+    std::vector<std::string> testFilesAnnotated;
+    std::vector<std::string> testFilesClassified;
+    std::vector<std::string> trainFilesBottom;
+    std::vector<std::string> trainFilesTop;
 
-    DIR *dir;
-    struct dirent *ent;
-    if ((dir = opendir(samplePath)) != NULL) {
-        /* print all the files and directories within directory */
-        while ((ent = readdir(dir)) != NULL) {
-            if (strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0) continue;
-            std::string path_str = std::string(ent->d_name);
-            if (path_str.find("_classified.png") != std::string::npos) continue;
-            sampleFiles.push_back(std::string(samplePath) + std::string(ent->d_name));
-        }
-        closedir(dir);
-    } else {
-        /* could not open directory */
-        return EXIT_FAILURE;
+    // Create the GreenChroma data structure and the classifier
+    GreenChroma gc = GreenChroma();
+    GreenChromaClassifier gcc = GreenChromaClassifier();
+
+    // Given the directories, open them and store the files in string vectors
+    openFilesTest(imgDirTest, testFilesRaw, testFilesAnnotated, testFilesClassified);
+    openFilesTrain(imgDirTrainTop, trainFilesTop);
+    openFilesTrain(imgDirTrainBottom, trainFilesBottom);
+
+    // Sort all files (particularly the paired folders) to ensure indedxes match up
+    std::sort(trainFilesTop.begin(), trainFilesTop.end());
+    std::sort(trainFilesBottom.begin(), trainFilesBottom.end());
+    std::sort(testFilesRaw.begin(), testFilesRaw.end());
+    std::sort(testFilesAnnotated.begin(), testFilesAnnotated.end());
+    std::sort(testFilesClassified.begin(), testFilesClassified.end());
+
+    // Ensure we have equal number of top and bottom camera images
+    if (trainFilesTop.size() != trainFilesBottom.size()) {
+        std::cerr << "Number of files in bottom and top training folder do not match.";
     }
 
-    if ((dir = opendir(classifyPath)) != NULL) {
-        /* print all the files and directories within directory */
-        while ((ent = readdir(dir)) != NULL) {
-            if (strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0) continue;
-            std::string path_str = std::string(ent->d_name);
-            if (path_str.find("_classified.png") != std::string::npos) continue;
-            classifyFiles.push_back(std::string(classifyPath) + path_str);
-        }
-        closedir(dir);
-    } else {
-        /* could not open directory */
-        return EXIT_FAILURE;
+    // Ensure we have as many testing files as we have their annotations
+    if (testFilesRaw.size() != testFilesAnnotated.size()) {
+        std::cerr << "Number of raw and annotated files in test folder do not match.";
     }
 
-    int num_files = sampleFiles.size() < classifyFiles.size() ? sampleFiles.size() : classifyFiles.size();
-
-    //for (int i = 0; i < num_files; i++) std::cout << sampleFiles[i] << std::endl;
-
-
-    if (strcmp(arg3, "hsv") == 0) {
-        HSVSample green = HSVSample();
-        for (int i = 0; i < num_files; i++) {
-            green.sampleImage(sampleFiles[i]);
-            std::string out_file = classifyFiles[i] + std::string("_hsv_classified.png");
-            green.createHistogram();
-            //green.showHueHistogram();
-            green.classifyImage(classifyFiles[i], out_file);
-        }
-    } else if (strcmp(arg3, "yuv") == 0) {
-        YUVSample2 green = YUVSample2();
-        for (int i = 0; i < num_files; i++) {
-            std::cout << "Image " << i + 1 << " name: " << classifyFiles[i] << std::endl;  
-            green.sampleImage(sampleFiles[i]);
-            std::string out_file = classifyFiles[i] + std::string("_yuv_classified.png");
-            green.createHistogram();
-            green.classifyImage(classifyFiles[i], out_file);
-        }
-    } else {
-        Sample green = Sample();
-        for (int i = 0; i < num_files; i++) {
-            green.sampleImage(sampleFiles[i]);
-
-            std::string out_file = classifyFiles[i] + std::string("_rgchroma_classified.png");
-            green.createHistogram();
-            green.classifyImage(classifyFiles[i], out_file);
-        }
+    // For each of the training top/bottom camera pairs, fit our classifier to them
+    for (int i = 0; i < trainFilesTop.size(); i++) {
+        process_training(gcc, gc, trainFilesTop[i], trainFilesBottom[i]);
     }
+
+    // Using our fitted classifier, generate results for the test images
+    for (int i = 0; i < testFilesRaw.size(); i++) {
+        process_testing(gcc, gc, testFilesRaw[i], testFilesClassified[i], testFilesAnnotated[i]);
+    }
+
     return EXIT_SUCCESS;
 }
 
+void process_training(GreenChromaClassifier& gcc, GreenChroma& gc, std::string& pathTop, std::string& pathBottom) {
+    cv::Mat imgTop = cv::imread(pathTop, cv::IMREAD_COLOR);
+    cv::Mat imgBottom = cv::imread(pathBottom, cv::IMREAD_COLOR);
 
-void tests(void) {
-    /*
-    std::cout << "Testing building histograms..." << std::endl;
-
-    std::vector<int> vec1;
-    std::vector<int> vec2;
-    std::vector<int> vec3;
-
-    for (int i = 0; i < 5; i++) {
-        vec1.push_back(i);
-        vec2.push_back(i);
-        vec3.push_back(i);
+    if (!imgTop.data) {
+        std::cerr << "Exception at classifyImage for file,'" << pathTop << "'" << std::endl;
+        throw no_img_data("No Image Data...");
+    }
+    if (!imgBottom.data) {
+        std::cerr << "Exception at classifyImage for file,'" << pathBottom<< "'" << std::endl;
+        throw no_img_data("No Image Data...");
     }
 
-    for (int i = 0; i < 10; i++) {
-        vec2.push_back(i);
-        vec3.push_back(i);
+    cv::cvtColor(imgTop, imgTop, cv::COLOR_BGR2YUV);
+    cv::cvtColor(imgBottom, imgBottom, cv::COLOR_BGR2YUV);
+
+    gcc.fit(gc, imgTop, imgBottom);
+
+    imgTop.release();
+    imgBottom.release();
+}
+
+void process_testing(GreenChromaClassifier& gcc, GreenChroma& gc, std::string& pathRaw, std::string& pathClassified, std::string& pathAnnotated) {
+    cv::Mat imgTest = cv::imread(pathRaw, cv::IMREAD_COLOR);
+    cv::Mat imgAnnotated = cv::imread(pathAnnotated, cv::IMREAD_COLOR);
+    cv::Mat imgClassified(960, 1280, CV_8UC3, cv::Scalar(0,0,0));
+
+    if (!imgTest.data) {
+        std::cerr << "Exception at classifyImage for file,'" << pathRaw << "'" << std::endl;
+        throw no_img_data("No Image Data...");
+    }
+    if (!imgAnnotated.data) {
+        std::cerr << "Exception at classifyImage for file,'" << pathAnnotated << "'" << std::endl;
+        throw no_img_data("No Image Data...");
     }
 
-    for (int i = 0; i < 100; i++) {
-        vec3.push_back(i);
+    cv::cvtColor(imgTest, imgTest, cv::COLOR_BGR2YUV);
+    cv::cvtColor(imgAnnotated, imgAnnotated, cv::COLOR_BGR2YUV);
+
+    gcc.predict(gc, imgTest, imgClassified);
+
+    std::vector<int> compression_params;
+    compression_params.push_back(CV_IMWRITE_PNG_COMPRESSION);
+    compression_params.push_back(9);
+
+    bool status = imwrite(pathClassified, imgClassified, compression_params);
+    if (!status) {
+        std::cerr << "Failed to write image '" << pathClassified << "'" << std::endl;
     }
 
-    for (int i = 80; i < 100; i++) {
-        vec3.push_back(i); vec3.push_back(i);
+    // TODO: Compare Classified with Annotated
+
+    imgTest.release();
+    imgAnnotated.release();
+
+}
+
+void openFilesTest(std::string& testDir, svtr& raw, svtr& annotated, svtr& classified) {
+    DIR *dir;
+    struct dirent *ent;
+    if ((dir = opendir(testDir.c_str())) != NULL) {
+        /* print all the files and directories within directory */
+        while ((ent = readdir(dir)) != NULL) {
+            if (strcmp(ent->d_name, ".") != 0 && strcmp(ent->d_name, "..") != 0) {
+                std::string path_str = std::string(ent->d_name);
+                if (path_str.find("_classified.png") == std::string::npos) {
+                    if (path_str.find("_ann.png") != std::string::npos) {
+                        annotated.push_back(std::string(testDir.c_str()) + std::string(ent->d_name));   
+                    } else {
+                        raw.push_back(std::string(testDir.c_str()) + std::string(ent->d_name));   
+
+                        std::string rawName = std::string(ent->d_name);
+                        rawName = rawName.substr(0, rawName.size() - 4);
+                        classified.push_back(std::string(testDir.c_str()) + rawName + "_classified.png");   
+                    }
+                }
+            }
+        }
+        closedir(dir);
+    } else {
+        /* could not open directory */
+        std::cerr << "Error opening directory for test files" << std::endl;
+        exit(1);
     }
+}
 
-    for (int i = 80; i < 100; i++) {
-        vec3.push_back(i); vec3.push_back(i);
+void openFilesTrain(std::string& trainDir, svtr& files) {
+    DIR *dir;
+    struct dirent *ent;
+    if ((dir = opendir(trainDir.c_str())) != NULL) {
+        /* print all the files and directories within directory */
+        while ((ent = readdir(dir)) != NULL) {
+            if (strcmp(ent->d_name, ".") != 0 && strcmp(ent->d_name, "..") != 0) {
+                files.push_back(std::string(trainDir.c_str()) + std::string(ent->d_name));   
+            }
+        }
+        closedir(dir);
+    } else {
+        /* could not open directory */
+        std::cerr << "Error opening directory for test files" << std::endl;
+        exit(1);
     }
-
-    for (int i = 100; i < 1000; i++) vec3.push_back(i);
-
-    Histogram<int> test1 = Histogram<int>(vec1);
-
-    std::vector<int> vec4;
-    vec4.push_back(6);
-    test1.appendData(vec4);
-
-    std::vector<int> vec5;
-    vec5.push_back(8); vec5.push_back(8); vec5.push_back(8); vec5.push_back(8);
-    test1.appendData(vec5);
-    test1.showHistogram();
-
-    int min; int max;
-    test1.getPeakRange(0.15, min, max);
-    std::cout << min << " " << max << std::endl;
-    return;
-     */
-
-    /*
-    std::cout << "Testing Polynomial Fitting..." << std::endl;
-    std::vector<double> x1 = std::vector<double>();
-    std::vector<double> y1 = std::vector<double>();
-
-    for (int i = 1; i <= 4; i++) x1.push_back(i);
-    y1.push_back(6); y1.push_back(5); y1.push_back(7); y1.push_back(10);
-
-    Polynomial1V p1 = polyFit(x1, y1, 3);
-    p1.showPolynomial();
-
-    double min; double max;
-    p1.maxAreaWindow(0, 5, 1, min, max);
-    std::cout << "Min area " << min << "max area " << max << std::endl;
-     */
-
-    std::cout << "Testing 2D Histogram..." << std::endl;
-
-    std::vector<double> vec1;
-
-    for (int i = 0; i < 5; i++) {
-        vec1.push_back(i);
-    }
-
-    std::vector<double> vec2;
-    vec2.push_back(2); vec2.push_back(3); vec2.push_back(1); vec2.push_back(1); vec2.push_back(4);
-
-    Histogram2D<double> test1 = Histogram2D<double>(vec1, vec2);
-    test1.showHistogram();
 }
