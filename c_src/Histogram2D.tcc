@@ -48,6 +48,9 @@ Histogram2D<T>::Histogram2D(std::vector<T> &X1_values, std::vector<T> &X2_values
     double X1_interval = static_cast<double>(X1_range) /static_cast<double>(X1_bin_num);
     double X2_interval = static_cast<double>(X2_range) /static_cast<double>(X2_bin_num);
 
+    this->X1_interval_ = X1_interval;
+    this->X2_interval_ = X2_interval;
+
     // iterate through the bin intervals. Set each element of bins_
     // to be the upper bound of the bin.
     double bin_ubound = X1_min + X1_interval;
@@ -103,6 +106,9 @@ Histogram2D<T>::Histogram2D(std::deque<T> &X1_values, std::deque<T> &X2_values) 
     T X2_max = *std::max_element(X2_values.begin(), X2_values.end());
     T X2_range = X2_max - X2_min;
 
+    this->X1_min_ = X1_min;
+    this->X2_min_ = X2_min;
+
     // Get the number of bins for each Variable
     int X1_bin_num = (sqrt(sqrt(X1_size)) > X1_range) ? sqrt(sqrt(X1_size)) : X1_range;
     int X2_bin_num = (sqrt(sqrt(X2_size)) > X2_range) ? sqrt(sqrt(X2_size)) : X2_range;
@@ -129,6 +135,9 @@ Histogram2D<T>::Histogram2D(std::deque<T> &X1_values, std::deque<T> &X2_values) 
     // calculate the interval between each bin
     double X1_interval = static_cast<double>(X1_range) /static_cast<double>(X1_bin_num);
     double X2_interval = static_cast<double>(X2_range) /static_cast<double>(X2_bin_num);
+
+    this->X1_interval_ = X1_interval;
+    this->X2_interval_ = X2_interval;
 
     // iterate through the bin intervals. Set each element of bins_
     // to be the upper bound of the bin.
@@ -394,17 +403,11 @@ std::pair<int, int> Histogram2D<T>::getBinPos(T X1_val, T X2_val) {
     int X1_bin_pos;
     int X2_bin_pos;
 
-    if (this->X1_bins_.size() == 1) X1_bin_pos = 0;
-    else {
-        double X1_interval = this->X1_bins_.at(1) - X1_bins_.at(0);
-        X1_bin_pos = static_cast<int>((X1_val - (this->X1_bins_.at(0) - X1_interval) )/X1_interval);
-    }
-
-    if (this->X2_bins_.size() == 1) X2_bin_pos = 0;
-    else {
-        double X2_interval = this->X2_bins_.at(1) - X2_bins_.at(0);
-        X2_bin_pos = static_cast<int>((X2_val - (this->X2_bins_.at(0) - X2_interval) )/X2_interval);
-    }
+    //auto t_start = std::chrono::high_resolution_clock::now();
+    X1_bin_pos = static_cast<int>((X1_val - this->X1_min_)/this->X1_interval_);
+    X2_bin_pos = static_cast<int>((X2_val - this->X2_min_)/this->X2_interval_);
+    //auto t_end = std::chrono::high_resolution_clock::now();
+    //std::cout << "Calc bin pos took " << std::chrono::duration<double, std::milli>(t_end-t_start).count() << "ms\n";
 
     if (X1_bin_pos == this->X1_bins_.size()) X1_bin_pos--;
     if (X2_bin_pos == this->X2_bins_.size()) X2_bin_pos--;

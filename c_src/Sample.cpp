@@ -11,6 +11,8 @@
 #include "Sample.h"
 #include "Histogram.h"
 
+#include <chrono>
+
 // constructor for sample
 Sample::Sample() {
 }
@@ -99,8 +101,10 @@ void Sample::classifyImage(std::string path, std::string out_path) {
 
     std::cout << minRange << " " << maxRange << std::endl;
     minRange = 90;
+    double time = 0;
     for (int y_val = 0; y_val < n_rows; y_val++) {
         for (int x_val = 0; x_val < n_cols; x_val++) {
+            auto t_start = std::chrono::high_resolution_clock::now();
             float rgb_sum = 0;
 
             for (int i = 0; i < 3; i++) {
@@ -115,9 +119,11 @@ void Sample::classifyImage(std::string path, std::string out_path) {
                 new_img.at<cv::Vec3b>(y_val, x_val)[1] = 112;
                 new_img.at<cv::Vec3b>(y_val, x_val)[2] = 132;
             }
+            auto t_end = std::chrono::high_resolution_clock::now();
+            time += std::chrono::duration<double, std::milli>(t_end-t_start).count();
         }
     }
-
+    std::cout << "Classification took " << time << "ms\n";
     std::vector<int> compression_params;
     compression_params.push_back(CV_IMWRITE_PNG_COMPRESSION);
     compression_params.push_back(9);

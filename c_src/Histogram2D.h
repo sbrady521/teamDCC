@@ -15,6 +15,8 @@
 #include <utility>
 #include <Eigen/Dense>
 
+#include <chrono>
+
 template <typename T>
 class Histogram2D {
 private:
@@ -31,6 +33,12 @@ private:
     int X2_bin_num_; // Number of bins the second Variable has
 
     int num_data_; // Number of Data points
+
+    // Some useful information to store
+    double X1_interval_;    // Interval between each bin
+    double X2_interval_;
+    double X1_min_; // The smallest value that was in the given data (not the smallest bin!)
+    double X2_min_;
 
     void filterVerticalPeaks(int max_bins);
 
