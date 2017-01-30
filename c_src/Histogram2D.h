@@ -14,6 +14,7 @@
 #include <algorithm>
 #include <utility>
 #include <Eigen/Dense>
+#include <stdexcept>
 
 template <typename T>
 class Histogram2D {

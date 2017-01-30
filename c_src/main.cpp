@@ -4,12 +4,7 @@
 #include <string.h>
 #include <algorithm>
 #include <sstream>
-#include "Sample.h"
-#include "HSVSample.h"
-#include "YUVSample.h"
-#include "YUVSample2.h"
-#include "Polynomial.h"
-#include "Histogram2D.h"
+#include <stdexcept>
 #include "Types.h"
 #include "GreenChromaClassifier.h"
 
@@ -88,11 +83,11 @@ void process_training(GreenChromaClassifier& gcc, GreenChroma& gc, std::string& 
 
     if (!imgTop.data) {
         std::cerr << "Exception at classifyImage for file,'" << pathTop << "'" << std::endl;
-        throw no_img_data("No Image Data...");
+        throw std::runtime_error("No Image Data...");
     }
     if (!imgBottom.data) {
         std::cerr << "Exception at classifyImage for file,'" << pathBottom<< "'" << std::endl;
-        throw no_img_data("No Image Data...");
+        throw std::runtime_error("No Image Data...");
     }
 
     cv::cvtColor(imgTop, imgTop, cv::COLOR_BGR2YUV);
@@ -111,11 +106,11 @@ void process_testing(GreenChromaClassifier& gcc, GreenChroma& gc, std::string& p
 
     if (!imgTest.data) {
         std::cerr << "Exception at classifyImage for file,'" << pathRaw << "'" << std::endl;
-        throw no_img_data("No Image Data...");
+        throw std::runtime_error("No Image Data...");
     }
     if (!imgAnnotated.data) {
         std::cerr << "Exception at classifyImage for file,'" << pathAnnotated << "'" << std::endl;
-        throw no_img_data("No Image Data...");
+        throw std::runtime_error("No Image Data...");
     }
 
     cv::cvtColor(imgTest, imgTest, cv::COLOR_BGR2YUV);
