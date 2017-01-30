@@ -116,7 +116,7 @@ void process_testing(GreenChromaClassifier& gcc, GreenChroma& gc, std::string& p
     cv::cvtColor(imgTest, imgTest, cv::COLOR_BGR2YUV);
     cv::cvtColor(imgAnnotated, imgAnnotated, cv::COLOR_BGR2YUV);
 
-    gcc.predict(gc, imgTest, imgClassified);
+    gcc.classify(gc, imgTest, imgClassified);
 
     std::vector<int> compression_params;
     compression_params.push_back(CV_IMWRITE_PNG_COMPRESSION);
@@ -176,7 +176,7 @@ void openFilesTrain(std::string& trainDir, svtr& files) {
         closedir(dir);
     } else {
         /* could not open directory */
-        std::cerr << "Error opening directory for test files" << std::endl;
+        std::cerr << "Error opening directory for train files" << std::endl;
         exit(1);
     }
 }

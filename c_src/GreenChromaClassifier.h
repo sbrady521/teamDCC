@@ -10,5 +10,5 @@ private:
     std::vector<int> y_vals_;
 public:
 	void fit(GreenChroma&, cv::Mat&, cv::Mat&);
-	void predict(GreenChroma& gc, cv::Mat&, cv::Mat&);
+	void classify(GreenChroma& gc, cv::Mat&, cv::Mat&);
 };

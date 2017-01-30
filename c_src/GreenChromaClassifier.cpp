@@ -24,7 +24,7 @@ void GreenChromaClassifier::fit(GreenChroma& gc, cv::Mat& top, cv::Mat& bottom) 
     gc.createHistogram(this->u_vals_, this->v_vals_);
 }
 
-void GreenChromaClassifier::predict(GreenChroma& gc, cv::Mat& test, cv::Mat& classified) {
+void GreenChromaClassifier::classify(GreenChroma& gc, cv::Mat& test, cv::Mat& classified) {
     int n_rows = test.rows;
     int n_cols = test.cols;
 
