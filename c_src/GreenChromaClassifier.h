@@ -9,6 +9,7 @@ private:
     std::vector<int> v_vals_;
     std::vector<int> y_vals_;
 public:
-	void fit(GreenChroma&, cv::Mat&, cv::Mat&);
+	void sample(GreenChroma&, cv::Mat&, cv::Mat&);
+    void model(GreenChroma&);
 	void classify(GreenChroma& gc, cv::Mat&, cv::Mat&);
 };

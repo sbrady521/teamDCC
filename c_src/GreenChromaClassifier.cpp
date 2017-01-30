@@ -3,7 +3,7 @@
 #include "Types.h"
 #include "GreenChromaClassifier.h"
 
-void GreenChromaClassifier::fit(GreenChroma& gc, cv::Mat& top, cv::Mat& bottom) {
+void GreenChromaClassifier::sample(GreenChroma& gc, cv::Mat& top, cv::Mat& bottom) {
 
     int n_rows = top.rows;
     int n_cols = top.cols;
@@ -20,7 +20,9 @@ void GreenChromaClassifier::fit(GreenChroma& gc, cv::Mat& top, cv::Mat& bottom) 
             this->y_vals_.push_back(y_val_col);
         }
     }
+}
 
+void GreenChromaClassifier::model(GreenChroma & gc) {
     gc.createHistogram(this->u_vals_, this->v_vals_);
 }
 

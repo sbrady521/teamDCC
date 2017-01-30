@@ -66,8 +66,12 @@ int main(int argc, char** argv ) {
 
     // For each of the training top/bottom camera pairs, fit our classifier to them
     for (int i = 0; i < trainFilesTop.size(); i++) {
+        // Sampling
         process_training(gcc, gc, trainFilesTop[i], trainFilesBottom[i]);
     }
+    // Modelling
+    std::cout << "Creating a model..." << std::endl;
+    gcc.model(gc);
 
     // Using our fitted classifier, generate results for the test images
     for (int i = 0; i < testFilesRaw.size(); i++) {
@@ -93,7 +97,9 @@ void process_training(GreenChromaClassifier& gcc, GreenChroma& gc, std::string& 
     cv::cvtColor(imgTop, imgTop, cv::COLOR_BGR2YUV);
     cv::cvtColor(imgBottom, imgBottom, cv::COLOR_BGR2YUV);
 
-    gcc.fit(gc, imgTop, imgBottom);
+    std::cout << "Sampling " << pathTop << std::endl;
+
+    gcc.sample(gc, imgTop, imgBottom);
 
     imgTop.release();
     imgBottom.release();
@@ -116,6 +122,7 @@ void process_testing(GreenChromaClassifier& gcc, GreenChroma& gc, std::string& p
     cv::cvtColor(imgTest, imgTest, cv::COLOR_BGR2YUV);
     cv::cvtColor(imgAnnotated, imgAnnotated, cv::COLOR_BGR2YUV);
 
+    std::cout << "Classifying " << pathRaw << " and saving it to " << pathClassified << std::endl;
     gcc.classify(gc, imgTest, imgClassified);
 
     std::vector<int> compression_params;
@@ -158,7 +165,8 @@ void openFilesTest(std::string& testDir, svtr& raw, svtr& annotated, svtr& class
         closedir(dir);
     } else {
         /* could not open directory */
-        std::cerr << "Error opening directory for test files" << std::endl;
+        std::cerr << "Error opening directory for test files at "
+                  << testDir << std::endl;
         exit(1);
     }
 }
@@ -176,7 +184,8 @@ void openFilesTrain(std::string& trainDir, svtr& files) {
         closedir(dir);
     } else {
         /* could not open directory */
-        std::cerr << "Error opening directory for train files" << std::endl;
+        std::cerr << "Error opening directory for train files at "
+                  << trainDir << std::endl;
         exit(1);
     }
 }
