@@ -43,7 +43,8 @@ public:
 
     Histogram2D(std::vector<T> &X1_values, std::vector<T> &X2_values);
 
-    Histogram2D(std::deque<T> &X1_values, std::deque<T> &X2_values);
+    Histogram2D(std::vector<T> &X1_values, std::vector<T> &X2_values,
+                std::vector<double> X1_bins, std::vector<double> X2_bins);
 
     Histogram2D(const Histogram2D &obj);
 

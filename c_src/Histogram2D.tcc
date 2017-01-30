@@ -86,6 +86,71 @@ Histogram2D<T>::Histogram2D(std::vector<T> &X1_values, std::vector<T> &X2_values
 }
 
 template <typename T>
+Histogram2D<T>::Histogram2D(std::vector<T> &X1_values, std::vector<T> &X2_values,
+        std::vector<double> X1_bins, std::vector<double> X2_bins) {
+    int X1_size = X1_values.size(); int X2_size = X2_values.size();
+
+    if (X1_size != X2_size) throw std::runtime_error("Value vectors differ in size!");
+
+    this->num_data_ = X1_size;
+
+    // get the range of the values
+    T X1_min = *std::min_element(X1_values.begin(), X1_values.end());
+    T X1_max = *std::max_element(X1_values.begin(), X1_values.end());
+    T X1_range = X1_max - X1_min;
+
+    T X2_min = *std::min_element(X2_values.begin(), X2_values.end());
+    T X2_max = *std::max_element(X2_values.begin(), X2_values.end());
+    T X2_range = X2_max - X2_min;
+
+    int X1_bin_num = X1_bins.size();
+    int X2_bin_num = X2_bins.size();
+
+    // calculate the interval between each bin
+    double X1_interval = X1_bins.at(1) - X1_bins.at(0);
+    double X2_interval = X2_bins.at(1) - X2_bins.at(0);
+
+    // Initialize member vectors
+    try {
+        this->X1_bins_ = std::vector<double>(X1_bins);
+        this->X2_bins_ = std::vector<double>(X2_bins);
+        this->density_ = std::vector<std::vector<double> >(X1_bin_num);
+        this->counts_ = std::vector<std::vector<int> >(X1_bin_num);
+
+        for (int i = 0; i < X1_bin_num; i++) {
+            this->density_.at(i) = (std::vector<double>(X2_bin_num));
+            this->counts_.at(i) = (std::vector<int>(X2_bin_num));
+        }
+
+    } catch (std::bad_alloc &ex) {
+        std::cerr << ex.what() << std::endl;
+        throw;
+    }
+
+    // calculate how much each data point contributes to the density
+    double density_incr = 1.0/static_cast<double>(this->num_data_);
+
+    // iterate through data points and increment counts_ and density_ appropriately
+    for (int i = 0; i < this->num_data_; i++) {
+        T X1_val = X1_values.at(i); T X2_val = X2_values.at(i);
+        int X1_bin_pos = static_cast<int>((X1_val - X1_min)/X1_interval);
+        int X2_bin_pos = static_cast<int>((X2_val - X2_min)/X2_interval);
+        if (X1_bin_pos == X1_bin_num) X1_bin_pos--;
+        if (X2_bin_pos == X2_bin_num) X2_bin_pos--;
+
+        try {
+            this->density_.at(X1_bin_pos).at(X2_bin_pos) += density_incr;
+            this->counts_.at(X1_bin_pos).at(X2_bin_pos)++;
+        } catch (std::exception &ex) {
+            std::cout << ex.what() << std::endl;
+            throw;
+        }
+    }
+
+    this->filtered_ = false;
+}
+
+template <typename T>
 Histogram2D<T>::Histogram2D(const Histogram2D &obj) {
     // TODO: Don't shallow copy the 2d vectors
     std::vector<double> X1_bins(obj.X1_bins_);
