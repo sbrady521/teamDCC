@@ -18,7 +18,7 @@ typedef std::vector<std::string> svtr;
 void openFilesTest(std::string&, svtr&, svtr&, svtr&);
 void openFilesTrain(std::string&, svtr&);
 void process_training(GreenChromaClassifier&, GreenChroma&, std::string&, std::string&);
-void process_testing(GreenChromaClassifier&, GreenChroma&, std::string&, std::string&, std::string&);
+int process_testing(GreenChromaClassifier&, GreenChroma&, std::string&, std::string&, std::string&);
 
 
 int main(int argc, char** argv ) {
@@ -33,8 +33,8 @@ int main(int argc, char** argv ) {
     std::string imgDirTrain(argv[1]);
     std::string imgDirTestRaw(argv[2]);
     std::string imgDirTest = imgDirTestRaw + "/";
-    std::string imgDirTrainTop = imgDirTrain + "top/";
-    std::string imgDirTrainBottom = imgDirTrain + "bottom/";
+    std::string imgDirTrainTop = imgDirTrain + "/top/";
+    std::string imgDirTrainBottom = imgDirTrain + "/bottom/";
 
     // Create string vectors to store file names
     std::vector<std::string> testFilesRaw;
@@ -75,9 +75,17 @@ int main(int argc, char** argv ) {
     }
 
     // Using our fitted classifier, generate results for the test images
+    std::vector<int> allfs(1);
     for (int i = 0; i < testFilesRaw.size(); i++) {
-        process_testing(gcc, gc, testFilesRaw[i], testFilesClassified[i], testFilesAnnotated[i]);
+        int value = process_testing(gcc, gc, testFilesRaw[i], testFilesClassified[i], testFilesAnnotated[i]);
+        allfs.push_back(value);
     }
+
+    double average = 0;
+    for (int i = 0; i < allfs.size(); ++i) {
+        average += allfs.at(i);
+    }
+    std::cout << "Average F1: " << (average / allfs.size()) << std::endl << std::endl;
 
     return EXIT_SUCCESS;
 }
@@ -104,7 +112,7 @@ void process_training(GreenChromaClassifier& gcc, GreenChroma& gc, std::string& 
     imgBottom.release();
 }
 
-void process_testing(GreenChromaClassifier& gcc, GreenChroma& gc, std::string& pathRaw, std::string& pathClassified, std::string& pathAnnotated) {
+int process_testing(GreenChromaClassifier& gcc, GreenChroma& gc, std::string& pathRaw, std::string& pathClassified, std::string& pathAnnotated) {
     cv::Mat imgTest = cv::imread(pathRaw, cv::IMREAD_COLOR);
     cv::Mat imgAnnotated = cv::imread(pathAnnotated, cv::IMREAD_COLOR);
     cv::Mat imgClassified(960, 1280, CV_8UC3, cv::Scalar(0,0,0));
@@ -132,10 +140,51 @@ void process_testing(GreenChromaClassifier& gcc, GreenChroma& gc, std::string& p
         std::cerr << "Failed to write image '" << pathClassified << "'" << std::endl;
     }
 
-    // TODO: Compare Classified with Annotated
+    int tp = 0;
+    int fp = 0;
+    int tn = 0;
+    int fn = 0;
+    for (int i = 0; i < 960; ++i) {
+        for (int j = 0; j < 1280; ++j) {
+            bool annotatedGreen = false;
+            bool classifiedGreen = false;
+            if (imgAnnotated.at<cv::Vec3b>(i,j)[0] < 1) {
+                annotatedGreen = true;
+            }
+            if (imgClassified.at<cv::Vec3b>(i,j)[0] < 1) {
+                classifiedGreen = true;
+            }
+            if (annotatedGreen && classifiedGreen) tp++;
+            if (!annotatedGreen && classifiedGreen) fp++;
+            if (!annotatedGreen && !classifiedGreen) tn++;
+            if (annotatedGreen && !classifiedGreen) fn++;
+        }
+    }
+
+    double precision = 0;
+    double recall = 0;
+    double f1 = 0;
+    if (tp + fp > 0) {
+        precision = (tp) / (tp + fp);
+    }
+    if (tp + fn > 0) {
+        recall = (tp) / (tp + fn);
+    }
+    if (precision + recall > 0) {
+        f1 = (precision * recall * 2) / (precision + recall);
+    }
+
+    std::cout << pathRaw << std::endl;
+    std::cout << "tp(" << tp << ") fp(" << fp << ") tn(" << tn << ") fn(" << fn << ")" << std::endl;
+    std::cout << "Precision: " << precision << std::endl;
+    std::cout << "Recall: " << recall << std::endl;
+    std::cout << "F1 Score: " << f1 << std::endl;
+    std::cout << std::endl;
 
     imgTest.release();
     imgAnnotated.release();
+
+    return f1;
 
 }
 
@@ -181,7 +230,7 @@ void openFilesTrain(std::string& trainDir, svtr& files) {
         closedir(dir);
     } else {
         /* could not open directory */
-        std::cerr << "Error opening directory for test files" << std::endl;
+        std::cerr << "Error opening directory for training files" << std::endl;
         exit(1);
     }
 }
