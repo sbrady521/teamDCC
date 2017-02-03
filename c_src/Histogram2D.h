@@ -14,8 +14,7 @@
 #include <algorithm>
 #include <utility>
 #include <Eigen/Dense>
-
-#include <chrono>
+#include <stdexcept>
 
 template <typename T>
 class Histogram2D {
@@ -34,12 +33,6 @@ private:
 
     int num_data_; // Number of Data points
 
-    // Some useful information to store
-    double X1_interval_;    // Interval between each bin
-    double X2_interval_;
-    double X1_min_; // The smallest value that was in the given data (not the smallest bin!)
-    double X2_min_;
-
     void filterVerticalPeaks(int max_bins);
 
     std::vector<std::pair<int, int> > getBinNeighbours(std::pair<int, int> bin);
@@ -50,7 +43,8 @@ public:
 
     Histogram2D(std::vector<T> &X1_values, std::vector<T> &X2_values);
 
-    Histogram2D(std::deque<T> &X1_values, std::deque<T> &X2_values);
+    Histogram2D(std::vector<T> &X1_values, std::vector<T> &X2_values,
+                std::vector<double> X1_bins, std::vector<double> X2_bins);
 
     Histogram2D(const Histogram2D &obj);
 
@@ -69,6 +63,7 @@ public:
     // Check if a value is filtered.
     bool isFiltered(T X1_val, T X2_val);
     bool areNeighboursFiltered(T X1_val, T X2_val);
+    std::vector<std::vector<bool> >& getFilteredBins();
 
     // Get the bin pos
     std::pair<int, int> getBinPos(T X1_val, T X2_val);

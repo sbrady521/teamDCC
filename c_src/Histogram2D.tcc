@@ -8,7 +8,7 @@ Histogram2D<T>::Histogram2D(std::vector<T> &X1_values, std::vector<T> &X2_values
     // Get the size of each argument vector
     int X1_size = X1_values.size(); int X2_size = X2_values.size();
 
-    if (X1_size != X2_size) throw std::runtime_error("Value deques differ in size!");
+    if (X1_size != X2_size) throw std::runtime_error("Value vectors differ in size!");
 
     this->num_data_ = X1_size;
 
@@ -47,9 +47,6 @@ Histogram2D<T>::Histogram2D(std::vector<T> &X1_values, std::vector<T> &X2_values
     // calculate the interval between each bin
     double X1_interval = static_cast<double>(X1_range) /static_cast<double>(X1_bin_num);
     double X2_interval = static_cast<double>(X2_range) /static_cast<double>(X2_bin_num);
-
-    this->X1_interval_ = X1_interval;
-    this->X2_interval_ = X2_interval;
 
     // iterate through the bin intervals. Set each element of bins_
     // to be the upper bound of the bin.
@@ -89,11 +86,11 @@ Histogram2D<T>::Histogram2D(std::vector<T> &X1_values, std::vector<T> &X2_values
 }
 
 template <typename T>
-Histogram2D<T>::Histogram2D(std::deque<T> &X1_values, std::deque<T> &X2_values) {
-    // Get the size of each argument vector
+Histogram2D<T>::Histogram2D(std::vector<T> &X1_values, std::vector<T> &X2_values,
+                            std::vector<double> X1_bins, std::vector<double> X2_bins) {
     int X1_size = X1_values.size(); int X2_size = X2_values.size();
 
-    if (X1_size != X2_size) throw std::runtime_error("Value deques differ in size!");
+    if (X1_size != X2_size) throw std::runtime_error("Value vectors differ in size!");
 
     this->num_data_ = X1_size;
 
@@ -106,17 +103,17 @@ Histogram2D<T>::Histogram2D(std::deque<T> &X1_values, std::deque<T> &X2_values) 
     T X2_max = *std::max_element(X2_values.begin(), X2_values.end());
     T X2_range = X2_max - X2_min;
 
-    this->X1_min_ = X1_min;
-    this->X2_min_ = X2_min;
+    int X1_bin_num = X1_bins.size();
+    int X2_bin_num = X2_bins.size();
 
-    // Get the number of bins for each Variable
-    int X1_bin_num = (sqrt(sqrt(X1_size)) > X1_range) ? sqrt(sqrt(X1_size)) : X1_range;
-    int X2_bin_num = (sqrt(sqrt(X2_size)) > X2_range) ? sqrt(sqrt(X2_size)) : X2_range;
+    // calculate the interval between each bin
+    double X1_interval = X1_bins.at(1) - X1_bins.at(0);
+    double X2_interval = X2_bins.at(1) - X2_bins.at(0);
 
     // Initialize member vectors
     try {
-        this->X1_bins_ = std::vector<double>(X1_bin_num);
-        this->X2_bins_ = std::vector<double>(X2_bin_num);
+        this->X1_bins_ = std::vector<double>(X1_bins);
+        this->X2_bins_ = std::vector<double>(X2_bins);
         this->density_ = std::vector<std::vector<double> >(X1_bin_num);
         this->counts_ = std::vector<std::vector<int> >(X1_bin_num);
 
@@ -128,29 +125,6 @@ Histogram2D<T>::Histogram2D(std::deque<T> &X1_values, std::deque<T> &X2_values) 
     } catch (std::bad_alloc &ex) {
         std::cerr << ex.what() << std::endl;
         throw;
-    }
-
-    //this->X1_bin_num_ = X1_bin_num; this->X2_bin_num_ = X2_bin_num;
-
-    // calculate the interval between each bin
-    double X1_interval = static_cast<double>(X1_range) /static_cast<double>(X1_bin_num);
-    double X2_interval = static_cast<double>(X2_range) /static_cast<double>(X2_bin_num);
-
-    this->X1_interval_ = X1_interval;
-    this->X2_interval_ = X2_interval;
-
-    // iterate through the bin intervals. Set each element of bins_
-    // to be the upper bound of the bin.
-    double bin_ubound = X1_min + X1_interval;
-    for (int bin_cnt = 0; bin_cnt < X1_bin_num; bin_cnt++) {
-        this->X1_bins_.at(bin_cnt) = bin_ubound;
-        bin_ubound += X1_interval;
-    }
-
-    bin_ubound = X2_min + X2_interval;
-    for (int bin_cnt = 0; bin_cnt < X2_bin_num; bin_cnt++) {
-        this->X2_bins_.at(bin_cnt) = bin_ubound;
-        bin_ubound += X2_interval;
     }
 
     // calculate how much each data point contributes to the density
@@ -399,15 +373,26 @@ bool Histogram2D<T>::areNeighboursFiltered(T X1_val, T X2_val) {
 }
 
 template <typename T>
+std::vector<std::vector<bool> >& Histogram2D<T>::getFilteredBins() {
+    return this->filtered_bins_;
+}
+
+template <typename T>
 std::pair<int, int> Histogram2D<T>::getBinPos(T X1_val, T X2_val) {
     int X1_bin_pos;
     int X2_bin_pos;
 
-    //auto t_start = std::chrono::high_resolution_clock::now();
-    X1_bin_pos = static_cast<int>((X1_val - this->X1_min_)/this->X1_interval_);
-    X2_bin_pos = static_cast<int>((X2_val - this->X2_min_)/this->X2_interval_);
-    //auto t_end = std::chrono::high_resolution_clock::now();
-    //std::cout << "Calc bin pos took " << std::chrono::duration<double, std::milli>(t_end-t_start).count() << "ms\n";
+    if (this->X1_bins_.size() == 1) X1_bin_pos = 0;
+    else {
+        double X1_interval = this->X1_bins_.at(1) - X1_bins_.at(0);
+        X1_bin_pos = static_cast<int>((X1_val - (this->X1_bins_.at(0) - X1_interval) )/X1_interval);
+    }
+
+    if (this->X2_bins_.size() == 1) X2_bin_pos = 0;
+    else {
+        double X2_interval = this->X2_bins_.at(1) - X2_bins_.at(0);
+        X2_bin_pos = static_cast<int>((X2_val - (this->X2_bins_.at(0) - X2_interval) )/X2_interval);
+    }
 
     if (X1_bin_pos == this->X1_bins_.size()) X1_bin_pos--;
     if (X2_bin_pos == this->X2_bins_.size()) X2_bin_pos--;

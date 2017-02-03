@@ -4,12 +4,7 @@
 #include <string.h>
 #include <algorithm>
 #include <sstream>
-#include "Sample.h"
-#include "HSVSample.h"
-#include "YUVSample.h"
-#include "YUVSample2.h"
-#include "Polynomial.h"
-#include "Histogram2D.h"
+#include <stdexcept>
 #include "Types.h"
 #include "GreenChromaClassifier.h"
 
@@ -69,10 +64,13 @@ int main(int argc, char** argv ) {
         std::cerr << "Number of raw and annotated files in test folder do not match.";
     }
 
-    // For each of the training top/bottom camera pairs, fit our classifier to them
+    // For each of the training top/bottom camera pairs, sample data from them
     for (int i = 0; i < trainFilesTop.size(); i++) {
         process_training(gcc, gc, trainFilesTop[i], trainFilesBottom[i]);
     }
+
+    // Now create a model using the data we have collected
+    gcc.model(gc);
 
     // Using our fitted classifier, generate results for the test images
     std::vector<int> allfs(1);
@@ -96,17 +94,17 @@ void process_training(GreenChromaClassifier& gcc, GreenChroma& gc, std::string& 
 
     if (!imgTop.data) {
         std::cerr << "Exception at classifyImage for file,'" << pathTop << "'" << std::endl;
-        throw no_img_data("No Image Data...");
+        throw std::runtime_error("No Image Data...");
     }
     if (!imgBottom.data) {
         std::cerr << "Exception at classifyImage for file,'" << pathBottom<< "'" << std::endl;
-        throw no_img_data("No Image Data...");
+        throw std::runtime_error("No Image Data...");
     }
 
     cv::cvtColor(imgTop, imgTop, cv::COLOR_BGR2YUV);
     cv::cvtColor(imgBottom, imgBottom, cv::COLOR_BGR2YUV);
 
-    gcc.fit(gc, imgTop, imgBottom);
+    gcc.sample(gc, imgTop, imgBottom);
 
     imgTop.release();
     imgBottom.release();
@@ -119,17 +117,17 @@ int process_testing(GreenChromaClassifier& gcc, GreenChroma& gc, std::string& pa
 
     if (!imgTest.data) {
         std::cerr << "Exception at classifyImage for file,'" << pathRaw << "'" << std::endl;
-        throw no_img_data("No Image Data...");
+        throw std::runtime_error("No Image Data...");
     }
     if (!imgAnnotated.data) {
         std::cerr << "Exception at classifyImage for file,'" << pathAnnotated << "'" << std::endl;
-        throw no_img_data("No Image Data...");
+        throw std::runtime_error("No Image Data...");
     }
 
     cv::cvtColor(imgTest, imgTest, cv::COLOR_BGR2YUV);
     cv::cvtColor(imgAnnotated, imgAnnotated, cv::COLOR_BGR2YUV);
 
-    gcc.predict(gc, imgTest, imgClassified);
+    gcc.classify(gc, imgTest, imgClassified);
 
     std::vector<int> compression_params;
     compression_params.push_back(CV_IMWRITE_PNG_COMPRESSION);
