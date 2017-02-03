@@ -8,7 +8,7 @@ void GreenChromaClassifier::sample(GreenChroma& gc, cv::Mat& top, cv::Mat& botto
     int n_rows = top.rows;
     int n_cols = top.cols;
 
-    for (int y_val = 0; y_val < n_rows; y_val++) {
+    for (int y_val = n_rows*0.5; y_val < n_rows; y_val++) {
         for (int x_val = 0; x_val < n_cols; x_val++) {
             int y_val_col = top.at<cv::Vec3b>(y_val, x_val)[0];
             int u_val = top.at<cv::Vec3b>(y_val, x_val)[1];
