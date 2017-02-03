@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <sstream>
 #include <stdexcept>
+#include <chrono>
 #include "Types.h"
 #include "GreenChromaClassifier.h"
 
@@ -128,8 +129,12 @@ int process_testing(GreenChromaClassifier& gcc, GreenChroma& gc, std::string& pa
     }
 
     cv::cvtColor(imgTest, imgTest, cv::COLOR_BGR2YUV);
-
+    auto t_start = std::chrono::high_resolution_clock::now();
     gcc.classify(gc, imgTest, imgClassified);
+    auto t_end = std::chrono::high_resolution_clock::now();
+    std::cout << "Classification took "
+              << std::chrono::duration<double, std::milli>(t_end-t_start).count()
+              << " ms\n";
 
     std::vector<int> compression_params;
     compression_params.push_back(CV_IMWRITE_PNG_COMPRESSION);
