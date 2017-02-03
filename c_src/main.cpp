@@ -65,14 +65,17 @@ int main(int argc, char** argv ) {
     }
 
     // For each of the training top/bottom camera pairs, sample data from them
+    std::cout << "Sampling Images..." << std::endl;
     for (int i = 0; i < trainFilesTop.size(); i++) {
         process_training(gcc, gc, trainFilesTop[i], trainFilesBottom[i]);
     }
 
     // Now create a model using the data we have collected
+    std::cout << "Creating a model..." << std::endl;
     gcc.model(gc);
 
     // Using our fitted classifier, generate results for the test images
+    std::cout << "Classifying images..." << std::endl;
     std::vector<int> allfs(1);
     for (int i = 0; i < testFilesRaw.size(); i++) {
         int value = process_testing(gcc, gc, testFilesRaw[i], testFilesClassified[i], testFilesAnnotated[i]);
@@ -113,7 +116,7 @@ void process_training(GreenChromaClassifier& gcc, GreenChroma& gc, std::string& 
 int process_testing(GreenChromaClassifier& gcc, GreenChroma& gc, std::string& pathRaw, std::string& pathClassified, std::string& pathAnnotated) {
     cv::Mat imgTest = cv::imread(pathRaw, cv::IMREAD_COLOR);
     cv::Mat imgAnnotated = cv::imread(pathAnnotated, cv::IMREAD_COLOR);
-    cv::Mat imgClassified(960, 1280, CV_8UC3, cv::Scalar(0,0,0));
+    cv::Mat imgClassified(960, 1280, CV_8UC3, cv::Scalar(255,255,255));
 
     if (!imgTest.data) {
         std::cerr << "Exception at classifyImage for file,'" << pathRaw << "'" << std::endl;

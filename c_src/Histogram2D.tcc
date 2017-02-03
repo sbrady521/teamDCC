@@ -327,7 +327,8 @@ void Histogram2D<T>::filterVerticalPeaks(int max_bins) {
             // Mark it as valid, then add its neighbours to bins_todo
             std::pair<int, int> curr_bin = bins_todo.at(i);
 
-            if (this->density_.at(curr_bin.first).at(curr_bin.second) >= density) {
+            if (this->density_.at(curr_bin.first).at(curr_bin.second) >= density &&
+                    this->filtered_bins_.at(curr_bin.first).at(curr_bin.second) == false) {
                 this->filtered_bins_.at(curr_bin.first).at(curr_bin.second) = true;
                 validated_cnt++;
                 std::vector<std::pair<int, int> > neighbours = getBinNeighbours(curr_bin);

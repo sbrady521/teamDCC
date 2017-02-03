@@ -27,6 +27,7 @@ void GreenChromaClassifier::model(GreenChroma & gc) {
 }
 
 void GreenChromaClassifier::classify(GreenChroma& gc, cv::Mat& test, cv::Mat& classified) {
+    std::cout << "Running gc.classify" << std::endl;
     int n_rows = test.rows;
     int n_cols = test.cols;
 
@@ -37,9 +38,9 @@ void GreenChromaClassifier::classify(GreenChroma& gc, cv::Mat& test, cv::Mat& cl
             int v_val = test.at<cv::Vec3b>(y_val, x_val)[2];
 
             if (gc.isFiltered(u_val, v_val)) {
-                classified.at<cv::Vec3b>(y_val, x_val)[0] = 255;
-                classified.at<cv::Vec3b>(y_val, x_val)[1] = 112;
-                classified.at<cv::Vec3b>(y_val, x_val)[2] = 132;
+                classified.at<cv::Vec3b>(y_val, x_val)[0] = 0;
+                classified.at<cv::Vec3b>(y_val, x_val)[1] = 0;
+                classified.at<cv::Vec3b>(y_val, x_val)[2] = 0;
             }
         }
     }

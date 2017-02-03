@@ -25,7 +25,6 @@ private:
     std::vector<std::vector<int> > counts_;
 
     bool filtered_;
-    std::vector<std::vector<bool> > filtered_bins_;
 
     // Variable X1 is the the "outer" variable in the above vectors, X2 the "inner"
     int X1_bin_num_; // Number of bins the first Variable has
@@ -38,6 +37,8 @@ private:
     std::vector<std::pair<int, int> > getBinNeighbours(std::pair<int, int> bin);
 
 public:
+    std::vector<std::vector<bool> > filtered_bins_;
+
     // constructors
     Histogram2D();
 
