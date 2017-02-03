@@ -128,7 +128,6 @@ int process_testing(GreenChromaClassifier& gcc, GreenChroma& gc, std::string& pa
     }
 
     cv::cvtColor(imgTest, imgTest, cv::COLOR_BGR2YUV);
-    cv::cvtColor(imgAnnotated, imgAnnotated, cv::COLOR_BGR2YUV);
 
     gcc.classify(gc, imgTest, imgClassified);
 

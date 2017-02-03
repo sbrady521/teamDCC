@@ -290,10 +290,7 @@ void Histogram2D<T>::filterBins(int max_bins, const std::string method) {
 template <typename T>
 void Histogram2D<T>::filterVerticalPeaks(int max_bins) {
     /*
-     * TODO:
-     * Optimize this massively.
-     * Instead of setting an arbitrary starting density we can look for the max
-     * density in the histogram.
+     * we can look for the max density in the histogram.
      * We then add all neighbours to a vector of to be considered vertices
      * Then we repeatedly decrement the density and search over all the to be considered vertices until we have enough
      */
@@ -329,6 +326,7 @@ void Histogram2D<T>::filterVerticalPeaks(int max_bins) {
 
             if (this->density_.at(curr_bin.first).at(curr_bin.second) >= density &&
                     this->filtered_bins_.at(curr_bin.first).at(curr_bin.second) == false) {
+                //std::cout << "Adding " << curr_bin.first << " " << curr_bin.second << "; ";
                 this->filtered_bins_.at(curr_bin.first).at(curr_bin.second) = true;
                 validated_cnt++;
                 std::vector<std::pair<int, int> > neighbours = getBinNeighbours(curr_bin);
@@ -351,7 +349,6 @@ template <typename T>
 bool Histogram2D<T>::isFiltered(T X1_val, T X2_val) {
     if (!this->filtered_) throw std::runtime_error("Histogram has not been filtered!");
 
-    // TODO refactor into getBinPos function!!
     // Figure out which bin each Value belongs to.
     std::pair<int, int> bin = getBinPos(X1_val, X2_val);
 
