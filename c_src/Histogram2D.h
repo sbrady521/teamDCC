@@ -65,6 +65,8 @@ public:
     bool isFiltered(T X1_val, T X2_val);
     bool areNeighboursFiltered(T X1_val, T X2_val);
     std::vector<std::vector<bool> >& getFilteredBins();
+    void showFilteredBins();
+
 
     // Get the bin pos
     std::pair<int, int> getBinPos(T X1_val, T X2_val);

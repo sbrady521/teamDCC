@@ -7,7 +7,7 @@
 class GreenChroma {
 private:
     Histogram2D<int> green_;
-
+    std::vector<std::vector<bool> > filtered_bins_;
 public:
     GreenChroma();
 

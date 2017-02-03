@@ -331,8 +331,9 @@ void Histogram2D<T>::filterVerticalPeaks(int max_bins) {
                 validated_cnt++;
                 std::vector<std::pair<int, int> > neighbours = getBinNeighbours(curr_bin);
                 for (int j = 0; j < neighbours.size(); j++) {
-                    if (this->filtered_bins_.at(neighbours.at(j).first).at(neighbours.at(j).second) == false)
+                    if (this->filtered_bins_.at(neighbours.at(j).first).at(neighbours.at(j).second) == false) {
                         bins_todo.push_back(neighbours.at(j));
+                    }
                 }
                 std::swap(bins_todo.at(i), bins_todo.back());
                 bins_todo.pop_back();
@@ -374,6 +375,17 @@ template <typename T>
 std::vector<std::vector<bool> >& Histogram2D<T>::getFilteredBins() {
     return this->filtered_bins_;
 }
+
+template <typename T>
+void Histogram2D<T>::showFilteredBins() {
+    for (int i = 0; i < this->filtered_bins_.size(); i++) {
+        for (int j = 0; j < this->filtered_bins_.at(i).size(); j++) {
+            std::cout << this->filtered_bins_.at(i).at(j) << " ";
+        }
+        std::cout << std::endl;
+    }
+}
+
 
 template <typename T>
 std::pair<int, int> Histogram2D<T>::getBinPos(T X1_val, T X2_val) {
