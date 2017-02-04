@@ -3,6 +3,7 @@
 //
 
 // TODO typedef std::pair<int, int> to binLoc or smth
+typedef std::pair<int, int> binPos;
 
 #ifndef CHROMATICITY_HISTOGRAM2D_H
 #define CHROMATICITY_HISTOGRAM2D_H
@@ -68,7 +69,7 @@ public:
 
 
     // Get the bin pos
-    std::pair<int, int> getBinPos(T X1_val, T X2_val);
+    binPos getBinPos(T X1_val, T X2_val);
 };
 
 #include "Histogram2D.tcc"

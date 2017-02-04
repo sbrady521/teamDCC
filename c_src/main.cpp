@@ -1,6 +1,5 @@
 #include <iostream>
 #include <dirent.h>
-#include <stdio.h>
 #include <string.h>
 #include <algorithm>
 #include <sstream>
@@ -129,6 +128,7 @@ int process_testing(GreenChromaClassifier& gcc, GreenChroma& gc, std::string& pa
     }
 
     cv::cvtColor(imgTest, imgTest, cv::COLOR_BGR2YUV);
+
     auto t_start = std::chrono::high_resolution_clock::now();
     gcc.classify(gc, imgTest, imgClassified);
     auto t_end = std::chrono::high_resolution_clock::now();
