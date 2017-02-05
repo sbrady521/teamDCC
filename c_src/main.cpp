@@ -13,7 +13,7 @@ typedef std::vector<std::string> svtr;
 void openFilesTest(std::string&, svtr&, svtr&, svtr&);
 void openFilesTrain(std::string&, svtr&);
 void process_training(GreenChromaClassifier&, GreenChroma&, std::string&, std::string&);
-int process_testing(GreenChromaClassifier&, GreenChroma&, std::string&, std::string&, std::string&);
+double process_testing(GreenChromaClassifier&, GreenChroma&, std::string&, std::string&, std::string&);
 
 
 int main(int argc, char** argv ) {
@@ -76,9 +76,9 @@ int main(int argc, char** argv ) {
 
     // Using our fitted classifier, generate results for the test images
     std::cout << "Classifying images..." << std::endl;
-    std::vector<int> allfs(1);
+    std::vector<double> allfs(0);
     for (int i = 0; i < testFilesRaw.size(); i++) {
-        int value = process_testing(gcc, gc, testFilesRaw[i], testFilesClassified[i], testFilesAnnotated[i]);
+        double value = process_testing(gcc, gc, testFilesRaw[i], testFilesClassified[i], testFilesAnnotated[i]);
         allfs.push_back(value);
     }
 
@@ -86,7 +86,7 @@ int main(int argc, char** argv ) {
     for (int i = 0; i < allfs.size(); ++i) {
         average += allfs.at(i);
     }
-    std::cout << "Average F1: " << (average / allfs.size()) << std::endl << std::endl;
+    std::cout << "Average F1: " << (average / (double)allfs.size()) << std::endl << std::endl;
 
     return EXIT_SUCCESS;
 }
@@ -113,7 +113,7 @@ void process_training(GreenChromaClassifier& gcc, GreenChroma& gc, std::string& 
     imgBottom.release();
 }
 
-int process_testing(GreenChromaClassifier& gcc, GreenChroma& gc, std::string& pathRaw, std::string& pathClassified, std::string& pathAnnotated) {
+double process_testing(GreenChromaClassifier& gcc, GreenChroma& gc, std::string& pathRaw, std::string& pathClassified, std::string& pathAnnotated) {
     cv::Mat imgTest = cv::imread(pathRaw, cv::IMREAD_COLOR);
     cv::Mat imgAnnotated = cv::imread(pathAnnotated, cv::IMREAD_COLOR);
     cv::Mat imgClassified(960, 1280, CV_8UC3, cv::Scalar(255,255,255));
@@ -145,10 +145,10 @@ int process_testing(GreenChromaClassifier& gcc, GreenChroma& gc, std::string& pa
         std::cerr << "Failed to write image '" << pathClassified << "'" << std::endl;
     }
 
-    int tp = 0;
-    int fp = 0;
-    int tn = 0;
-    int fn = 0;
+    double tp = 0;
+    double fp = 0;
+    double tn = 0;
+    double fn = 0;
     for (int i = 0; i < 960; ++i) {
         for (int j = 0; j < 1280; ++j) {
             bool annotatedGreen = false;
