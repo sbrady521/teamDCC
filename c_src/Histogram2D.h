@@ -2,7 +2,6 @@
 // Created by red on 25-Jan-17.
 //
 
-// TODO typedef std::pair<int, int> to binLoc or smth
 typedef std::pair<int, int> binPos;
 
 #ifndef CHROMATICITY_HISTOGRAM2D_H

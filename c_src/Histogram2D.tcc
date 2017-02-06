@@ -152,7 +152,6 @@ Histogram2D<T>::Histogram2D(std::vector<T> &X1_values, std::vector<T> &X2_values
 
 template <typename T>
 Histogram2D<T>::Histogram2D(const Histogram2D &obj) {
-    // TODO: Don't shallow copy the 2d vectors
     std::vector<double> X1_bins(obj.X1_bins_);
     std::vector<double> X2_bins(obj.X2_bins_);
     std::vector<std::vector<double> > density(obj.density_);
@@ -162,11 +161,15 @@ Histogram2D<T>::Histogram2D(const Histogram2D &obj) {
     this->density_ = density;
     this->counts_ = counts;
     this->num_data_ = obj.num_data_;
+
+    for (int i = 0; i < this->density_.size(); i++) {
+        this->density_.at(i) = std::vector<double>(obj.density_.at(i));
+        this->counts_.at(i) = std::vector<int>(obj.counts_.at(i));
+    }
 }
 
 template <typename T>
 Histogram2D<T>& Histogram2D<T>::operator=(const Histogram2D& obj) {
-    // TODO: Don't shallow copy the 2d vectors
     if (this != &obj) {
         std::vector<double> X1_bins(obj.X1_bins_);
         std::vector<double> X2_bins(obj.X2_bins_);
@@ -177,6 +180,11 @@ Histogram2D<T>& Histogram2D<T>::operator=(const Histogram2D& obj) {
         this->density_ = density;
         this->counts_ = counts;
         this->num_data_ = obj.num_data_;
+
+        for (int i = 0; i < this->density_.size(); i++) {
+            this->density_.at(i) = std::vector<double>(obj.density_.at(i));
+            this->counts_.at(i) = std::vector<int>(obj.counts_.at(i));
+        }
     }
 }
 
