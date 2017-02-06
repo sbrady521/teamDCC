@@ -324,8 +324,6 @@ void Histogram2D<T>::filterVerticalPeaks(int max_bins) {
     std::vector<binPos > bins_todo = std::vector<binPos >();
     bins_todo.push_back(best_bin_loc);
 
-    std::cout << best_bin_density << std::endl;
-
     for (double density = best_bin_density; density > 0; density -= 0.0005) {
         // For this density, starting at the best bins density, iterate through all
         // of bins_todo

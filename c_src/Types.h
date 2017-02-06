@@ -8,6 +8,8 @@ class GreenChroma {
 private:
     Histogram2D<int> green_;
     std::vector<std::vector<bool> > filtered_bins_;
+
+    void removeOutliers(std::vector<std::vector<bool> > plane);
 public:
     GreenChroma();
 

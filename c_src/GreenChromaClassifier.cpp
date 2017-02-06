@@ -44,5 +44,4 @@ void GreenChromaClassifier::classify(GreenChroma& gc, cv::Mat& test, cv::Mat& cl
             }
         }
     }
-
 }

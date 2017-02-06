@@ -3,6 +3,7 @@
 //
 
 #include <vector>
+#include <cmath>
 #include "Histogram2D.h"
 #include "Types.h"
 
@@ -14,16 +15,6 @@ GreenChroma::GreenChroma() {
 }
 
 void GreenChroma::createHistogram(std::vector<int> u_vals, std::vector<int> v_vals) {
-    // Initialize the desired bin vectors
-    std::vector<double> u_bin = std::vector<double>(U_RANGE);
-    std::vector<double> v_bin = std::vector<double>(V_RANGE);
-
-    // Fill each bin with the desired bin values
-    for (int i = 0; i <= 255; i++) {
-        u_bin.at(i) = i;
-        v_bin.at(i) = i;
-    }
-
     // Create the histogram
     this->green_ = Histogram2D<int>(u_vals, v_vals);
 
@@ -43,9 +34,50 @@ void GreenChroma::createHistogram(std::vector<int> u_vals, std::vector<int> v_va
             }
         }
     }
+
+    // Further processing on the filtered bins (testing)
+
+    // Doesn't seem to make a difference, though it does remove bins >>
+    // removeOutliers(this->filtered_bins_);
+
 }
 
 bool GreenChroma::isFiltered(int u_val, int v_val) {
     return this->filtered_bins_.at(u_val).at(v_val);
     //return this->green_.isFiltered(u_val, v_val);
+}
+
+void GreenChroma::removeOutliers(std::vector<std::vector<bool> > plane) {
+    // Find the sd of the euclidean inner product of all points
+    double inner_product_sum = 0;
+    double inner_product_squared_sum = 0;
+    double inner_product_expected_value;
+    double inner_product_sd;
+    double point_cnt = 0;
+
+    for (int i = 0; i < plane.size(); i++) {
+        for (int j = 0; j < plane.at(i).size(); j++) {
+            if (plane.at(i).at(j)) {
+                double inner_product = pow(i, 2) + pow(j, 2);
+                inner_product_sum += inner_product;
+                inner_product_squared_sum += pow(inner_product, 2);
+                point_cnt++;
+            }
+        }
+    }
+    inner_product_expected_value = inner_product_sum / point_cnt;
+    inner_product_sd = sqrt((inner_product_squared_sum / point_cnt) - pow(inner_product_expected_value, 2));
+
+    // Now calculate how many SD's away from the expected value each point is. If it is 3 or more, remove it.
+    for (int i = 0; i < plane.size(); i++) {
+        for (int j = 0; j < plane.at(i).size(); j++) {
+            if (plane.at(i).at(j)) {
+                double inner_product = pow(i, 2) + pow(j, 2);
+                if (abs(inner_product - inner_product_expected_value) / inner_product_sd >= 2) {
+                    std::cout << "Removing bin...\n";
+                    plane.at(i).at(j) = false;
+                }
+            }
+        }
+    }
 }
