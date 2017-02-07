@@ -9,7 +9,7 @@
 
 #define U_RANGE 256
 #define V_RANGE 256
-#define MAX_BINS 400
+#define MAX_BINS 600
 
 GreenChroma::GreenChroma() {
 }
@@ -37,7 +37,7 @@ void GreenChroma::createHistogram(std::vector<int> u_vals, std::vector<int> v_va
 
     // Further processing on the filtered bins (testing)
 
-    // removeOutliers(this->filtered_bins_);
+    removeOutliers(this->filtered_bins_);
 
     smoothPoints(this->filtered_bins_);
 }
@@ -100,7 +100,7 @@ void GreenChroma::removeOutliers(std::vector<std::vector<bool> > &plane) {
         for (int j = 0; j < plane.at(i).size(); j++) {
             if (plane.at(i).at(j)) {
                 double inner_product = pow(i, 2) + pow(j, 2);
-                if (abs(inner_product - inner_product_expected_value) / inner_product_sd >= 2) {
+                if (abs(inner_product - inner_product_expected_value) / inner_product_sd >= 1) {
                     plane.at(i).at(j) = false;
                 }
             }
