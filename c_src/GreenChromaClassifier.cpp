@@ -26,7 +26,6 @@ void GreenChromaClassifier::model(GreenChroma & gc) {
 }
 
 void GreenChromaClassifier::classify(GreenChroma& gc, cv::Mat& test, cv::Mat& classified) {
-    std::cout << "Running gc.classify" << std::endl;
     int n_rows = test.rows;
     int n_cols = test.cols;
 

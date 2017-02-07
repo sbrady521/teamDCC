@@ -66,13 +66,24 @@ int main(int argc, char** argv ) {
 
     // For each of the training top/bottom camera pairs, sample data from them
     std::cout << "Sampling Images..." << std::endl;
+    auto t_start = std::chrono::high_resolution_clock::now();
     for (int i = 0; i < trainFilesTop.size(); i++) {
         process_training(gcc, gc, trainFilesTop[i], trainFilesBottom[i]);
     }
+    auto t_end = std::chrono::high_resolution_clock::now();
+    std::cout << "Sampling took "
+              << std::chrono::duration<double, std::milli>(t_end-t_start).count()
+              << " ms\n";
 
     // Now create a model using the data we have collected
     std::cout << "Creating a model..." << std::endl;
+    t_start = std::chrono::high_resolution_clock::now();
     gcc.model(gc);
+    t_end = std::chrono::high_resolution_clock::now();
+
+    std::cout << "Model creation took "
+              << std::chrono::duration<double, std::milli>(t_end-t_start).count()
+              << " ms\n";
 
     // Using our fitted classifier, generate results for the test images
     std::cout << "Classifying images..." << std::endl;

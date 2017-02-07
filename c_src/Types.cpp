@@ -36,10 +36,8 @@ void GreenChroma::createHistogram(std::vector<int> u_vals, std::vector<int> v_va
     }
 
     // Further processing on the filtered bins (testing)
-
-    removeOutliers(this->filtered_bins_);
-
     smoothPoints(this->filtered_bins_);
+    removeOutliers(this->filtered_bins_);
 }
 
 bool GreenChroma::isFiltered(int u_val, int v_val) {
@@ -65,6 +63,12 @@ void GreenChroma::smoothPoints(std::vector<std::vector<bool> > &plane) {
                 !plane.at(i).at(j)    &&
                 plane.at(i).at(j - 1) &&
                 plane.at(i).at(j + 1)
+                    )
+                                      ||
+                    (
+                !plane.at(i).at(j)    &&
+                plane.at(i - 1).at(j - 1) &&
+                plane.at(i + 1).at(j + 1)
                     )
                 ) {
                 plane.at(i).at(j) = true;
@@ -95,7 +99,7 @@ void GreenChroma::removeOutliers(std::vector<std::vector<bool> > &plane) {
     inner_product_expected_value = inner_product_sum / point_cnt;
     inner_product_sd = sqrt((inner_product_squared_sum / point_cnt) - pow(inner_product_expected_value, 2));
 
-    // Now calculate how many SD's away from the expected value each point is. If it is 3 or more, remove it.
+    // Now calculate how many SD's away from the expected value each point is. If it is 1 or more, remove it.
     for (int i = 0; i < plane.size(); i++) {
         for (int j = 0; j < plane.at(i).size(); j++) {
             if (plane.at(i).at(j)) {
