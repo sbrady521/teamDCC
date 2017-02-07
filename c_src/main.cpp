@@ -153,7 +153,7 @@ double process_testing(GreenChromaClassifier& gcc, GreenChroma& gc, std::string&
         for (int j = 0; j < 1280; ++j) {
             bool annotatedGreen = false;
             bool classifiedGreen = false;
-            if (imgAnnotated.at<cv::Vec3b>(i,j)[0] < 1) {
+            if (imgAnnotated.at<cv::Vec3b>(i,j)[2] < 1) {
                 annotatedGreen = true;
             }
             if (imgClassified.at<cv::Vec3b>(i,j)[0] < 1) {
