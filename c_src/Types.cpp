@@ -37,20 +37,16 @@ void GreenChroma::createHistogram(std::vector<int> u_vals, std::vector<int> v_va
 
     // Further processing on the filtered bins (testing)
 
-    // Doesn't seem to make a difference, though it does remove bins >>
     // removeOutliers(this->filtered_bins_);
 
-    // Again doesn't seem to do anything, but it does add bins.. >>
-    // smoothPoints(this->filtered_bins_);
-
+    smoothPoints(this->filtered_bins_);
 }
 
 bool GreenChroma::isFiltered(int u_val, int v_val) {
     return this->filtered_bins_.at(u_val).at(v_val);
-    //return this->green_.isFiltered(u_val, v_val);
 }
 
-void GreenChroma::smoothPoints(std::vector<std::vector<bool> > plane) {
+void GreenChroma::smoothPoints(std::vector<std::vector<bool> > &plane) {
     // Simple smoothing - flips points horizontally or vertically between two flipped points.
     for (int i = 0; i < plane.size() - 1; i++) {
         if (i == 0) continue;
@@ -78,7 +74,7 @@ void GreenChroma::smoothPoints(std::vector<std::vector<bool> > plane) {
 }
 
 
-void GreenChroma::removeOutliers(std::vector<std::vector<bool> > plane) {
+void GreenChroma::removeOutliers(std::vector<std::vector<bool> > &plane) {
     // Find the sd of the euclidean inner product of all points
     double inner_product_sum = 0;
     double inner_product_squared_sum = 0;
@@ -105,7 +101,6 @@ void GreenChroma::removeOutliers(std::vector<std::vector<bool> > plane) {
             if (plane.at(i).at(j)) {
                 double inner_product = pow(i, 2) + pow(j, 2);
                 if (abs(inner_product - inner_product_expected_value) / inner_product_sd >= 2) {
-                    std::cout << "Removing bin...\n";
                     plane.at(i).at(j) = false;
                 }
             }
