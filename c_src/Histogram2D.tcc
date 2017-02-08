@@ -193,6 +193,79 @@ Histogram2D<T>::~Histogram2D() {
 }
 
 template <typename T>
+void Histogram2D<T>::addData(std::vector<T> &X1_values, std::vector<T> &X2_values) {
+    if (X1_values.size() != X2_values.size()) throw std::runtime_error("Value vectors differ in size!");
+    int new_data_num = X1_values.size();
+
+    // Figure out if we need to add bins.
+    double X1_bin_min = this->X1_bins_.at(0);
+    double X2_bin_min = this->X2_bins_.at(0);
+
+    double X1_bin_max = this->X1_bins_.at(this->X1_bin_num_ - 1);
+    double X2_bin_max = this->X2_bins_.at(this->X2_bin_num_ - 1);
+
+    double X1_bin_interval = this->X1_bins_.at(1) - this->X1_bins_.at(0);
+    double X2_bin_interval = this->X2_bins_.at(1) - this->X2_bins_.at(0);
+
+    T X1_min = *std::min_element(X1_values.begin(), X1_values.end());
+    T X1_max = *std::max_element(X1_values.begin(), X1_values.end());
+
+    T X2_min = *std::min_element(X2_values.begin(), X2_values.end());
+    T X2_max = *std::max_element(X2_values.begin(), X2_values.end());
+
+    for (double i = X1_bin_min - X1_bin_interval; i >= X1_min; i -= X1_bin_interval) {
+        this->X1_bins_.insert(this->X1_bins_.begin(), i);
+        this->density_.insert(this->density_.begin(), std::vector<double>(this->X2_bin_num_));
+        this->counts_.insert(this->density_.begin(), std::vector<int>(this->X2_bin_num_));
+        this->X1_bin_num_++;
+    }
+
+    for (double i = X1_bin_max + X1_bin_interval; i - X1_bin_interval <= X1_max; i += X1_bin_max) {
+        this->X1_bins_.insert(this->X1_bins_.end(), i);
+        this->density_.insert(this->density_.end(), std::vector<double>(this->X2_bin_num_));
+        this->counts_.insert(this->density_.end(), std::vector<int>(this->X2_bin_num_));
+        this->X1_bin_num_++;
+    }
+
+    for (double i = X2_bin_min - X2_bin_interval; i >= X2_min; i -= X2_bin_interval) {
+        this->X2_bins_.insert(this->X2_bins_.begin(), i);
+        for (int j = 0; j < this->X1_bin_num; j++) {
+            this->density_.at(j).insert(this->density_.at(j).begin(), 0);
+            this->counts_.at(j).insert(this->counts_at(j).begin(), 0);
+        }
+        this->X2_bin_num_++;
+    }
+
+    for (double i = X2_bin_max + X2_bin_interval; i - X2_bin_interval <= X2_max; i += X2_bin_max) {
+        this->X2_bins_.insert(this->X2_bins_.end(), i);
+        for (int j = 0; j < this->X1_bin_num; j++) {
+            this->density_.at(j).insert(this->density_.at(j).end(), 0);
+            this->counts_.at(j).insert(this->counts_at(j).end(), 0);
+        }
+        this->X2_bin_num_++;
+    }
+
+    // Figure out the new density increment for a single data point
+    double density_multiplier = static_cast<double>(this->num_data_)/static_cast<double>((this->num_data_ + new_data_num));
+    this->num_data_ += new_data_num;
+    double density_incr = 1.0/static_cast<double>((this->num_data_));
+
+    // Adjust current density appropriately.
+    for (int i = 0; i < this->density_.size(); i++) {
+        for (int j = 0; j < this->density_.at(i).size(); j++) {
+            this->density_.at(i).at(j) *= density_multiplier;
+        }
+    }
+
+    // Now get the bin positions of each new value, then increment
+    for (int i = 0; i < new_data_num; i++) {
+        binPos loc = getBinPos(X1_values.at(i), X2_values.at(i));
+        this->density_.at(loc.first).at(loc.second) += density_incr;
+        this->counts_.at(loc.first).at(loc.second)++;
+    }
+}
+
+template <typename T>
 void Histogram2D<T>::showHistogram() {
     std::cout << "X2 \\ X1  ";
     for (int i = 0; i < this->X1_bins_.size(); i++) {

@@ -53,6 +53,9 @@ public:
     // destructor
     ~Histogram2D();
 
+    // Add more data to the Histogram
+    void addData(std::vector<T> &X1_values, std::vector<T> &X2_values);
+
     void showHistogram();
 
     double getDensity(T X1_val, T X2_val);
