@@ -69,6 +69,7 @@ int main(int argc, char** argv ) {
     auto t_start = std::chrono::high_resolution_clock::now();
     for (int i = 0; i < trainFilesTop.size(); i++) {
         process_training(gcc, gc, trainFilesTop[i], trainFilesBottom[i]);
+        gcc.model(gc);
     }
     auto t_end = std::chrono::high_resolution_clock::now();
     std::cout << "Sampling took "
@@ -78,7 +79,8 @@ int main(int argc, char** argv ) {
     // Now create a model using the data we have collected
     std::cout << "Creating a model..." << std::endl;
     t_start = std::chrono::high_resolution_clock::now();
-    gcc.model(gc);
+    gcc.model(gc); //TODO this creation is no longer nescessary
+    //Kept for speed testings sake
     t_end = std::chrono::high_resolution_clock::now();
 
     std::cout << "Model creation took "
@@ -118,7 +120,11 @@ void process_training(GreenChromaClassifier& gcc, GreenChroma& gc, std::string& 
     cv::cvtColor(imgTop, imgTop, cv::COLOR_BGR2YUV);
     cv::cvtColor(imgBottom, imgBottom, cv::COLOR_BGR2YUV);
 
-    gcc.sample(gc, imgTop, imgBottom);
+    if(gcc.isEmpty()){
+        gcc.initialSample(gc, imgTop, imgBottom);
+    }else{
+        gcc.progressSample(gc, imgTop. imgBottom);
+    }
 
     imgTop.release();
     imgBottom.release();
@@ -214,13 +220,13 @@ void openFilesTest(std::string& testDir, svtr& raw, svtr& annotated, svtr& class
                 std::string path_str = std::string(ent->d_name);
                 if (path_str.find("_classified.png") == std::string::npos) {
                     if (path_str.find("_ann.png") != std::string::npos) {
-                        annotated.push_back(std::string(testDir.c_str()) + std::string(ent->d_name));   
+                        annotated.push_back(std::string(testDir.c_str()) + std::string(ent->d_name));
                     } else {
-                        raw.push_back(std::string(testDir.c_str()) + std::string(ent->d_name));   
+                        raw.push_back(std::string(testDir.c_str()) + std::string(ent->d_name));
 
                         std::string rawName = std::string(ent->d_name);
                         rawName = rawName.substr(0, rawName.size() - 4);
-                        classified.push_back(std::string(testDir.c_str()) + rawName + "_classified.png");   
+                        classified.push_back(std::string(testDir.c_str()) + rawName + "_classified.png");
                     }
                 }
             }
@@ -240,7 +246,7 @@ void openFilesTrain(std::string& trainDir, svtr& files) {
         /* print all the files and directories within directory */
         while ((ent = readdir(dir)) != NULL) {
             if (strcmp(ent->d_name, ".") != 0 && strcmp(ent->d_name, "..") != 0) {
-                files.push_back(std::string(trainDir.c_str()) + std::string(ent->d_name));   
+                files.push_back(std::string(trainDir.c_str()) + std::string(ent->d_name));
             }
         }
         closedir(dir);
