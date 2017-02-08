@@ -40,9 +40,6 @@ void GreenChroma::createHistogram(std::vector<int> u_vals, std::vector<int> v_va
     removeOutliers(this->filtered_bins_);
 }
 
-bool GreenChroma::isFiltered(int u_val, int v_val) {
-    return this->filtered_bins_.at(u_val).at(v_val);
-}
 
 void GreenChroma::smoothPoints(std::vector<std::vector<bool> > &plane) {
     // Simple smoothing - flips points horizontally or vertically between two flipped points.
