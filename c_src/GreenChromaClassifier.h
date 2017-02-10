@@ -8,6 +8,8 @@ private:
     std::vector<int> u_vals_;
     std::vector<int> v_vals_;
     std::vector<int> y_vals_;
+
+    int y_sum_;
 public:
     void sample(GreenChroma&, cv::Mat&, cv::Mat&);
     void model(GreenChroma&);
