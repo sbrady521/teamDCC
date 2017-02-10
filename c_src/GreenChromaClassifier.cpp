@@ -40,7 +40,7 @@ void GreenChromaClassifier::classify(GreenChroma& gc, cv::Mat& test, cv::Mat& cl
     int n_rows = test.rows;
     int n_cols = test.cols;
 
-    int white_min_y = this->y_expv_ + 2*this->y_sd_;
+    int white_min_y = this->y_expv_ + 3*this->y_sd_;
 
     for (int y_pos = 0; y_pos < n_rows; y_pos++) {
         for (int x_pos = 0; x_pos < n_cols; x_pos++) {
