@@ -44,12 +44,13 @@ void GreenChroma::createHistogram(std::vector<int> u_vals, std::vector<int> v_va
 }
 
 bool GreenChroma::isWhite(int y_val, int u_val, int v_val) {
-    int white_min_y = this->y_expv_ + 3*this->y_sd_;
+    // The L^1 function space has a unit circle shaped by a diamond,
+    // which is similar to the uv_plane white diamond
+    // We want all uv-points within a Lp-1 radius of the centre of the uv plane
+    int radius = abs(this->y_expv_ - 128);
+    int lp1_norm = abs(u_val) + abs(v_val);
 
-    // TODO: do this more dynamically.
-    return (y_val >= white_min_y       &&
-            u_val > 112 && u_val < 142 &&
-            v_val > 112 && v_val < 142);
+    return (lp1_norm < radius);
 }
 
 void GreenChroma::smoothPoints(std::vector<std::vector<bool> > &plane) {
