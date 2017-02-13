@@ -43,6 +43,14 @@ void GreenChroma::createHistogram(std::vector<int> u_vals, std::vector<int> v_va
     this->filtered_ = true;
 }
 
+bool GreenChroma::isWhite(int y_val, int u_val, int v_val) {
+    int white_min_y = this->y_expv_ + 3*this->y_sd_;
+
+    // TODO: do this more dynamically.
+    return (y_val >= white_min_y       &&
+            u_val > 112 && u_val < 142 &&
+            v_val > 112 && v_val < 142);
+}
 
 void GreenChroma::smoothPoints(std::vector<std::vector<bool> > &plane) {
     // Simple smoothing - flips points horizontally or vertically between two flipped points.
