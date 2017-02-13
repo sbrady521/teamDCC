@@ -12,6 +12,7 @@ private:
     void smoothPoints(std::vector<std::vector<bool> > &plane);
 public:
     std::vector<std::vector<bool> > filtered_bins_;
+    bool filtered_;
 
     GreenChroma();
 

@@ -54,7 +54,9 @@ void GreenChromaClassifier::classify(GreenChroma& gc, cv::Mat& test, cv::Mat& cl
                 classified.at<cv::Vec3b>(y_pos, x_pos)[0] = 0;
                 classified.at<cv::Vec3b>(y_pos, x_pos)[1] = 255;
                 classified.at<cv::Vec3b>(y_pos, x_pos)[2] = 0;
-            } else if (y_val >= white_min_y) {
+            } else if (y_val >= white_min_y       &&
+                       u_val > 112 && u_val < 142 &&
+                       v_val > 112 && v_val < 142) {
                 classified.at<cv::Vec3b>(y_pos, x_pos)[0] = 128;
                 classified.at<cv::Vec3b>(y_pos, x_pos)[1] = 128;
                 classified.at<cv::Vec3b>(y_pos, x_pos)[2] = 128;
