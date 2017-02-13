@@ -7,12 +7,18 @@
 
 #define INITIAL 1;
 #define PROGRESS 2;
+#define PLAYING 3;
 #define TOTALPIXELS 1228800;
 #define SAMPLESIZE 61440;
 #define TOPWIDTH 1280;
 #define TOPHEIGHT 960;
 
 void GreenChromaClassifier::sample(GreenChroma& gc, cv::Mat& top, cv::Mat& bottom, int context) {
+    if(gc.binsExist() == false && context == PROGRESS){
+        std::cerr << "unable to take progress sample as no initial sample exits" << std::endl;
+        context = INITIAL;
+    }
+
     if(context == INITIAL){
         int n_rows = top.rows;
         int n_cols = top.cols;
@@ -28,9 +34,6 @@ void GreenChromaClassifier::sample(GreenChroma& gc, cv::Mat& top, cv::Mat& botto
             }
         }
     }else if(context == PROGRESS){
-        //Ensure a valid classification exists
-        
-
         int randX;
         int randY;
         for(int pix_counter = 0 ; pix_counter < SAMPLESIZE ; pix_counter++){
@@ -39,17 +42,20 @@ void GreenChromaClassifier::sample(GreenChroma& gc, cv::Mat& top, cv::Mat& botto
 
             //randY must be higher than 200 as unlikely any green pixels lower
             randY = rand() % (TOPHEIGHT - 200);
-            randY = randY + 200;
+            randY += 200;
 
             int y_val = top.at<cv::Vec3b>(randY, randX)[0];
             int u_val = top.at<cv::Vec3b>(randY, randX)[1];
             int v_val = top.at<cv::Vec3b>(randY, randX)[2];
 
-            bool validGreen = possiblyGreen()
-
-
-
+            //Check if any U V values within 2 are green
+            bool validGreen = possiblyGreen(y_val, u_val, v_val, 2, gc);
+            if(validGreen){
+                gc.setGreen(u_val, v_val);
+            }
         }
+    }else if(context == PLAYING){
+        return;
     }
 }
 
@@ -94,4 +100,16 @@ void GreenChromaClassifier::classify(GreenChroma& gc, cv::Mat& test, cv::Mat& cl
             }
         }
     }
+}
+
+//This function checks if any YUV values within a certain range are green
+void GreenChromaClassifier::possiblyGreen(int y, int u, int v, int within, GreenChroma& gc){
+    for(int u_pos = u - within ; u_pos <= u + within ; u_pos++){
+        for(int v_pos = v - within ; v_pos <= v + within ; v_pos++){
+            if(gc.isFiltered(u, v)){
+                return true;
+            }
+        }
+    }
+    return false;
 }

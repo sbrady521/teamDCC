@@ -12,6 +12,8 @@ private:
     double y_expv_;
     double y_sd_;
 
+    bool possiblyGreen(int y, int u, int v, GreenChroma& gc);
+
 public:
     void sample(GreenChroma&, cv::Mat&, cv::Mat&);
     void model(GreenChroma&);
