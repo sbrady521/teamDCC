@@ -12,6 +12,7 @@
 #define MAX_BINS 600
 
 GreenChroma::GreenChroma() {
+    this->filtered_ = false;
 }
 
 void GreenChroma::createHistogram(std::vector<int> u_vals, std::vector<int> v_vals) {
@@ -38,6 +39,8 @@ void GreenChroma::createHistogram(std::vector<int> u_vals, std::vector<int> v_va
     // Further processing on the filtered bins (testing)
     smoothPoints(this->filtered_bins_);
     removeOutliers(this->filtered_bins_);
+
+    this->filtered_ = true;
 }
 
 
