@@ -5,19 +5,50 @@
 #include "Types.h"
 #include "GreenChromaClassifier.h"
 
-void GreenChromaClassifier::sample(GreenChroma& gc, cv::Mat& top, cv::Mat& bottom) {
-    int n_rows = top.rows;
-    int n_cols = top.cols;
+#define INITIAL 1;
+#define PROGRESS 2;
+#define TOTALPIXELS 1228800;
+#define SAMPLESIZE 61440;
+#define TOPWIDTH 1280;
+#define TOPHEIGHT 960;
 
-    for (int y_pos = n_rows*0.5; y_pos < n_rows; y_pos++) {
-        for (int x_pos = 0; x_pos < n_cols; x_pos++) {
-            int y_val = top.at<cv::Vec3b>(y_pos, x_pos)[0];
-            int u_val = top.at<cv::Vec3b>(y_pos, x_pos)[1];
-            int v_val = top.at<cv::Vec3b>(y_pos, x_pos)[2];
+void GreenChromaClassifier::sample(GreenChroma& gc, cv::Mat& top, cv::Mat& bottom, int context) {
+    if(context == INITIAL){
+        int n_rows = top.rows;
+        int n_cols = top.cols;
+        for (int y_pos = n_rows*0.5; y_pos < n_rows; y_pos++) {
+            for (int x_pos = 0; x_pos < n_cols; x_pos++) {
+                int y_val = top.at<cv::Vec3b>(y_pos, x_pos)[0];
+                int u_val = top.at<cv::Vec3b>(y_pos, x_pos)[1];
+                int v_val = top.at<cv::Vec3b>(y_pos, x_pos)[2];
 
-            this->y_vals_.push_back(y_val);
-            this->u_vals_.push_back(u_val);
-            this->v_vals_.push_back(v_val);
+                this->u_vals_.push_back(u_val);
+                this->v_vals_.push_back(v_val);
+                this->y_vals_.push_back(y_val;
+            }
+        }
+    }else if(context == PROGRESS){
+        //Ensure a valid classification exists
+        
+
+        int randX;
+        int randY;
+        for(int pix_counter = 0 ; pix_counter < SAMPLESIZE ; pix_counter++){
+            //Generate random (x, y) coordinates to sample
+            randX = rand() % TOPWIDTH;
+
+            //randY must be higher than 200 as unlikely any green pixels lower
+            randY = rand() % (TOPHEIGHT - 200);
+            randY = randY + 200;
+
+            int y_val = top.at<cv::Vec3b>(randY, randX)[0];
+            int u_val = top.at<cv::Vec3b>(randY, randX)[1];
+            int v_val = top.at<cv::Vec3b>(randY, randX)[2];
+
+            bool validGreen = possiblyGreen()
+
+
+
         }
     }
 }
