@@ -5,13 +5,13 @@
 #include "Types.h"
 #include "GreenChromaClassifier.h"
 
-#define INITIAL 1;
-#define PROGRESS 2;
-#define PLAYING 3;
-#define TOTALPIXELS 1228800;
-#define SAMPLESIZE 61440;
-#define TOPWIDTH 1280;
-#define TOPHEIGHT 960;
+#define INITIAL 1
+#define PROGRESS 2
+#define PLAYING 3
+#define TOTALPIXELS 1228800
+#define SAMPLESIZE 61440
+#define TOPWIDTH 1280
+#define TOPHEIGHT 960
 
 void GreenChromaClassifier::sample(GreenChroma& gc, cv::Mat& top, cv::Mat& bottom, int context) {
     if(gc.binsExist() == false && context == PROGRESS){
@@ -30,7 +30,7 @@ void GreenChromaClassifier::sample(GreenChroma& gc, cv::Mat& top, cv::Mat& botto
 
                 this->u_vals_.push_back(u_val);
                 this->v_vals_.push_back(v_val);
-                this->y_vals_.push_back(y_val;
+                this->y_vals_.push_back(y_val);
             }
         }
     }else if(context == PROGRESS){
@@ -103,7 +103,7 @@ void GreenChromaClassifier::classify(GreenChroma& gc, cv::Mat& test, cv::Mat& cl
 }
 
 //This function checks if any YUV values within a certain range are green
-void GreenChromaClassifier::possiblyGreen(int y, int u, int v, int within, GreenChroma& gc){
+bool GreenChromaClassifier::possiblyGreen(int y, int u, int v, int within, GreenChroma& gc){
     for(int u_pos = u - within ; u_pos <= u + within ; u_pos++){
         for(int v_pos = v - within ; v_pos <= v + within ; v_pos++){
             if(gc.isFiltered(u, v)){

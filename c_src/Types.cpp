@@ -43,7 +43,7 @@ void GreenChroma::createHistogram(std::vector<int> u_vals, std::vector<int> v_va
     this->filtered_ = true;
 }
 
-void GreenChroma::binsExist(){
+bool GreenChroma::binsExist(){
     return this->filtered_;
 }
 

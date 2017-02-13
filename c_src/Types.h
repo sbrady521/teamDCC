@@ -16,7 +16,10 @@ public:
 
     GreenChroma();
 
+
+    bool binsExist();
     void createHistogram(std::vector<int> u_vals, std::vector<int> v_vals);
+    void setGreen(int u, int v);
 
     inline bool isFiltered(int u_val, int v_val) {
         return this->filtered_bins_.at(u_val).at(v_val);

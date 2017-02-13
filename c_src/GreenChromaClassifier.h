@@ -12,10 +12,10 @@ private:
     double y_expv_;
     double y_sd_;
 
-    bool possiblyGreen(int y, int u, int v, GreenChroma& gc);
+    bool possiblyGreen(int y, int u, int v, int within, GreenChroma& gc);
 
 public:
-    void sample(GreenChroma&, cv::Mat&, cv::Mat&);
+    void sample(GreenChroma&, cv::Mat&, cv::Mat&, int context);
     void model(GreenChroma&);
     void classify(GreenChroma& gc, cv::Mat&, cv::Mat&);
 };

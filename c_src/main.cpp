@@ -118,7 +118,11 @@ void process_training(GreenChromaClassifier& gcc, GreenChroma& gc, std::string& 
     cv::cvtColor(imgTop, imgTop, cv::COLOR_BGR2YUV);
     cv::cvtColor(imgBottom, imgBottom, cv::COLOR_BGR2YUV);
 
-    gcc.sample(gc, imgTop, imgBottom);
+    if(gc.binsExist()){ //Progress sample
+        gcc.sample(gc, imgTop, imgBottom, 2);
+    }else{ //Initial sample
+        gcc.sample(gc, imgTop, imgBottom, 1);
+    }
 
     imgTop.release();
     imgBottom.release();
@@ -214,13 +218,13 @@ void openFilesTest(std::string& testDir, svtr& raw, svtr& annotated, svtr& class
                 std::string path_str = std::string(ent->d_name);
                 if (path_str.find("_classified.png") == std::string::npos) {
                     if (path_str.find("_ann.png") != std::string::npos) {
-                        annotated.push_back(std::string(testDir.c_str()) + std::string(ent->d_name));   
+                        annotated.push_back(std::string(testDir.c_str()) + std::string(ent->d_name));
                     } else {
-                        raw.push_back(std::string(testDir.c_str()) + std::string(ent->d_name));   
+                        raw.push_back(std::string(testDir.c_str()) + std::string(ent->d_name));
 
                         std::string rawName = std::string(ent->d_name);
                         rawName = rawName.substr(0, rawName.size() - 4);
-                        classified.push_back(std::string(testDir.c_str()) + rawName + "_classified.png");   
+                        classified.push_back(std::string(testDir.c_str()) + rawName + "_classified.png");
                     }
                 }
             }
@@ -240,7 +244,7 @@ void openFilesTrain(std::string& trainDir, svtr& files) {
         /* print all the files and directories within directory */
         while ((ent = readdir(dir)) != NULL) {
             if (strcmp(ent->d_name, ".") != 0 && strcmp(ent->d_name, "..") != 0) {
-                files.push_back(std::string(trainDir.c_str()) + std::string(ent->d_name));   
+                files.push_back(std::string(trainDir.c_str()) + std::string(ent->d_name));
             }
         }
         closedir(dir);
