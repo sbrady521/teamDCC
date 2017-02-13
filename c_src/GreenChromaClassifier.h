@@ -13,6 +13,7 @@ private:
     double y_sd_;
 
     bool possiblyGreen(int y, int u, int v, int within, GreenChroma& gc);
+    int getWeightedPos(int min, int max, float weight);
 
 public:
     void sample(GreenChroma&, cv::Mat&, cv::Mat&, int context);

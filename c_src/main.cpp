@@ -124,6 +124,8 @@ void process_training(GreenChromaClassifier& gcc, GreenChroma& gc, std::string& 
         gcc.sample(gc, imgTop, imgBottom, 1);
     }
 
+    gcc.model(gc);
+
     imgTop.release();
     imgBottom.release();
 }

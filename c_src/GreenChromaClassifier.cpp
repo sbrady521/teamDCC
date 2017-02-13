@@ -30,7 +30,7 @@ void GreenChromaClassifier::sample(GreenChroma& gc, cv::Mat& top, cv::Mat& botto
 
                 this->u_vals_.push_back(u_val);
                 this->v_vals_.push_back(v_val);
-                this->y_vals_.push_back(y_val);
+                this->y_vals_.push_back(y_val)  ;
             }
         }
     }else if(context == PROGRESS){
@@ -41,8 +41,7 @@ void GreenChromaClassifier::sample(GreenChroma& gc, cv::Mat& top, cv::Mat& botto
             randX = rand() % TOPWIDTH;
 
             //randY must be higher than 200 as unlikely any green pixels lower
-            randY = rand() % (TOPHEIGHT - 200);
-            randY += 200;
+            randY = getWeightedPos(200, TOPHEIGHT, 0.85); //Weight towards higher y vals
 
             int y_val = top.at<cv::Vec3b>(randY, randX)[0];
             int u_val = top.at<cv::Vec3b>(randY, randX)[1];
@@ -112,4 +111,12 @@ bool GreenChromaClassifier::possiblyGreen(int y, int u, int v, int within, Green
         }
     }
     return false;
+}
+
+//Gets a random number between min and max, weighted towards the weight value
+//weight to be between 0 and 1, 1 being weight towards the max
+//0 being weight towards the min
+int GreenChromaClassifier::getWeightedPos(int min, int max, float weight){
+    int result = (rand() + min) % max;
+    return result;
 }
