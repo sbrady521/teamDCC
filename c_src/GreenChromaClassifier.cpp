@@ -105,7 +105,10 @@ void GreenChromaClassifier::classify(GreenChroma& gc, cv::Mat& test, cv::Mat& cl
 bool GreenChromaClassifier::possiblyGreen(int y, int u, int v, int within, GreenChroma& gc){
     for(int u_pos = u - within ; u_pos <= u + within ; u_pos++){
         for(int v_pos = v - within ; v_pos <= v + within ; v_pos++){
-            if(gc.isFiltered(u, v)){
+            if(u_pos < 0 || u_pos > 255 || v_pos < 0 || v_pos > 255){ //make sure values arent out of range
+                continue;
+            }
+            if(gc.isFiltered(u_pos, v_pos)){
                 return true;
             }
         }

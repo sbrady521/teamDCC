@@ -75,11 +75,6 @@ int main(int argc, char** argv ) {
               << std::chrono::duration<double, std::milli>(t_end-t_start).count()
               << " ms\n";
 
-    // Now create a model using the data we have collected
-    std::cout << "Creating a model..." << std::endl;
-    t_start = std::chrono::high_resolution_clock::now();
-    gcc.model(gc);
-    t_end = std::chrono::high_resolution_clock::now();
 
     std::cout << "Model creation took "
               << std::chrono::duration<double, std::milli>(t_end-t_start).count()
@@ -119,12 +114,13 @@ void process_training(GreenChromaClassifier& gcc, GreenChroma& gc, std::string& 
     cv::cvtColor(imgBottom, imgBottom, cv::COLOR_BGR2YUV);
 
     if(gc.binsExist()){ //Progress sample
+        std::cout << "taking progress sample" << std::endl;
         gcc.sample(gc, imgTop, imgBottom, 2);
     }else{ //Initial sample
+        std::cout << "taking Initial sample" << std::endl;
         gcc.sample(gc, imgTop, imgBottom, 1);
+        gcc.model(gc);
     }
-
-    gcc.model(gc);
 
     imgTop.release();
     imgBottom.release();
