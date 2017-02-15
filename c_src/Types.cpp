@@ -13,9 +13,11 @@
 
 GreenChroma::GreenChroma() {
     this->filtered_ = false;
+    this->numBins = 0;
 }
 
 void GreenChroma::createHistogram(std::vector<int> u_vals, std::vector<int> v_vals) {
+    this->numBins = 0;
     // Create the histogram
     this->green_ = Histogram2D<int>(u_vals, v_vals);
 
@@ -32,6 +34,7 @@ void GreenChroma::createHistogram(std::vector<int> u_vals, std::vector<int> v_va
         for (int j = 0; j < V_RANGE; j++) {
             if (this->green_.isFiltered(i, j)) {
                 this->filtered_bins_.at(i).at(j) = true;
+                this->numBins++;
             }
         }
     }
@@ -74,6 +77,9 @@ void GreenChroma::smoothPoints(std::vector<std::vector<bool> > &plane) {
                 plane.at(i + 1).at(j + 1)
                     )
                 ) {
+                if(plane.at(i).at(j) == false){
+                    this->numBins++;
+                }
                 plane.at(i).at(j) = true;
             }
         }
@@ -108,6 +114,9 @@ void GreenChroma::removeOutliers(std::vector<std::vector<bool> > &plane) {
             if (plane.at(i).at(j)) {
                 double inner_product = pow(i, 2) + pow(j, 2);
                 if (abs(inner_product - inner_product_expected_value) / inner_product_sd >= 1) {
+                    if(plane.at(i).at(j) == true){
+                        this->numBins--;
+                    }
                     plane.at(i).at(j) = false;
                 }
             }
@@ -116,5 +125,16 @@ void GreenChroma::removeOutliers(std::vector<std::vector<bool> > &plane) {
 }
 
 void GreenChroma::setGreen(int u, int v){
+    if(this->filtered_bins_.at(u).at(v) == false){
+        this->numBins++;
+    }
     this->filtered_bins_.at(u).at(v) = true;
+}
+
+void GreenChroma::setGreenArray(std::vector<std::vector<bool> > new_vals){
+    this->filtered_bins_ = new_vals;
+}
+
+int GreenChroma::getNumBins(){
+    return this->numBins;
 }

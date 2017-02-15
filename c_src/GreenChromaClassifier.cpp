@@ -9,7 +9,7 @@
 #define PROGRESS 2
 #define PLAYING 3
 #define TOTALPIXELS 1228800
-#define SAMPLESIZE 61440
+#define SAMPLESIZE 50
 #define TOPWIDTH 1280
 #define TOPHEIGHT 960
 
@@ -18,7 +18,6 @@ void GreenChromaClassifier::sample(GreenChroma& gc, cv::Mat& top, cv::Mat& botto
         std::cerr << "unable to take progress sample as no initial sample exits" << std::endl;
         context = INITIAL;
     }
-
     if(context == INITIAL){
         int n_rows = top.rows;
         int n_cols = top.cols;
@@ -48,7 +47,7 @@ void GreenChromaClassifier::sample(GreenChroma& gc, cv::Mat& top, cv::Mat& botto
             int v_val = top.at<cv::Vec3b>(randY, randX)[2];
 
             //Check if any U V values within 2 are green
-            bool validGreen = possiblyGreen(y_val, u_val, v_val, 2, gc);
+            bool validGreen = possiblyGreen(y_val, u_val, v_val, 1, gc);
             if(validGreen){
                 gc.setGreen(u_val, v_val);
             }
