@@ -14,6 +14,7 @@ private:
 
     bool possiblyGreen(int y, int u, int v, int within, GreenChroma& gc);
     int getWeightedPos(int min, int max, float weight);
+    void classifiedSanityCheck(GreenChroma &gc, cv::Mat& image);
 
 public:
     void sample(GreenChroma&, cv::Mat&, cv::Mat&, int context);

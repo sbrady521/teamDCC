@@ -9,7 +9,7 @@
 
 #define U_RANGE 256
 #define V_RANGE 256
-#define MAX_BINS 600
+#define MAX_BINS 400
 
 GreenChroma::GreenChroma() {
     this->filtered_ = false;
@@ -129,6 +129,12 @@ void GreenChroma::setGreen(int u, int v){
         this->numBins++;
     }
     this->filtered_bins_.at(u).at(v) = true;
+}
+void GreenChroma::unsetGreen(int u, int v){
+    if(this->filtered_bins_.at(u).at(v) == true){
+        this->numBins--;
+    }
+    this->filtered_bins_.at(u).at(v) = false;
 }
 
 void GreenChroma::setGreenArray(std::vector<std::vector<bool> > new_vals){

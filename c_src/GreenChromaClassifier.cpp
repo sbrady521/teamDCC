@@ -9,7 +9,7 @@
 #define PROGRESS 2
 #define PLAYING 3
 #define TOTALPIXELS 1228800
-#define SAMPLESIZE 200
+#define SAMPLESIZE 5000
 #define TOPWIDTH 1280
 #define TOPHEIGHT 960
 #define U_RANGE 256
@@ -40,11 +40,13 @@ void GreenChromaClassifier::sample(GreenChroma& gc, cv::Mat& top, cv::Mat& botto
 
         //Create temporary UV val array for new values
 
+        /*
         std::vector<std::vector<bool> > filteredUV;
         filteredUV = std::vector<std::vector<bool> >(U_RANGE);
         for (int i = 0; i < U_RANGE; i++) {
             filteredUV.at(i) = std::vector<bool>(V_RANGE);
         }
+        */
 
         for(int pix_counter = 0 ; pix_counter < SAMPLESIZE ; pix_counter++){
             //Generate random (x, y) coordinates to sample
@@ -58,12 +60,13 @@ void GreenChromaClassifier::sample(GreenChroma& gc, cv::Mat& top, cv::Mat& botto
             int v_val = top.at<cv::Vec3b>(randY, randX)[2];
 
             //Check if any U V values within 2 are green
-            bool validGreen = possiblyGreen(y_val, u_val, v_val, 1, gc);
+            bool validGreen = possiblyGreen(y_val, u_val, v_val, 2, gc);
             if(validGreen){
-                filteredUV.at(u_val).at(v_val) = true;;
+                gc.setGreen(u_val,v_val);
             }
         }
         //Plug in new values
+        /*
         for(int u = 0 ; u < U_RANGE ; u++){
             for(int v = 0 ; v < V_RANGE ; v++){
                 if(filteredUV.at(u).at(v) == true){
@@ -71,6 +74,9 @@ void GreenChromaClassifier::sample(GreenChroma& gc, cv::Mat& top, cv::Mat& botto
                 }
             }
         }
+        */
+
+        this->classifiedSanityCheck(gc, top);
 
     }else if(context == PLAYING){
         return;
@@ -140,5 +146,47 @@ bool GreenChromaClassifier::possiblyGreen(int y, int u, int v, int within, Green
 //0 being weight towards the min
 int GreenChromaClassifier::getWeightedPos(int min, int max, float weight){
     int result = (rand() + min) % max;
+
+    /*
+    int range = max - min;
+    int idealNum = range*weight + min;
+    bool chosen = false;
+    bool chanceArray[10];
+    for(int i = 0 ; i < 10 ; i++){
+        chanceArray[i] = false;
+    }
+    while(!chosen){
+        result = (rand() + min) % max;
+        int dif = std::abs(result - idealNum);
+        float difRatio = 1 - dif/range;
+        int i = 0;
+        while(difRatio > 0 && i < 10){
+            chanceArray[i] = true;
+            difRatio -= 0.1;
+        }
+        int randIndex = rand() % 10;
+        if(chanceArray[randIndex]){
+            chosen = true;
+        }
+    }
+    */
+
     return result;
+}
+
+void GreenChromaClassifier::classifiedSanityCheck(GreenChroma &gc, cv::Mat& image){
+    int n_rows = image.rows;
+    int n_cols = image.cols;
+
+    for(int y_pos = 0 ; y_pos < n_rows*0.05 ; y_pos++){
+        for(int x_pos = 0 ; x_pos < n_cols ; x_pos++){
+            int y_val = image.at<cv::Vec3b>(y_pos, x_pos)[0];
+            int u_val = image.at<cv::Vec3b>(y_pos, x_pos)[1];
+            int v_val = image.at<cv::Vec3b>(y_pos, x_pos)[2];
+
+            if(gc.isFiltered(u_val, v_val)){
+                gc.unsetGreen(u_val, v_val);
+            }
+        }
+    }
 }

@@ -21,6 +21,7 @@ public:
     bool binsExist();
     void createHistogram(std::vector<int> u_vals, std::vector<int> v_vals);
     void setGreen(int u, int v);
+    void unsetGreen(int u, int v);
     void setGreenArray(std::vector<std::vector<bool> > new_vals);
     int getNumBins();
 
