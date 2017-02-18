@@ -34,6 +34,7 @@ void GreenChromaClassifier::model(GreenChroma & gc) {
 
     gc.y_expv_ = y_sum / static_cast<double>(this->y_vals_.size());
     gc.y_sd_ = sqrt((y_sum_squared / static_cast<double>(this->y_vals_.size())) - pow(gc.y_expv_, 2));
+    gc.y_radius_ = abs(gc.y_expv_ - 128);
 }
 
 void GreenChromaClassifier::classify(GreenChroma& gc, cv::Mat& test, cv::Mat& classified) {
@@ -54,9 +55,7 @@ void GreenChromaClassifier::classify(GreenChroma& gc, cv::Mat& test, cv::Mat& cl
                 classified.at<cv::Vec3b>(y_pos, x_pos)[0] = 0;
                 classified.at<cv::Vec3b>(y_pos, x_pos)[1] = 255;
                 classified.at<cv::Vec3b>(y_pos, x_pos)[2] = 0;
-            } else if (y_val >= white_min_y       &&
-                       u_val > 112 && u_val < 142 &&
-                       v_val > 112 && v_val < 142) {
+            } else if (gc.isWhite(y_val, u_val, v_val)) {
                 classified.at<cv::Vec3b>(y_pos, x_pos)[0] = 128;
                 classified.at<cv::Vec3b>(y_pos, x_pos)[1] = 128;
                 classified.at<cv::Vec3b>(y_pos, x_pos)[2] = 128;

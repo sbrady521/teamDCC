@@ -16,6 +16,7 @@ public:
 
     double y_expv_;
     double y_sd_;
+    double y_radius_;
 
     GreenChroma();
 
