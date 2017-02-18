@@ -9,7 +9,7 @@
 #define PROGRESS 2
 #define PLAYING 3
 #define TOTALPIXELS 1228800
-#define SAMPLESIZE 10
+#define SAMPLESIZE 200
 #define TOPWIDTH 1280
 #define TOPHEIGHT 960
 #define U_RANGE 256
