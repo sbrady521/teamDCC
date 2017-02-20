@@ -9,7 +9,7 @@
 
 #define U_RANGE 256
 #define V_RANGE 256
-#define MAX_BINS 400
+#define MAX_BINS 600
 
 GreenChroma::GreenChroma() {
     this->filtered_ = false;
@@ -125,12 +125,18 @@ void GreenChroma::removeOutliers(std::vector<std::vector<bool> > &plane) {
 }
 
 void GreenChroma::setGreen(int u, int v){
+    if(this->numBins >= MAX_GREEN){
+        return;
+    }
     if(this->filtered_bins_.at(u).at(v) == false){
         this->numBins++;
     }
     this->filtered_bins_.at(u).at(v) = true;
 }
 void GreenChroma::unsetGreen(int u, int v){
+    if(this->numBins < 1){
+        return;
+    }
     if(this->filtered_bins_.at(u).at(v) == true){
         this->numBins--;
     }
@@ -143,4 +149,10 @@ void GreenChroma::setGreenArray(std::vector<std::vector<bool> > new_vals){
 
 int GreenChroma::getNumBins(){
     return this->numBins;
+}
+
+void GreenChroma::fillPoints(int occurences){
+    for(int i = 0 ; i < occurences ; i++){
+        smoothPoints(this->filtered_bins_);
+    }
 }

@@ -1,5 +1,6 @@
 #ifndef TYPES
 #define TYPES
+#define MAX_GREEN 2000
 
 #include <vector>
 #include "Histogram2D.h"
@@ -12,6 +13,7 @@ private:
     void smoothPoints(std::vector<std::vector<bool> > &plane);
     int numBins;
 public:
+    void fillPoints(int occurences);
     std::vector<std::vector<bool> > filtered_bins_;
     bool filtered_;
 

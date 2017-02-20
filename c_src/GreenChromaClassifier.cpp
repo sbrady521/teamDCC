@@ -8,8 +8,7 @@
 #define INITIAL 1
 #define PROGRESS 2
 #define PLAYING 3
-#define TOTALPIXELS 1228800
-#define SAMPLESIZE 5000
+#define BASESAMPLESIZE 10000
 #define TOPWIDTH 1280
 #define TOPHEIGHT 960
 #define U_RANGE 256
@@ -47,8 +46,11 @@ void GreenChromaClassifier::sample(GreenChroma& gc, cv::Mat& top, cv::Mat& botto
             filteredUV.at(i) = std::vector<bool>(V_RANGE);
         }
         */
-
-        for(int pix_counter = 0 ; pix_counter < SAMPLESIZE ; pix_counter++){
+        int bins_dif = MAX_GREEN - gc.getNumBins();
+        float dif_ratio = (float)bins_dif/(float)MAX_GREEN;
+        int samplesize = BASESAMPLESIZE * dif_ratio;
+        std::cout << "Sample Size: " << samplesize << std::endl;
+        for(int pix_counter = 0 ; pix_counter < samplesize ; pix_counter++){
             //Generate random (x, y) coordinates to sample
             randX = rand() % TOPWIDTH;
 
@@ -178,7 +180,7 @@ void GreenChromaClassifier::classifiedSanityCheck(GreenChroma &gc, cv::Mat& imag
     int n_rows = image.rows;
     int n_cols = image.cols;
 
-    for(int y_pos = 0 ; y_pos < n_rows*0.05 ; y_pos++){
+    for(int y_pos = 0 ; y_pos < n_rows*0.02 ; y_pos++){
         for(int x_pos = 0 ; x_pos < n_cols ; x_pos++){
             int y_val = image.at<cv::Vec3b>(y_pos, x_pos)[0];
             int u_val = image.at<cv::Vec3b>(y_pos, x_pos)[1];
