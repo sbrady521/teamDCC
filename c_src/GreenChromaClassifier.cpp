@@ -19,6 +19,7 @@ void GreenChromaClassifier::sample(GreenChroma& gc, cv::Mat& top, cv::Mat& botto
         std::cerr << "unable to take progress sample as no initial sample exits" << std::endl;
         context = INITIAL;
     }
+
     if(context == INITIAL){
         int n_rows = top.rows;
         int n_cols = top.cols;
@@ -87,7 +88,6 @@ void GreenChromaClassifier::sample(GreenChroma& gc, cv::Mat& top, cv::Mat& botto
 
 void GreenChromaClassifier::model(GreenChroma & gc) {
     gc.createHistogram(this->u_vals_, this->v_vals_);
-
     // Calculate the expected value and SD of the y_values
     double y_sum, y_sum_squared;
     for (int i = 0; i < this->y_vals_.size(); i++) {

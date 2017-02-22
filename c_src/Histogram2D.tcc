@@ -353,108 +353,29 @@ std::vector<binPos > Histogram2D<T>::getBinNeighbours(binPos bin) {
 };
 
 template <typename T>
-void Histogram2D<T>::filterBins(int max_bins, const std::string method) {
-    // Initialize this->filtered_bins_
+void Histogram2D<T>::filterBins(int max_bins, double threshold) {
     this->filtered_bins_ = std::vector<std::vector<bool> >(this->X1_bins_.size());
     for (int i = 0; i < this->X1_bins_.size(); i++) {
         this->filtered_bins_.at(i) = std::vector<bool>(this->X2_bins_.size());
     }
 
-    if (method == "vertical_peak")
-        this->filterVerticalPeaks(max_bins);
-    else
-        throw std::runtime_error("Invalid filtering method!");
+    for (int i = 0; i < this->X1_bins_.size(); i++) {
+        for (int j = 0; j < this->X2_bins_.size(); j++) {
+            if (this->density_.at(i).at(j) > threshold) {
+                this->filtered_bins_.at(i).at(j) = true;
+            }
+        }
+    }
 
     this->filtered_ = true;
 }
 
 template <typename T>
-void Histogram2D<T>::filterVerticalPeaks(int max_bins) {
-    /*
-     * we can look for the max density in the histogram.
-     * We then add all neighbours to a vector of to be considered vertices
-     * Then we repeatedly decrement the density and search over all the to be considered vertices until we have enough
-     */
-    int validated_cnt = 0;
-
-    int X1_bin_num = this->X1_bins_.size();
-    int X2_bin_num = this->X2_bins_.size();
-
-    binPos best_bin_loc;
-    double best_bin_density = 0;
-
-    // Get the densest bin in the Histogram
-    for (int i = 0; i < X1_bin_num; i++) {
-        for (int j = 0; j < X2_bin_num; j++) {
-            if (this->density_.at(i).at(j) > best_bin_density) {
-                best_bin_loc = std::make_pair(i, j);
-                best_bin_density = this->density_.at(i).at(j);
-            }
-        }
-    }
-
-    // Create vector of candidate bins
-    std::vector<binPos > bins_todo = std::vector<binPos >();
-    bins_todo.push_back(best_bin_loc);
-
-    for (double density = best_bin_density; density > 0; density -= 0.0005) {
-        // For this density, starting at the best bins density, iterate through all
-        // of bins_todo
-        for (int i = 0; i < bins_todo.size();) {
-            // If this bin has greater than or equal density,
-            // Mark it as valid, then add its neighbours to bins_todo
-            binPos curr_bin = bins_todo.at(i);
-
-            if (this->density_.at(curr_bin.first).at(curr_bin.second) >= density &&
-                    this->filtered_bins_.at(curr_bin.first).at(curr_bin.second) == false) {
-                //std::cout << "Adding " << curr_bin.first << " " << curr_bin.second << "; ";
-                this->filtered_bins_.at(curr_bin.first).at(curr_bin.second) = true;
-                validated_cnt++;
-                std::vector<binPos > neighbours = getBinNeighbours(curr_bin);
-                for (int j = 0; j < neighbours.size(); j++) {
-                    if (this->filtered_bins_.at(neighbours.at(j).first).at(neighbours.at(j).second) == false) {
-                        bins_todo.push_back(neighbours.at(j));
-                    }
-                }
-                std::swap(bins_todo.at(i), bins_todo.back());
-                bins_todo.pop_back();
-            } else {
-                i++;
-            }
-
-            if (validated_cnt == max_bins) return;
-        }
-    }
-}
-
-template <typename T>
 bool Histogram2D<T>::isFiltered(T X1_val, T X2_val) {
     if (!this->filtered_) throw std::runtime_error("Histogram has not been filtered!");
-
     // Figure out which bin each Value belongs to.
     binPos bin = getBinPos(X1_val, X2_val);
-
     return this->filtered_bins_.at(bin.first).at(bin.second);
-}
-
-template <typename T>
-bool Histogram2D<T>::areNeighboursFiltered(T X1_val, T X2_val) {
-    binPos bin = getBinPos(X1_val, X2_val);
-    if (this->filtered_bins_.at(bin.first).at(bin.second)) return true;
-
-    std::vector<binPos > neighbours = getBinNeighbours(bin);
-
-    for (int i = 0; i < neighbours.size(); i++) {
-        binPos neighbour_bin = neighbours.at(i);
-        //std::cout << neighbour_bin.first << " " << neighbour_bin.second << std::endl;
-        if (this->filtered_bins_.at(neighbour_bin.first).at(neighbour_bin.second)) return true;
-    }
-    return false;
-}
-
-template <typename T>
-std::vector<std::vector<bool> >& Histogram2D<T>::getFilteredBins() {
-    return this->filtered_bins_;
 }
 
 template <typename T>

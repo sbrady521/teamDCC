@@ -31,8 +31,6 @@ private:
 
     int num_data_; // Number of Data points
 
-    void filterVerticalPeaks(int max_bins);
-
     std::vector<std::pair<int, int> > getBinNeighbours(std::pair<int, int> bin);
 
 public:
@@ -61,12 +59,10 @@ public:
     double getDensity(T X1_val, T X2_val);
 
     // Filter bins with a method. Initializes private member filtered_bins_;
-    void filterBins(int max_bins, std::string method = "vertical_peak");
+    void filterBins(int max_bins, double threshold);
 
     // Check if a value is filtered.
     bool isFiltered(T X1_val, T X2_val);
-    bool areNeighboursFiltered(T X1_val, T X2_val);
-    std::vector<std::vector<bool> >& getFilteredBins();
     void showFilteredBins();
 
 

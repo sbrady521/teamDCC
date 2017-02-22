@@ -10,6 +10,7 @@
 #define U_RANGE 256
 #define V_RANGE 256
 #define MAX_BINS 400
+#define SIGNIFICANT_BIN_THRESHOLD 0.005
 
 GreenChroma::GreenChroma() {
     this->filtered_ = false;
@@ -20,9 +21,8 @@ void GreenChroma::createHistogram(std::vector<int> u_vals, std::vector<int> v_va
     this->numBins = 0;
     // Create the histogram
     this->green_ = Histogram2D<int>(u_vals, v_vals);
-
     // Filter the histogram
-    this->green_.filterBins(MAX_BINS);
+    this->green_.filterBins(MAX_BINS, SIGNIFICANT_BIN_THRESHOLD);
 
     // Now modify the filtered bins so that indexes match to u&v value
     this->filtered_bins_ = std::vector<std::vector<bool> >(U_RANGE);
@@ -64,12 +64,8 @@ bool GreenChroma::isWhite(int y_val, int u_val, int v_val) {
 
 void GreenChroma::smoothPoints(std::vector<std::vector<bool> > &plane) {
     // Simple smoothing - flips points horizontally or vertically between two flipped points.
-    for (int i = 0; i < plane.size() - 1; i++) {
-        if (i == 0) continue;
-
-        for (int j = 0; j < plane.at(i).size() - 1; j++) {
-            if (j == 0) continue;
-
+    for (int i = 1; i < plane.size() - 1; i++) {
+        for (int j = 1; j < plane.at(i).size() - 1; j++) {
             if (
                     (
                 !plane.at(i).at(j)    &&
