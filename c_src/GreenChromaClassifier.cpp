@@ -8,7 +8,7 @@
 #define INITIAL 1
 #define PROGRESS 2
 #define PLAYING 3
-#define BASESAMPLESIZE 10000
+#define BASESAMPLESIZE 200
 #define TOPWIDTH 1280
 #define TOPHEIGHT 960
 #define U_RANGE 256
@@ -62,7 +62,7 @@ void GreenChromaClassifier::sample(GreenChroma& gc, cv::Mat& top, cv::Mat& botto
             int v_val = top.at<cv::Vec3b>(randY, randX)[2];
 
             //Check if any U V values within 2 are green
-            bool validGreen = possiblyGreen(y_val, u_val, v_val, 2, gc);
+            bool validGreen = possiblyGreen(y_val, u_val, v_val, 1, gc);
             if(validGreen){
                 gc.setGreen(u_val,v_val);
             }
@@ -78,7 +78,7 @@ void GreenChromaClassifier::sample(GreenChroma& gc, cv::Mat& top, cv::Mat& botto
         }
         */
 
-        this->classifiedSanityCheck(gc, top);
+        //this->classifiedSanityCheck(gc, top);
 
     }else if(context == PLAYING){
         return;
