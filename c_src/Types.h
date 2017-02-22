@@ -40,6 +40,8 @@ public:
     }
 
     bool isWhite(int y_val, int u_val, int v_val);
+
+    void sanityCheck();
 };
 
 #endif

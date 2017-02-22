@@ -9,7 +9,7 @@
 
 #define U_RANGE 256
 #define V_RANGE 256
-#define MAX_BINS 600
+#define MAX_BINS 400
 
 GreenChroma::GreenChroma() {
     this->filtered_ = false;
@@ -167,4 +167,8 @@ void GreenChroma::fillPoints(int occurences){
     for(int i = 0 ; i < occurences ; i++){
         smoothPoints(this->filtered_bins_);
     }
+}
+
+void GreenChroma::sanityCheck(){
+    removeOutliers(this->filtered_bins_);
 }

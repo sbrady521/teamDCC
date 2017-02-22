@@ -8,7 +8,7 @@
 #define INITIAL 1
 #define PROGRESS 2
 #define PLAYING 3
-#define BASESAMPLESIZE 200
+#define BASESAMPLESIZE 600
 #define TOPWIDTH 1280
 #define TOPHEIGHT 960
 #define U_RANGE 256

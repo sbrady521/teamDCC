@@ -70,7 +70,8 @@ int main(int argc, char** argv ) {
     for (int i = 0; i < trainFilesTop.size(); i++) {
         process_training(gcc, gc, trainFilesTop[i], trainFilesBottom[i]);
     }
-    //gc.fillPoints(4);
+    gc.sanityCheck();
+    gc.fillPoints(4);
     std::cout << "total bins found: " << gc.getNumBins() << std::endl;
     auto t_end = std::chrono::high_resolution_clock::now();
     std::cout << "Sampling took "
