@@ -9,9 +9,6 @@ private:
     std::vector<int> v_vals_;
     std::vector<int> y_vals_;
 
-    double y_expv_;
-    double y_sd_;
-
     bool possiblyGreen(int y, int u, int v, int within, GreenChroma& gc);
     int getWeightedPos(int min, int max, float weight);
     void classifiedSanityCheck(GreenChroma &gc, cv::Mat& image);
