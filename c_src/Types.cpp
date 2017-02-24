@@ -4,13 +4,16 @@
 
 #include <vector>
 #include <cmath>
-#include "Histogram2D.h"
 #include "Types.h"
 
 #define U_RANGE 256
 #define V_RANGE 256
 #define MAX_BINS 400
+
 #define SIGNIFICANT_BIN_THRESHOLD 0.005
+
+#define MIN_CLUSTER_THRESHOLD 5
+#define DBSCAN_EPSILON 10
 
 GreenChroma::GreenChroma() {
     this->filtered_ = false;
@@ -44,6 +47,128 @@ void GreenChroma::createHistogram(std::vector<int> u_vals, std::vector<int> v_va
     removeOutliers(this->filtered_bins_);
 
     this->filtered_ = true;
+}
+
+void GreenChroma::clusterBins() {
+    // Apply DBSCAN to bins
+
+    ColourCluster curr_cluster;
+    std::vector<ColourCluster> cluster_list = std::vector<ColourCluster>();
+    std::vector<std::vector<bool> > visited_points = std::vector<std::vector<bool> >(this->filtered_bins_.size());
+
+    for (int i = 0; i < this->filtered_bins_.size(); i++) {
+        visited_points.at(i) = std::vector<bool>(this->filtered_bins_.at(i).size());
+    }
+
+    for (int i = 0; i <this->filtered_bins_.size(); i++) {
+        for (int j = 0; j < this->filtered_bins_.at(i).size(); j++) {
+            if (this->filtered_bins_.at(i).at(j) == false) continue;
+            if (visited_points.at(i).at(j) == true) continue;
+
+            visited_points.at(i).at(j) = true;
+
+            // Get Neighbouring points
+            std::vector<std::pair<int, int> > neighbours = regionQuery(i, j, DBSCAN_EPSILON);
+            if (neighbours.size() < MIN_CLUSTER_THRESHOLD) continue;
+
+            curr_cluster = ColourCluster(cUNCLASSIFIED, U_RANGE, V_RANGE);
+            expandCluster(i, j, neighbours, curr_cluster, visited_points, cluster_list);
+            cluster_list.push_back(curr_cluster);
+        }
+    }
+
+    // Guess which colour each cluster is
+
+    // Find the biggest cluster. That's probably green.
+    // The second biggest cluster is probably white/black (hopefully)
+    // Disregard other clusters for now.
+    ColourCluster largest;
+    ColourCluster second_largest;
+
+    int largest_cluster_size = 0;
+    int second_largest_cluster_size = 0;
+
+    bool found_largest;
+    bool found_second_largest;
+
+    for (int i = 0; i < cluster_list.size(); i++) {
+        ColourCluster curr_cluster = cluster_list.at(i);
+        if (curr_cluster.size() > largest_cluster_size) {
+            second_largest = largest;
+            second_largest_cluster_size = largest_cluster_size;
+
+            largest = curr_cluster;
+            largest_cluster_size = curr_cluster.size();
+
+            if (found_largest) found_second_largest = true;
+            found_largest = true;
+        } else if (curr_cluster.size() >  second_largest_cluster_size) {
+            second_largest = curr_cluster;
+            second_largest_cluster_size = curr_cluster.size();
+            found_second_largest = true;
+        }
+    }
+
+    if (found_largest) {
+        largest.setColour(cFIELD_GREEN);
+        green_cluster_ = largest;
+        green_cluster_exists_ = true;
+    }
+    if (found_second_largest) {
+        second_largest.setColour(cWHITE);
+        white_cluster_ = second_largest;
+        white_cluster_exists_ = true;
+    }
+}
+
+void GreenChroma::expandCluster(int x, int y,
+                                std::vector<std::pair<int, int> >& neighbours,
+                                ColourCluster& cluster,
+                                std::vector<std::vector<bool> >& visited_points,
+                                std::vector<ColourCluster>& cluster_list) {
+    cluster.addPoint(x, y);
+    for (int i = 0; i < neighbours.size(); i++) {
+       std::pair<int, int> curr_point = neighbours.at(i);
+        int curr_x = curr_point.first;
+        int curr_y = curr_point.second;
+
+        if (visited_points.at(curr_x).at(curr_y) == false) {
+            visited_points.at(curr_x).at(curr_y) = true;
+
+            std::vector<std::pair<int, int> > curr_neighbours = regionQuery(curr_x, curr_y, DBSCAN_EPSILON);
+            if (curr_neighbours.size() >= MIN_CLUSTER_THRESHOLD) {
+                neighbours.insert(neighbours.end(), curr_neighbours.begin(), curr_neighbours.end());
+            }
+
+            bool is_clustered = false;
+            for (int j = 0; j < cluster_list.size(); j++) {
+                if (cluster_list.at(j).inCluster(curr_x, curr_y)) {
+                    is_clustered = true;
+                    break;
+                }
+            }
+
+            if (!is_clustered) cluster.addPoint(curr_x, curr_y);
+        }
+    }
+}
+
+std::vector<std::pair<int, int> > GreenChroma::regionQuery(int x, int y, int distance) {
+    std::vector<std::pair<int, int> > neighbours = std::vector<std::pair<int, int> >();
+
+    for (int x_pos = ((x - distance) > 0) ? x - distance : 0;
+         x_pos < ((x + distance) < this->filtered_bins_.size()) ? x + distance : this->filtered_bins_.size();
+         x_pos++) {
+        for (int y_pos = ((y - distance) > 0) ? y - distance : 0;
+             y_pos < ((y + distance) < this->filtered_bins_.at(x_pos).size()) ? y + distance : this->filtered_bins_.at(x_pos).size();
+             y_pos++) {
+            if (this->filtered_bins_.at(x_pos).at(y_pos)) {
+                neighbours.push_back(std::make_pair(x_pos, y_pos));
+            }
+        }
+    }
+
+    return neighbours;
 }
 
 bool GreenChroma::binsExist(){

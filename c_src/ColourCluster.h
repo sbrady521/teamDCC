@@ -18,6 +18,9 @@ private:
     int y_range_;
 
 public:
+    int num_points_;
+
+    ColourCluster();
     ColourCluster(Colour colour, int x_size, int y_size);
 
     // Add a u-v value to the current cluster.
@@ -26,12 +29,19 @@ public:
         addPoint(u, v);
     }
 
+    // Classify the cluster
+    void setColour(Colour colour);
+
     inline bool inCluster(int x, int y) {
         return this->points_.at(x).at(y);
     }
 
     inline bool inCluster(uint8_t y, uint8_t u, uint8_t v) {
         return inCluster(u, v);
+    }
+
+    inline int size() {
+        return this->num_points_;
     }
 };
 

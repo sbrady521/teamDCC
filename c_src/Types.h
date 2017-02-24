@@ -3,7 +3,9 @@
 #define MAX_GREEN 2000
 
 #include <vector>
+#include "Colours.h"
 #include "Histogram2D.h"
+#include "ColourCluster.h"
 
 class GreenChroma {
 private:
@@ -11,11 +13,24 @@ private:
 
     void removeOutliers(std::vector<std::vector<bool> > &plane);
     void smoothPoints(std::vector<std::vector<bool> > &plane);
+    std::vector<std::pair<int, int> > regionQuery(int x, int y, int distance);
+    void expandCluster(int x, int y,
+                       std::vector<std::pair<int, int> >& neighbours,
+                       ColourCluster& cluster,
+                       std::vector<std::vector<bool> >& visited_points,
+                       std::vector<ColourCluster>& cluster_list);
+
     int numBins;
 public:
     void fillPoints(int occurences);
     std::vector<std::vector<bool> > filtered_bins_;
     bool filtered_;
+
+    ColourCluster green_cluster_;
+    ColourCluster white_cluster_;
+
+    bool green_cluster_exists_;
+    bool white_cluster_exists_;
 
     double y_expv_;
     double y_sd_;
@@ -23,9 +38,11 @@ public:
 
     GreenChroma();
 
+    void createHistogram(std::vector<int> u_vals, std::vector<int> v_vals);
+
+    void clusterBins();
 
     bool binsExist();
-    void createHistogram(std::vector<int> u_vals, std::vector<int> v_vals);
     void setGreen(int u, int v);
     void unsetGreen(int u, int v);
     void setGreenArray(std::vector<std::vector<bool> > new_vals);

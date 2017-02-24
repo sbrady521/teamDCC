@@ -5,8 +5,12 @@
 #include "ColourCluster.h"
 #include <stdexcept>
 
+ColourCluster::ColourCluster() {
+}
+
 ColourCluster::ColourCluster(Colour colour, int x_size, int y_size) {
     this->colour_ = colour;
+    this->num_points_ = 0;
 
     this->points_ = std::vector<std::vector<bool> >(x_size);
     for (int i = 0; i < x_size; i++) {
@@ -22,5 +26,12 @@ void ColourCluster::addPoint(int x, int y) {
         throw std::runtime_error("Point coordinates out of range! At ColourCluster::addPoint");
     }
 
-    this->points_.at(x).at(y) = true;
+    if (this->points_.at(x).at(y) == false) {
+        this->points_.at(x).at(y) = true;
+        this->num_points_++;
+    }
+}
+
+void ColourCluster::setColour(Colour colour) {
+    this->colour_ = colour;
 }
